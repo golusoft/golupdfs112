@@ -53,10 +53,26 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-ZQ3X06CGJS";
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jakarta.variable} ${mono.variable}`}>
       <head>
         <StructuredData data={[organizationJsonLd(), websiteJsonLd()]} />
+        {/* Google Analytics 4 (Statically rendered in HTML head) */}
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaId}', {
+                anonymize_ip: true,
+                send_page_view: false
+              });
+            `,
+          }}
+        />
       </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>

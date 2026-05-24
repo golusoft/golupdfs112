@@ -3,7 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
-import { GA_MEASUREMENT_ID, pageview } from "@/lib/analytics";
+import { pageview } from "@/lib/analytics";
 
 function NavigationEvents() {
   const pathname = usePathname();
@@ -23,22 +23,7 @@ export function Analytics() {
 
   return (
     <>
-      {/* Google Analytics 4 Script Injections */}
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
-      />
-      <Script id="ga-init" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}', {
-            anonymize_ip: true,
-            send_page_view: false
-          });
-        `}
-      </Script>
+
 
       {/* Navigation tracking wrapper */}
       <Suspense fallback={null}>
