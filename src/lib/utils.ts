@@ -27,7 +27,7 @@ export function slugify(s: string): string {
 }
 
 export function absoluteUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs.com";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs112-autz.vercel.app";
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 

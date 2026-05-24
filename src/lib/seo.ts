@@ -3,7 +3,7 @@ import { absoluteUrl } from "./utils";
 
 export const SITE = {
   name: process.env.NEXT_PUBLIC_SITE_NAME || "GoluPDFs",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs.com",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs112-autz.vercel.app",
   tagline: "The Modern PDF Studio — 30+ Premium Tools",
   description:
     "GoluPDFs is the modern PDF ecosystem. Compress, merge, split, sign, convert and edit PDFs with 30+ professional tools — all running privately in your browser.",
