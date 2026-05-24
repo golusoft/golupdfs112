@@ -4,7 +4,6 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ToolsBrowser } from "@/components/tools/tools-browser";
 import { buildMetadata } from "@/lib/seo";
-import { TOOLS } from "@/lib/tools";
 
 export const metadata: Metadata = buildMetadata({
   title: "All PDF Tools — 30+ Premium Tools",
@@ -14,13 +13,6 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default function ToolsIndexPage() {
-  // Sort: popular badged first, then alphabetical
-  const sorted = [...TOOLS].sort((a, b) => {
-    const ra = a.badge === "popular" ? -2 : a.badge === "new" ? -1 : 0;
-    const rb = b.badge === "popular" ? -2 : b.badge === "new" ? -1 : 0;
-    return ra - rb || a.name.localeCompare(b.name);
-  });
-
   return (
     <>
       <Navbar />
@@ -42,7 +34,7 @@ export default function ToolsIndexPage() {
 
           <div className="mt-12">
             <Suspense fallback={<div className="h-32 animate-pulse rounded-2xl bg-muted/40" />}>
-              <ToolsBrowser tools={sorted} />
+              <ToolsBrowser />
             </Suspense>
           </div>
         </div>

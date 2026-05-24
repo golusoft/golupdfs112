@@ -14,7 +14,7 @@ import type { Tool } from "@/lib/tools";
 import type { ProcessOptions } from "@/lib/pdf/types";
 
 interface OptionsPanelProps {
-  tool: Tool;
+  tool: Omit<Tool, "icon">;
   options: ProcessOptions;
   setOptions: (next: ProcessOptions) => void;
 }

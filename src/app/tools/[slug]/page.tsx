@@ -135,7 +135,10 @@ export default async function ToolPage(
 
         {/* RUNNER */}
         <section className="container mt-12">
-          <ToolRunner tool={tool} />
+          {(() => {
+            const { icon: _, ...serializedTool } = tool;
+            return <ToolRunner tool={serializedTool} />;
+          })()}
         </section>
 
         {/* AD SLOT */}

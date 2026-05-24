@@ -21,8 +21,8 @@ export function AdSlot({ slot, format = "auto", className }: AdSlotProps) {
   useEffect(() => {
     if (!client) return;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      const win = window as unknown as { adsbygoogle?: Record<string, unknown>[] };
+      (win.adsbygoogle = win.adsbygoogle || []).push({});
     } catch {
       /* noop */
     }

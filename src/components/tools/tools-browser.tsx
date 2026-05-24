@@ -8,17 +8,20 @@ import { Search, Sparkles, Clock, X, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CATEGORIES, type Tool, type ToolCategory } from "@/lib/tools";
+import { CATEGORIES, TOOLS, type Tool, type ToolCategory } from "@/lib/tools";
 import { useToolsStore } from "@/store/tools-store";
 import { cn } from "@/lib/utils";
 
 const ALL: ToolCategory | "all" = "all";
 
-interface ToolsBrowserProps {
-  tools: Tool[];
-}
-
-export function ToolsBrowser({ tools }: ToolsBrowserProps) {
+export function ToolsBrowser() {
+  const tools = useMemo(() => {
+    return [...TOOLS].sort((a, b) => {
+      const ra = a.badge === "popular" ? -2 : a.badge === "new" ? -1 : 0;
+      const rb = b.badge === "popular" ? -2 : b.badge === "new" ? -1 : 0;
+      return ra - rb || a.name.localeCompare(b.name);
+    });
+  }, []);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();

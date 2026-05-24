@@ -115,7 +115,10 @@ export default async function SeoLandingPage(
 
         {/* TOOL RUNNER */}
         <section className="container mt-12">
-          <ToolRunner tool={tool} />
+          {(() => {
+            const { icon: _, ...serializedTool } = tool;
+            return <ToolRunner tool={serializedTool} />;
+          })()}
         </section>
 
         {/* WHY THIS PAGE */}

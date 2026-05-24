@@ -16,7 +16,7 @@ import type { ProcessOptions, ProcessResult } from "@/lib/pdf/types";
 import { useToolsStore } from "@/store/tools-store";
 
 interface ToolRunnerProps {
-  tool: Tool;
+  tool: Omit<Tool, "icon">;
 }
 
 type Stage = "idle" | "configuring" | "processing" | "done" | "error";

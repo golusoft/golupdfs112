@@ -29,8 +29,9 @@ export async function signAdminToken(email: string): Promise<string> {
 export async function verifyAdminToken(token: string): Promise<AdminPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
-    if ((payload as AdminPayload).role !== "admin") return null;
-    return payload as AdminPayload;
+    const adminPayload = payload as unknown as AdminPayload;
+    if (adminPayload.role !== "admin") return null;
+    return adminPayload;
   } catch {
     return null;
   }
