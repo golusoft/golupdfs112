@@ -1,0 +1,831 @@
+/**
+ * Tool registry — single source of truth for all PDF tools.
+ * Each tool has a slug, metadata, SEO copy, FAQ, and an `engine` key
+ * pointing to a processor in /lib/pdf/processors.
+ */
+import type { LucideIcon } from "lucide-react";
+import {
+  Archive as ArchiveIcon,
+  Combine,
+  Scissors,
+  Image as ImageIcon,
+  FileImage,
+  LayoutGrid,
+  Trash2,
+  RotateCw,
+  Hash,
+  Lock,
+  Unlock,
+  Droplet,
+  PenLine,
+  FileText,
+  FileType2,
+  FileSpreadsheet,
+  Sheet,
+  FileBarChart,
+  Presentation,
+  ScanText,
+  Camera,
+  Crop,
+  EyeOff,
+  Highlighter,
+  Tag,
+  Layers,
+  BookOpen,
+  GitCompare,
+  Sparkles,
+} from "lucide-react";
+
+export type ToolCategory =
+  | "organize"
+  | "convert"
+  | "edit"
+  | "secure"
+  | "optimize"
+  | "ai";
+
+export const CATEGORIES: Record<ToolCategory, { label: string; description: string; color: string }> = {
+  organize: { label: "Organize", description: "Merge, split, rotate & rearrange pages", color: "from-blue-500 to-cyan-500" },
+  convert: { label: "Convert", description: "Convert to and from PDF formats", color: "from-violet-500 to-fuchsia-500" },
+  edit: { label: "Edit", description: "Annotate, sign, watermark & more", color: "from-emerald-500 to-teal-500" },
+  secure: { label: "Secure", description: "Protect, redact & control access", color: "from-amber-500 to-rose-500" },
+  optimize: { label: "Optimize", description: "Compress and reduce PDF size", color: "from-pink-500 to-rose-500" },
+  ai: { label: "AI Suite", description: "Intelligent document workflows", color: "from-indigo-500 to-purple-500" },
+};
+
+export interface ToolFAQ {
+  q: string;
+  a: string;
+}
+
+export interface Tool {
+  slug: string;
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  category: ToolCategory;
+  icon: LucideIcon;
+  badge?: "popular" | "new" | "pro" | "ai";
+  features: string[];
+  /** key referencing a processor in /lib/pdf/processors */
+  engine:
+    | "compress"
+    | "merge"
+    | "split"
+    | "pdf-to-jpg"
+    | "jpg-to-pdf"
+    | "organize"
+    | "remove-pages"
+    | "rotate"
+    | "extract"
+    | "page-numbers"
+    | "protect"
+    | "unlock"
+    | "watermark"
+    | "sign"
+    | "pdf-to-word"
+    | "word-to-pdf"
+    | "pdf-to-excel"
+    | "excel-to-pdf"
+    | "pdf-to-ppt"
+    | "ppt-to-pdf"
+    | "ocr"
+    | "scan"
+    | "crop"
+    | "redact"
+    | "annotate"
+    | "metadata"
+    | "bulk-convert"
+    | "ebook"
+    | "compare"
+    | "ai-assistant";
+  accept: string[];
+  maxFiles: number;
+  faq: ToolFAQ[];
+  longDescription: string;
+}
+
+const baseFaq = (name: string): ToolFAQ[] => [
+  {
+    q: `Is ${name} free to use?`,
+    a: `Yes. ${name} is 100% free, with no watermarks or daily limits. All processing happens in your browser, so there's no upload to our servers.`,
+  },
+  {
+    q: "Are my files secure?",
+    a: "Absolutely. Your files never leave your device — every operation runs locally in your browser using WebAssembly-grade libraries. Nothing is uploaded, stored, or logged.",
+  },
+  {
+    q: "Does it work on mobile?",
+    a: "Yes. The entire platform is mobile-first, optimized for iOS and Android with smooth touch interactions and responsive layouts.",
+  },
+  {
+    q: "What's the maximum file size?",
+    a: "We support files up to 200 MB per document on the free tier. Performance scales with your device's RAM since processing is local.",
+  },
+];
+
+export const TOOLS: Tool[] = [
+  // Optimize
+  {
+    slug: "compress-pdf",
+    name: "Compress PDF Pro",
+    shortName: "Compress PDF",
+    tagline: "Shrink any PDF up to 90% with cinema-grade quality",
+    description: "AI-style smart compression with target size mode, lossless optimization & batch processing.",
+    category: "optimize",
+    icon: ArchiveIcon,
+    badge: "popular",
+    engine: "compress",
+    accept: ["application/pdf"],
+    maxFiles: 50,
+    features: [
+      "Smart compression engine with 4 quality presets",
+      "Target file size mode (50KB / 100KB / 200KB / 500KB)",
+      "Extreme compression for email attachments",
+      "Lossless mode preserves vector quality",
+      "Batch compress up to 50 files",
+      "Live size comparison & analytics",
+      "ZIP bulk export",
+      "Smart optimization suggestions",
+    ],
+    faq: [
+      { q: "How small can I compress a PDF?", a: "Our extreme compression preset can reduce most PDFs by 60–90% while keeping text crisp. For image-heavy PDFs, we typically achieve 80%+ reduction." },
+      { q: "Will compression affect quality?", a: "Choose Lossless mode for zero quality loss, or use one of four presets (Light, Medium, Strong, Extreme) to balance size vs visual quality." },
+      ...baseFaq("Compress PDF Pro").slice(1),
+    ],
+    longDescription:
+      "Compress PDF Pro is an enterprise-grade PDF optimizer that uses content-aware compression to dramatically shrink file size without sacrificing readability. Perfect for emailing contracts, uploading to portals with size limits, or archiving thousands of documents.",
+  },
+  // Organize
+  {
+    slug: "merge-pdf",
+    name: "Merge PDF Studio",
+    shortName: "Merge PDF",
+    tagline: "Combine unlimited PDFs with visual page sorting",
+    description: "Drag-and-drop merge with live preview, smart duplicate detection & merge timeline.",
+    category: "organize",
+    icon: Combine,
+    badge: "popular",
+    engine: "merge",
+    accept: ["application/pdf"],
+    maxFiles: 100,
+    features: [
+      "Unlimited PDF merging",
+      "Drag-and-drop reordering",
+      "Live page preview thumbnails",
+      "Visual merge timeline",
+      "Smart duplicate detection",
+      "Combine password-protected PDFs",
+      "Instant export — no upload",
+      "Reorder by drag handle",
+    ],
+    faq: baseFaq("Merge PDF Studio"),
+    longDescription:
+      "Merge PDF Studio brings Adobe-grade combining to your browser. Drag files in any order, preview every page, and export a single polished document in seconds.",
+  },
+  {
+    slug: "split-pdf",
+    name: "Split PDF Advanced",
+    shortName: "Split PDF",
+    tagline: "Split by range, every page or smart extraction",
+    description: "Visual split planner with page preview, batch splitting and custom naming.",
+    category: "organize",
+    icon: Scissors,
+    badge: "popular",
+    engine: "split",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Split by custom page ranges",
+      "Split every page into separate PDFs",
+      "Smart extraction by bookmarks",
+      "Visual split planner with thumbnails",
+      "Batch split multiple files",
+      "Custom output file naming",
+      "ZIP all results in one click",
+    ],
+    faq: baseFaq("Split PDF Advanced"),
+    longDescription:
+      "Whether you need a single chapter or every page as its own file, Split PDF Advanced gives you visual control over how a document is broken apart.",
+  },
+  {
+    slug: "organize-pdf",
+    name: "PDF Page Organizer",
+    shortName: "Organize PDF",
+    tagline: "Drag, rotate, duplicate or delete pages visually",
+    description: "Adobe-style visual page editor with thumbnails, drag-to-reorder & bulk actions.",
+    category: "organize",
+    icon: LayoutGrid,
+    engine: "organize",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Drag-and-drop page reordering",
+      "Rotate any page 90°/180°/270°",
+      "Duplicate pages instantly",
+      "Delete pages with one click",
+      "Smart page alignment grid",
+      "Visual editing mode",
+      "Undo/redo support",
+    ],
+    faq: baseFaq("PDF Page Organizer"),
+    longDescription:
+      "PDF Page Organizer is the visual page editor every PDF should have built-in. Reorder, rotate, duplicate and delete pages with the speed of a presentation tool.",
+  },
+  {
+    slug: "remove-pages",
+    name: "Remove PDF Pages",
+    shortName: "Remove Pages",
+    tagline: "Delete pages from any PDF in seconds",
+    description: "Visual page selector with multi-remove, preview system & instant optimization.",
+    category: "organize",
+    icon: Trash2,
+    engine: "remove-pages",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Visual page selector with thumbnails",
+      "Multi-page removal",
+      "Preview before removing",
+      "Batch delete pages",
+      "Instant file size optimization",
+      "Range-based removal",
+    ],
+    faq: baseFaq("Remove PDF Pages"),
+    longDescription: "Remove unwanted pages — blank pages, ads, drafts — from any PDF and download a clean optimized version instantly.",
+  },
+  {
+    slug: "rotate-pdf",
+    name: "Rotate PDF Pro",
+    shortName: "Rotate PDF",
+    tagline: "Rotate selected or all pages with smart detection",
+    description: "Batch rotation with smart orientation detection & visual rotation preview.",
+    category: "organize",
+    icon: RotateCw,
+    engine: "rotate",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Rotate selected pages individually",
+      "Batch rotate entire document",
+      "90° / 180° / 270° presets",
+      "Smart orientation auto-detection",
+      "Visual rotation preview",
+    ],
+    faq: baseFaq("Rotate PDF Pro"),
+    longDescription: "Fix sideways or upside-down PDFs in seconds. Rotate selected pages or the entire document with full visual control.",
+  },
+  {
+    slug: "extract-pages",
+    name: "Extract PDF Pages",
+    shortName: "Extract Pages",
+    tagline: "Pull specific pages out as a new PDF",
+    description: "Extract page ranges with visual selection and preview before export.",
+    category: "organize",
+    icon: Layers,
+    engine: "extract",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Extract custom page ranges",
+      "Visual page selection",
+      "Merge extracted pages into one PDF",
+      "Preview pages before export",
+      "Custom output naming",
+    ],
+    faq: baseFaq("Extract PDF Pages"),
+    longDescription: "Extract any combination of pages from a PDF as a new compact document — ideal for sharing chapters, sections or specific exhibits.",
+  },
+  // Convert
+  {
+    slug: "pdf-to-jpg",
+    name: "PDF to JPG Ultra",
+    shortName: "PDF to JPG",
+    tagline: "Convert every page to crystal-clear images",
+    description: "HD/Ultra-HD export with custom quality engine, page selection & ZIP export.",
+    category: "convert",
+    icon: ImageIcon,
+    badge: "popular",
+    engine: "pdf-to-jpg",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Standard, HD & Ultra-HD export",
+      "Custom DPI control (72 – 300)",
+      "Page selection",
+      "ZIP all images in one download",
+      "Real-time preview",
+      "Optimized image generation",
+    ],
+    faq: baseFaq("PDF to JPG Ultra"),
+    longDescription: "Convert any PDF into pixel-perfect JPG images. Choose DPI from web-quality to print-ready, select specific pages, and export everything as a ZIP.",
+  },
+  {
+    slug: "jpg-to-pdf",
+    name: "JPG to PDF Pro",
+    shortName: "JPG to PDF",
+    tagline: "Turn images into a polished PDF document",
+    description: "Drag-to-order with margins, orientation control, custom page sizes & bulk uploads.",
+    category: "convert",
+    icon: FileImage,
+    badge: "popular",
+    engine: "jpg-to-pdf",
+    accept: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+    maxFiles: 200,
+    features: [
+      "Drag-and-drop ordering",
+      "Custom margins & padding",
+      "Portrait / landscape control",
+      "A4, US Letter, Legal & custom sizes",
+      "Bulk upload up to 200 images",
+      "Smart image alignment",
+      "Print-ready export",
+    ],
+    faq: baseFaq("JPG to PDF Pro"),
+    longDescription: "Build a professional PDF from JPG, PNG and WEBP images. Set page size, orientation and margins, then export a print-ready document.",
+  },
+  {
+    slug: "pdf-to-word",
+    name: "PDF to Word Ultra",
+    shortName: "PDF to Word",
+    tagline: "Convert PDFs into editable .docx documents",
+    description: "Smart text extraction with formatting preservation & OCR-ready structure.",
+    category: "convert",
+    icon: FileText,
+    badge: "popular",
+    engine: "pdf-to-word",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Editable DOCX export",
+      "Formatting preservation engine",
+      "Smart text extraction",
+      "OCR-ready structure",
+      "Multi-column layout detection",
+    ],
+    faq: baseFaq("PDF to Word Ultra"),
+    longDescription: "Get a fully editable Microsoft Word document from any PDF. Our extraction engine preserves headings, paragraphs and structure.",
+  },
+  {
+    slug: "word-to-pdf",
+    name: "Word to PDF Pro",
+    shortName: "Word to PDF",
+    tagline: "Convert .docx to high-fidelity PDFs",
+    description: "High-quality rendering with formatting retention and smart typography preservation.",
+    category: "convert",
+    icon: FileType2,
+    engine: "word-to-pdf",
+    accept: [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    maxFiles: 5,
+    features: [
+      "High-quality rendering",
+      "Formatting retention",
+      "Smart typography preservation",
+      "Embedded fonts support",
+    ],
+    faq: baseFaq("Word to PDF Pro"),
+    longDescription: "Convert Microsoft Word documents into pixel-perfect PDFs that look identical on every device.",
+  },
+  {
+    slug: "pdf-to-excel",
+    name: "PDF to Excel",
+    shortName: "PDF to Excel",
+    tagline: "Extract tables into clean spreadsheets",
+    description: "Intelligent table extraction with spreadsheet-ready export.",
+    category: "convert",
+    icon: FileSpreadsheet,
+    engine: "pdf-to-excel",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Intelligent table extraction",
+      "Spreadsheet-ready XLSX export",
+      "Smart table detection",
+      "Multi-sheet output",
+    ],
+    faq: baseFaq("PDF to Excel"),
+    longDescription: "Pull tables out of PDFs into editable Excel sheets — perfect for invoices, reports and financial statements.",
+  },
+  {
+    slug: "excel-to-pdf",
+    name: "Excel to PDF",
+    shortName: "Excel to PDF",
+    tagline: "Convert spreadsheets to print-ready PDFs",
+    description: "Print optimization, sheet selection and page fitting controls.",
+    category: "convert",
+    icon: Sheet,
+    engine: "excel-to-pdf",
+    accept: [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+    maxFiles: 5,
+    features: [
+      "Print-optimized output",
+      "Per-sheet selection",
+      "Fit-to-page controls",
+      "Custom margins",
+    ],
+    faq: baseFaq("Excel to PDF"),
+    longDescription: "Convert XLSX and XLS spreadsheets into clean print-ready PDFs with intelligent page fitting.",
+  },
+  {
+    slug: "pdf-to-powerpoint",
+    name: "PDF to PowerPoint",
+    shortName: "PDF to PPT",
+    tagline: "Turn PDFs into editable presentations",
+    description: "Slide extraction with editable PPT generation and layout preservation.",
+    category: "convert",
+    icon: Presentation,
+    engine: "pdf-to-ppt",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Slide extraction",
+      "Editable PPTX generation",
+      "Layout preservation",
+      "High-fidelity rendering",
+    ],
+    faq: baseFaq("PDF to PowerPoint"),
+    longDescription: "Convert PDF slide decks into fully editable PowerPoint presentations with preserved layouts and styles.",
+  },
+  {
+    slug: "powerpoint-to-pdf",
+    name: "PowerPoint to PDF",
+    shortName: "PPT to PDF",
+    tagline: "Convert presentations to PDF",
+    description: "Presentation optimization with HD rendering and slide quality engine.",
+    category: "convert",
+    icon: FileBarChart,
+    engine: "ppt-to-pdf",
+    accept: [
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ],
+    maxFiles: 5,
+    features: [
+      "Presentation optimization",
+      "HD rendering",
+      "Slide quality engine",
+      "Embedded media support",
+    ],
+    faq: baseFaq("PowerPoint to PDF"),
+    longDescription: "Share presentations as a polished PDF that looks identical to the source PowerPoint.",
+  },
+  {
+    slug: "ebook-to-pdf",
+    name: "Ebook to PDF",
+    shortName: "Ebook to PDF",
+    tagline: "Convert EPUB & MOBI ebooks into PDF",
+    description: "EPUB/MOBI support with typography preservation and responsive conversion.",
+    category: "convert",
+    icon: BookOpen,
+    engine: "ebook",
+    accept: [
+      "application/epub+zip",
+      "application/x-mobipocket-ebook",
+      "application/octet-stream",
+    ],
+    maxFiles: 5,
+    features: [
+      "EPUB & MOBI support",
+      "Typography preservation",
+      "Responsive conversion engine",
+      "Embedded image rendering",
+    ],
+    faq: baseFaq("Ebook to PDF"),
+    longDescription: "Convert your EPUB and MOBI library into universal PDFs that read perfectly on any device.",
+  },
+  {
+    slug: "bulk-convert",
+    name: "Bulk PDF Converter",
+    shortName: "Bulk Convert",
+    tagline: "Convert hundreds of files in one queue",
+    description: "Queue system with bulk conversion, ZIP export and conversion analytics.",
+    category: "convert",
+    icon: Layers,
+    engine: "bulk-convert",
+    accept: ["application/pdf", "image/*"],
+    maxFiles: 500,
+    features: [
+      "Queue-based processing",
+      "Bulk conversion engine",
+      "ZIP export of all results",
+      "Drag-and-drop workflow",
+      "Conversion analytics dashboard",
+    ],
+    faq: baseFaq("Bulk PDF Converter"),
+    longDescription: "Process hundreds of files in one go. Perfect for digitizing archives, batch invoice processing and large migrations.",
+  },
+  // Edit
+  {
+    slug: "page-numbers",
+    name: "Add Page Numbers",
+    shortName: "Page Numbers",
+    tagline: "Add beautiful page numbers with custom typography",
+    description: "Advanced typography, dynamic positioning, page range support & live preview.",
+    category: "edit",
+    icon: Hash,
+    engine: "page-numbers",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Advanced typography controls",
+      "8 position presets (corners + middles)",
+      "Dynamic positioning",
+      "Page range support",
+      "Live preview",
+      "Custom format strings (1, 1/N, Page 1)",
+    ],
+    faq: baseFaq("Add Page Numbers"),
+    longDescription: "Add professional page numbers to any PDF with full control over font, size, color and position.",
+  },
+  {
+    slug: "watermark-pdf",
+    name: "PDF Watermark Tool",
+    shortName: "Watermark",
+    tagline: "Add text or image watermarks with style",
+    description: "Text & image watermarks with opacity control, tiled mode & live preview.",
+    category: "edit",
+    icon: Droplet,
+    engine: "watermark",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Text watermarks with custom font",
+      "Image watermarks (PNG/JPG)",
+      "Opacity 0–100% control",
+      "Tiled / single placement modes",
+      "Advanced positioning",
+      "Live preview",
+    ],
+    faq: baseFaq("PDF Watermark Tool"),
+    longDescription: "Brand any PDF with a beautiful watermark — confidential stamps, logos, or copyright text.",
+  },
+  {
+    slug: "sign-pdf",
+    name: "PDF Signer Pro",
+    shortName: "Sign PDF",
+    tagline: "Sign documents legally and beautifully",
+    description: "Draw, type or upload signatures with reusable presets and smart placement.",
+    category: "edit",
+    icon: PenLine,
+    badge: "popular",
+    engine: "sign",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Draw signature with mouse or touch",
+      "Upload signature image",
+      "Type signature with handwritten font",
+      "Reusable signature presets",
+      "Smart placement guide",
+      "Multi-page signing",
+    ],
+    faq: baseFaq("PDF Signer Pro"),
+    longDescription: "Sign contracts, NDAs and forms in seconds. Draw, type or upload your signature and place it anywhere on a PDF.",
+  },
+  {
+    slug: "annotate-pdf",
+    name: "PDF Annotator",
+    shortName: "Annotate",
+    tagline: "Highlight, comment and draw on any PDF",
+    description: "Highlights, comments, free drawing, sticky notes & advanced shapes.",
+    category: "edit",
+    icon: Highlighter,
+    engine: "annotate",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Text highlighting",
+      "Comments & sticky notes",
+      "Free drawing pen",
+      "Shapes (rectangle, ellipse, arrow)",
+      "Collaborative-ready UI",
+      "Color presets",
+    ],
+    faq: baseFaq("PDF Annotator"),
+    longDescription: "Mark up any PDF with highlights, comments, shapes and free drawing. Perfect for reviewing contracts and giving feedback.",
+  },
+  {
+    slug: "crop-pdf",
+    name: "PDF Crop Tool",
+    shortName: "Crop PDF",
+    tagline: "Crop margins and unwanted content",
+    description: "Visual crop editor with margin removal and comparison preview.",
+    category: "edit",
+    icon: Crop,
+    engine: "crop",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Visual crop editor",
+      "Auto-detect & remove margins",
+      "Custom crop dimensions",
+      "Before/after comparison preview",
+      "Apply to all pages or selection",
+    ],
+    faq: baseFaq("PDF Crop Tool"),
+    longDescription: "Crop white margins, scanner artifacts or unwanted edges from any PDF page with pixel-perfect control.",
+  },
+  {
+    slug: "metadata-editor",
+    name: "PDF Metadata Editor",
+    shortName: "Metadata",
+    tagline: "Edit title, author, keywords & SEO metadata",
+    description: "Metadata editing with cleanup tools and bulk metadata operations.",
+    category: "edit",
+    icon: Tag,
+    engine: "metadata",
+    accept: ["application/pdf"],
+    maxFiles: 50,
+    features: [
+      "Edit title, author, subject, keywords",
+      "Metadata cleanup (remove tracker data)",
+      "SEO metadata fields",
+      "Bulk metadata operations",
+      "View XMP & document info",
+    ],
+    faq: baseFaq("PDF Metadata Editor"),
+    longDescription: "Take control of PDF metadata. Edit author, title, keywords for SEO, or strip tracking metadata before sharing.",
+  },
+  // Secure
+  {
+    slug: "protect-pdf",
+    name: "PDF Password Protector",
+    shortName: "Protect PDF",
+    tagline: "Encrypt PDFs with military-grade security",
+    description: "Permissions system, password generator and security analytics.",
+    category: "secure",
+    icon: Lock,
+    badge: "popular",
+    engine: "protect",
+    accept: ["application/pdf"],
+    maxFiles: 10,
+    features: [
+      "AES-256 encryption",
+      "Owner & user passwords",
+      "Granular permissions (print, copy, edit)",
+      "Built-in password generator",
+      "Security strength analytics",
+    ],
+    faq: baseFaq("PDF Password Protector"),
+    longDescription: "Protect sensitive PDFs with strong encryption. Set permissions for printing, copying and editing.",
+  },
+  {
+    slug: "unlock-pdf",
+    name: "PDF Password Remover",
+    shortName: "Unlock PDF",
+    tagline: "Remove passwords from PDFs you own",
+    description: "Unlock protected PDFs with secure browser-side processing.",
+    category: "secure",
+    icon: Unlock,
+    engine: "unlock",
+    accept: ["application/pdf"],
+    maxFiles: 10,
+    features: [
+      "Unlock with known password",
+      "Batch unlocking",
+      "Secure browser-side flow",
+      "No upload, no logging",
+    ],
+    faq: baseFaq("PDF Password Remover"),
+    longDescription: "Remove passwords from PDFs you own. Processing happens entirely in your browser — your password and file never leave your device.",
+  },
+  {
+    slug: "redact-pdf",
+    name: "PDF Redactor",
+    shortName: "Redact",
+    tagline: "Permanently remove sensitive information",
+    description: "Blur sensitive data, permanent black-box redaction and secure removal.",
+    category: "secure",
+    icon: EyeOff,
+    engine: "redact",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Blur sensitive areas",
+      "Permanent black-box redaction",
+      "Secure content removal",
+      "Page preview system",
+      "Apply to all pages",
+    ],
+    faq: baseFaq("PDF Redactor"),
+    longDescription: "Permanently remove names, account numbers and confidential text from PDFs before sharing.",
+  },
+  // Convert / OCR / Scan
+  {
+    slug: "ocr-pdf",
+    name: "OCR PDF Tool",
+    shortName: "OCR PDF",
+    tagline: "Make scanned PDFs searchable",
+    description: "Searchable PDF generation with selectable text extraction.",
+    category: "convert",
+    icon: ScanText,
+    badge: "ai",
+    engine: "ocr",
+    accept: ["application/pdf", "image/*"],
+    maxFiles: 1,
+    features: [
+      "Searchable PDF generation",
+      "Selectable text overlay",
+      "Multi-language support",
+      "AI-grade text recognition",
+    ],
+    faq: baseFaq("OCR PDF Tool"),
+    longDescription: "Turn scanned documents into searchable, copy-pasteable PDFs using advanced OCR.",
+  },
+  {
+    slug: "scan-to-pdf",
+    name: "Scan to PDF",
+    shortName: "Scan",
+    tagline: "Mobile scanner with auto edge detection",
+    description: "Auto edge detection, document enhancement, smart filters & perspective correction.",
+    category: "convert",
+    icon: Camera,
+    engine: "scan",
+    accept: ["image/*"],
+    maxFiles: 50,
+    features: [
+      "Mobile-optimized scanner UI",
+      "Auto edge detection",
+      "Document enhancement filters",
+      "Black & white / grayscale / color modes",
+      "Perspective correction",
+      "Multi-page scanning",
+    ],
+    faq: baseFaq("Scan to PDF"),
+    longDescription: "Turn your phone into a professional scanner. Snap photos and get a clean, color-corrected PDF instantly.",
+  },
+  // Compare
+  {
+    slug: "compare-pdf",
+    name: "PDF Comparison Tool",
+    shortName: "Compare",
+    tagline: "Spot every difference between two PDFs",
+    description: "Visual comparison with highlighted differences and side-by-side mode.",
+    category: "edit",
+    icon: GitCompare,
+    badge: "new",
+    engine: "compare",
+    accept: ["application/pdf"],
+    maxFiles: 2,
+    features: [
+      "Visual side-by-side comparison",
+      "Highlighted differences",
+      "Text difference engine",
+      "Export comparison report",
+    ],
+    faq: baseFaq("PDF Comparison Tool"),
+    longDescription: "Compare two versions of any PDF and instantly see what changed — perfect for contracts and legal review.",
+  },
+  // AI
+  {
+    slug: "ai-pdf-assistant",
+    name: "AI PDF Assistant",
+    shortName: "AI Assistant",
+    tagline: "Chat, summarize and analyze any PDF",
+    description: "AI-ready architecture with smart document insights and AI workflow layout.",
+    category: "ai",
+    icon: Sparkles,
+    badge: "ai",
+    engine: "ai-assistant",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Chat with your PDF (coming soon)",
+      "Auto-generated summaries",
+      "Smart document insights",
+      "Key-fact extraction",
+      "AI workflow layout",
+    ],
+    faq: baseFaq("AI PDF Assistant"),
+    longDescription: "The AI Assistant turns any PDF into a conversational knowledge base. Summarize 100-page reports in seconds, ask questions, extract key facts.",
+  },
+];
+
+export const TOOLS_BY_SLUG: Record<string, Tool> = Object.fromEntries(
+  TOOLS.map((t) => [t.slug, t])
+);
+
+export function getToolBySlug(slug: string): Tool | undefined {
+  return TOOLS_BY_SLUG[slug];
+}
+
+export function getToolsByCategory(category: ToolCategory): Tool[] {
+  return TOOLS.filter((t) => t.category === category);
+}
+
+export function getPopularTools(): Tool[] {
+  return TOOLS.filter((t) => t.badge === "popular");
+}
+
+export function getRelatedTools(slug: string, limit = 4): Tool[] {
+  const tool = getToolBySlug(slug);
+  if (!tool) return [];
+  return TOOLS.filter((t) => t.slug !== slug && t.category === tool.category).slice(0, limit);
+}
