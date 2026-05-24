@@ -76,7 +76,9 @@ export function buildMetadata({
       apple: "/apple-icon.png",
     },
     verification: {
-      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+      google:
+        process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION ||
+        "v-wxYB4BKU_NRIaNmEETf3TiRy9zbh1qewTFhdZYvhM",
     },
     category: "technology",
   };

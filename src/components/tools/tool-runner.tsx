@@ -14,6 +14,7 @@ import { processWithEngine } from "@/lib/pdf/processors";
 import type { Tool } from "@/lib/tools";
 import type { ProcessOptions, ProcessResult } from "@/lib/pdf/types";
 import { useToolsStore } from "@/store/tools-store";
+import { trackToolUse, trackUpload, trackConversion } from "@/lib/analytics";
 
 interface ToolRunnerProps {
   tool: Omit<Tool, "icon">;
@@ -55,18 +56,36 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
     if (files.length === 0 && stage === "configuring") setStage("idle");
   }, [files, stage]);
 
+  // GA4 Upload Event Tracking
+  const [lastTrackedCount, setLastTrackedCount] = useState(0);
+  useEffect(() => {
+    if (files.length > 0 && files.length !== lastTrackedCount) {
+      trackUpload(tool.slug, files.length);
+      setLastTrackedCount(files.length);
+    } else if (files.length === 0) {
+      setLastTrackedCount(0);
+    }
+  }, [files, tool.slug, lastTrackedCount]);
+
   const run = async () => {
     if (!files.length) return;
     setStage("processing");
     setProgress({ value: 0, message: "Starting" });
     setError(null);
     try {
+      // GA4 Track Tool Use Event (Execution Start)
+      trackToolUse(tool.slug, tool.shortName);
+
       const r = await processWithEngine(tool.engine, files, options, (p, m) =>
         setProgress({ value: Math.round(p), message: m || "" })
       );
       setResult(r);
       setStage("done");
       trackUse(tool.slug, tool.shortName);
+
+      // GA4 Track Conversion Event (Successful Execution Completion)
+      trackConversion(tool.slug, "tool_success");
+
       toast.success(`${tool.shortName} complete`, {
         description: `Output: ${r.filename}`,
       });
@@ -92,7 +111,7 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
         <AnimatePresence mode="wait">
           {stage === "done" && result ? (
             <motion.div key="done" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <ResultPanel result={result} onReset={reset} />
+              <ResultPanel result={result} onReset={reset} toolSlug={tool.slug} />
             </motion.div>
           ) : stage === "processing" ? (
             <motion.div key="proc" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

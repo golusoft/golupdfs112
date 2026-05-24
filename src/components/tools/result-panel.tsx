@@ -7,18 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/utils";
 import type { ProcessResult } from "@/lib/pdf/types";
+import { trackDownload } from "@/lib/analytics";
 
 interface ResultPanelProps {
   result: ProcessResult;
   onReset: () => void;
+  toolSlug?: string;
 }
 
-export function ResultPanel({ result, onReset }: ResultPanelProps) {
+export function ResultPanel({ result, onReset, toolSlug }: ResultPanelProps) {
   useEffect(() => {
     // Auto-trigger confetti-style celebration via parent toast (handled outside)
   }, []);
 
   const downloadOne = (blob: Blob, filename: string) => {
+    // GA4 Track Download Event
+    if (toolSlug) {
+      trackDownload(toolSlug, filename);
+    }
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
