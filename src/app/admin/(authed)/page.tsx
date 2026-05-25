@@ -1,37 +1,107 @@
 "use client";
 
-import { Eye, MousePointerClick, Wrench, DollarSign, RefreshCw, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, MousePointerClick, Wrench, DollarSign, RefreshCw, FileText, Loader2, AlertCircle } from "lucide-react";
 import { StatCard } from "@/components/admin/stat-card";
 import { TrafficAreaChart, ToolsBarChart } from "@/components/admin/charts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  trafficSeries,
-  topTools,
-  recentActivity,
-  siteHealth,
-} from "@/lib/admin/mock-data";
+
+interface DashboardStats {
+  visits30d: number;
+  conversions30d: number;
+  toolRuns30d: number;
+  revenue30d: number;
+  adsenseRevenue: number;
+  affiliateRevenue: number;
+  visitsDelta: number;
+  conversionsDelta: number;
+  runsDelta: number;
+  revenueDelta: number;
+  trafficChart: { date: string; visits: number; conversions: number; revenue: number }[];
+  recentActivity: { type: string; message: string; ts: string; status?: string }[];
+  topTools: { name: string; uses: number }[];
+  insights: { title: string; description: string; recommended_action?: string }[];
+  siteHealth: { uptime30d: number; avgResponse: number; p95Response: number; errorsLast24h: number; cwv: any };
+}
 
 export default function AdminDashboardPage() {
-  const traffic = trafficSeries(30);
-  const tools = topTools(8);
-  const activity = recentActivity();
-  const health = siteHealth();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalVisits = traffic.reduce((s, d) => s + d.visits, 0);
-  const totalConversions = traffic.reduce((s, d) => s + d.conversions, 0);
-  const totalToolUses = tools.reduce((s, t) => s + t.uses, 0);
-  const totalRevenue = traffic.reduce((s, d) => s + d.revenue, 0);
+  const fetchStats = async (refresh = false) => {
+    if (refresh) setSyncing(true);
+    else setLoading(true);
+    
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/dashboard-stats${refresh ? "?refresh=true" : ""}`);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} error fetching telemetry`);
+      }
+      const data = await res.json();
+      setStats(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load dashboard metrics");
+    } finally {
+      setLoading(false);
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground font-mono">Connecting to live production event streams...</p>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="flex h-[50vh] flex-col items-center justify-center gap-3 max-w-md mx-auto text-center">
+        <AlertCircle className="h-10 w-10 text-red-400 animate-pulse" />
+        <h3 className="font-bold text-lg text-foreground">API Connection Interrupted</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {error || "An unexpected error occurred during database metrics retrieval."}
+        </p>
+        <Button onClick={() => fetchStats()} variant="outline" className="mt-2">
+          <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Connection
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Dashboard Uptime bar */}
+      <div className="flex items-center justify-between p-4 rounded-xl border bg-card/60">
+        <div className="flex items-center gap-3">
+          <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-xs font-semibold text-foreground font-mono uppercase tracking-wider">
+            Connected to Live Supabase Event Stream
+          </span>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => fetchStats(true)} disabled={syncing}>
+          <RefreshCw className={`h-3.5 w-3.5 mr-2 ${syncing ? "animate-spin" : ""}`} />
+          {syncing ? "Syncing DB..." : "Sync Live Cache"}
+        </Button>
+      </div>
+
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Visits (30d)" value={totalVisits} delta={12.4} icon={Eye} color="from-brand-500 to-cyan-500" />
-        <StatCard label="Tool conversions" value={totalConversions} delta={8.7} icon={MousePointerClick} color="from-violet-500 to-fuchsia-500" />
-        <StatCard label="Total tool runs" value={totalToolUses} delta={15.2} icon={Wrench} color="from-emerald-500 to-teal-500" />
-        <StatCard label="Revenue (30d)" value={Math.floor(totalRevenue)} prefix="$" delta={6.8} icon={DollarSign} color="from-amber-500 to-orange-500" />
+        <StatCard label="Visits (30d)" value={stats.visits30d} delta={stats.visitsDelta} icon={Eye} color="from-brand-500 to-cyan-500" />
+        <StatCard label="Tool conversions" value={stats.conversions30d} delta={stats.conversionsDelta} icon={MousePointerClick} color="from-violet-500 to-fuchsia-500" />
+        <StatCard label="Total tool runs" value={stats.toolRuns30d} delta={stats.runsDelta} icon={Wrench} color="from-emerald-500 to-teal-500" />
+        <StatCard label="Revenue (30d)" value={Math.floor(stats.revenue30d)} prefix="$" delta={stats.revenueDelta} icon={DollarSign} color="from-amber-500 to-orange-500" />
       </div>
 
       {/* Traffic + top tools */}
@@ -43,11 +113,11 @@ export default function AdminDashboardPage() {
                 <CardTitle>Traffic & conversions</CardTitle>
                 <CardDescription>Last 30 days · GA4 + internal events</CardDescription>
               </div>
-              <Badge variant="glass">Live</Badge>
+              <Badge variant="glass">Live Data</Badge>
             </div>
           </CardHeader>
           <CardContent>
-            <TrafficAreaChart data={traffic} />
+            <TrafficAreaChart data={stats.trafficChart} />
           </CardContent>
         </Card>
 
@@ -57,7 +127,7 @@ export default function AdminDashboardPage() {
             <CardDescription>By usage in the last 30 days</CardDescription>
           </CardHeader>
           <CardContent>
-            <ToolsBarChart data={tools.slice(0, 6).map((t) => ({ name: t.name, uses: t.uses }))} />
+            <ToolsBarChart data={stats.topTools} />
           </CardContent>
         </Card>
       </div>
@@ -71,26 +141,26 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <HealthMetric label="Uptime (30d)" value={`${health.uptime30d}%`} good />
-              <HealthMetric label="Avg response" value={`${health.avgResponse}ms`} good />
-              <HealthMetric label="P95 response" value={`${health.p95Response}ms`} good />
-              <HealthMetric label="Errors (24h)" value={`${health.errorsLast24h}`} good={health.errorsLast24h < 10} />
+              <HealthMetric label="Uptime (30d)" value={`${stats.siteHealth.uptime30d}%`} good />
+              <HealthMetric label="Avg response" value={`${stats.siteHealth.avgResponse}ms`} good />
+              <HealthMetric label="P95 response" value={`${stats.siteHealth.p95Response}ms`} good />
+              <HealthMetric label="Errors (24h)" value={`${stats.siteHealth.errorsLast24h}`} good={stats.siteHealth.errorsLast24h < 10} />
             </div>
             <div className="mt-4 rounded-xl border bg-muted/30 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Core Web Vitals</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-mono">Core Web Vitals</p>
               <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
                 <div className="rounded-md bg-emerald-500/10 p-2">
-                  <p className="font-semibold text-emerald-600">LCP {health.cwv.lcp}s</p>
+                  <p className="font-semibold text-emerald-600">LCP {stats.siteHealth.cwv.lcp}s</p>
                 </div>
                 <div className="rounded-md bg-emerald-500/10 p-2">
-                  <p className="font-semibold text-emerald-600">FID {health.cwv.fid}ms</p>
+                  <p className="font-semibold text-emerald-600">FID {stats.siteHealth.cwv.fid}ms</p>
                 </div>
                 <div className="rounded-md bg-emerald-500/10 p-2">
-                  <p className="font-semibold text-emerald-600">CLS {health.cwv.cls}</p>
+                  <p className="font-semibold text-emerald-600">CLS {stats.siteHealth.cwv.cls}</p>
                 </div>
               </div>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                Lighthouse: <span className="font-bold text-foreground">{health.cwv.score}</span>/100
+                Lighthouse: <span className="font-bold text-foreground">{stats.siteHealth.cwv.score}</span>/100
               </p>
             </div>
           </CardContent>
@@ -103,14 +173,14 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">
-              {activity.map((a, i) => (
+              {stats.recentActivity.map((a, i) => (
                 <li key={i} className="flex items-start gap-3 rounded-lg border bg-card/50 p-3">
                   <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500" />
                   <div className="flex-1">
-                    <p className="text-sm">{a.message}</p>
-                    <p className="text-xs text-muted-foreground">{a.ts}</p>
+                    <p className="text-sm font-medium text-foreground">{a.message}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{a.ts}</p>
                   </div>
-                  <Badge variant="secondary" className="capitalize">{a.type}</Badge>
+                  <Badge variant="secondary" className="capitalize text-[9px] font-mono">{a.type}</Badge>
                 </li>
               ))}
             </ul>
@@ -128,49 +198,31 @@ export default function AdminDashboardPage() {
             <CardDescription>Articles needing SEO refresh to prevent rank decay</CardDescription>
           </div>
           <Badge variant="outline" className="border-amber-500/50 text-amber-400">
-            2 urgent
+            {stats.insights.length} recommendations
           </Badge>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {[
-              {
-                title: "Merge PDF Without Watermark Guide",
-                slug: "merge-pdf-without-watermark",
-                daysSince: 32,
-                seoScore: 78,
-                urgency: "high",
-              },
-              {
-                title: "Best OCR Reader for Scanned PDFs",
-                slug: "best-ocr-reader-scanned-pdfs",
-                daysSince: 28,
-                seoScore: 82,
-                urgency: "medium",
-              },
-            ].map((article, i) => (
+            {stats.insights.map((insight, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                  article.urgency === "high"
-                    ? "bg-red-500/5 border-red-500/20"
-                    : "bg-amber-500/5 border-amber-500/20"
-                }`}
+                className="flex items-center justify-between p-3 rounded-lg border bg-amber-500/5 border-amber-500/20"
               >
                 <div className="flex items-center gap-3">
-                  <FileText
-                    className={`h-4 w-4 ${
-                      article.urgency === "high" ? "text-red-400" : "text-amber-400"
-                    }`}
-                  />
+                  <FileText className="h-4 w-4 text-amber-400" />
                   <div>
-                    <p className="text-sm font-medium text-foreground">{article.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Not updated in {article.daysSince} days · SEO Score: {article.seoScore}/100
+                    <p className="text-sm font-medium text-foreground">{insight.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {insight.description}
                     </p>
+                    {insight.recommended_action && (
+                      <p className="text-[10px] text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5 mt-1.5 inline-block font-mono">
+                        🎯 Advice: {insight.recommended_action}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <Button size="sm" variant="outline" className="h-7 text-xs">
+                <Button size="sm" variant="outline" className="h-7 text-xs flex-shrink-0">
                   <RefreshCw className="h-3 w-3 mr-1" /> Refresh
                 </Button>
               </div>

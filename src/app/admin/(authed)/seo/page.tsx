@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   AlertTriangle,
@@ -12,41 +12,47 @@ import {
   BarChart2,
   Zap,
   Globe,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// Mock SEO analytics data — will read from Supabase GSC integration in production
-const INDEXING_STATUS = [
-  { url: "/blog/best-pdf-compressor-2026", status: "indexed", impressions: 4821, clicks: 312, position: 1.4, ctr: "6.5%" },
-  { url: "/blog/compress-pdf-to-100kb", status: "indexed", impressions: 3102, clicks: 198, position: 2.1, ctr: "6.4%" },
-  { url: "/compress-pdf-to-100kb", status: "indexed", impressions: 2841, clicks: 176, position: 3.2, ctr: "6.2%" },
-  { url: "/merge-pdf-online", status: "indexed", impressions: 1923, clicks: 104, position: 4.8, ctr: "5.4%" },
-  { url: "/sign-pdf-online", status: "pending", impressions: 0, clicks: 0, position: 0, ctr: "0%" },
-  { url: "/blog/sign-pdf-online-free-2026", status: "not_indexed", impressions: 0, clicks: 0, position: 0, ctr: "0%" },
-];
-
-const RANK_DECAY_ALERTS = [
-  { keyword: "pdf compressor online free", previousPos: 1.2, currentPos: 2.8, change: -1.6, article: "best-pdf-compressor-2026" },
-  { keyword: "merge pdf without watermark", previousPos: 3.4, currentPos: 5.1, change: -1.7, article: "merge-pdf-without-watermark" },
-];
-
-const KEYWORD_CLUSTERS = [
-  { cluster: "Compression Tools", articles: 4, avgPosition: 2.1, totalImpressions: 12840, topKeyword: "pdf compressor" },
-  { cluster: "Digital Signatures", articles: 2, avgPosition: 4.2, totalImpressions: 5210, topKeyword: "sign pdf online" },
-  { cluster: "Document Joining", articles: 3, avgPosition: 5.8, totalImpressions: 3820, topKeyword: "merge pdf" },
-  { cluster: "Text Extraction OCR", articles: 1, avgPosition: 8.4, totalImpressions: 1240, topKeyword: "ocr pdf reader" },
-];
+interface SeoStats {
+  totalImpressions: number;
+  totalClicks: number;
+  avgCtr: string;
+  decayAlertsCount: number;
+  indexingStatus: { url: string; status: string; impressions: number; clicks: number; position: number; ctr: string }[];
+  decayAlerts: { keyword: string; previousPos: number; currentPos: number; change: number; article: string }[];
+  topicClusters: { cluster: string; articles: number; avgPosition: number; totalImpressions: number; topKeyword: string }[];
+}
 
 export default function AdminSeoPage() {
+  const [seo, setSeo] = useState<SeoStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [reindexing, setReindexing] = useState<string | null>(null);
 
-  const totalImpressions = INDEXING_STATUS.reduce((s, p) => s + p.impressions, 0);
-  const totalClicks = INDEXING_STATUS.reduce((s, p) => s + p.clicks, 0);
-  const indexedCount = INDEXING_STATUS.filter((p) => p.status === "indexed").length;
-  const avgCtr =
-    totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : "0";
+  const fetchSeoStats = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/seo");
+      if (!res.ok) throw new Error("Failed to pull Google Search Console telemetry");
+      const data = await res.json();
+      setSeo(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load SEO stats");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSeoStats();
+  }, []);
 
   const handleReindex = async (url: string) => {
     setReindexing(url);
@@ -54,34 +60,55 @@ export default function AdminSeoPage() {
     setReindexing(null);
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center gap-2">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <span className="text-xs text-muted-foreground font-mono">Loading Search Console indices...</span>
+      </div>
+    );
+  }
+
+  if (error || !seo) {
+    return (
+      <div className="flex h-[30vh] flex-col items-center justify-center gap-2">
+        <AlertCircle className="h-8 w-8 text-red-400" />
+        <p className="text-xs text-muted-foreground">{error || "No SEO metrics registered."}</p>
+        <Button onClick={fetchSeoStats} size="sm" variant="outline" className="mt-2">
+          <RefreshCw className="h-3 w-3 mr-1" /> Retry
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* KPI Row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border bg-card p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Total Impressions</p>
-          <p className="text-2xl font-bold text-foreground">{totalImpressions.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-foreground">{seo.totalImpressions.toLocaleString()}</p>
           <Badge variant="glass" className="text-[10px]">
             Last 30 days
           </Badge>
         </div>
         <div className="rounded-xl border bg-card p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Total Clicks</p>
-          <p className="text-2xl font-bold text-emerald-400">{totalClicks.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-emerald-400">{seo.totalClicks.toLocaleString()}</p>
           <Badge variant="glass" className="text-[10px]">
-            GSC data
+            GSC Live Data
           </Badge>
         </div>
         <div className="rounded-xl border bg-card p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Avg CTR</p>
-          <p className="text-2xl font-bold text-violet-400">{avgCtr}%</p>
+          <p className="text-2xl font-bold text-violet-400">{seo.avgCtr}%</p>
           <Badge variant="glass" className="text-[10px]">
-            {indexedCount}/{INDEXING_STATUS.length} indexed
+            {seo.indexingStatus.filter(s => s.status === 'indexed').length}/{seo.indexingStatus.length} indexed
           </Badge>
         </div>
         <div className="rounded-xl border bg-card p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Rank Decay Alerts</p>
-          <p className="text-2xl font-bold text-amber-400">{RANK_DECAY_ALERTS.length}</p>
+          <p className="text-2xl font-bold text-amber-400">{seo.decayAlertsCount}</p>
           <Badge variant="outline" className="text-[10px] border-amber-500/50 text-amber-400">
             Needs attention
           </Badge>
@@ -89,7 +116,7 @@ export default function AdminSeoPage() {
       </div>
 
       {/* Rank Decay Alerts */}
-      {RANK_DECAY_ALERTS.length > 0 && (
+      {seo.decayAlerts.length > 0 && (
         <Card className="border-amber-500/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-400">
@@ -99,7 +126,7 @@ export default function AdminSeoPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {RANK_DECAY_ALERTS.map((alert, i) => (
+              {seo.decayAlerts.map((alert, i) => (
                 <div
                   key={i}
                   className="flex items-center justify-between p-3 rounded-lg bg-amber-500/5 border border-amber-500/20"
@@ -117,7 +144,7 @@ export default function AdminSeoPage() {
                         Now #{alert.currentPos.toFixed(1)}
                       </p>
                     </div>
-                    <Badge variant="outline" className="border-red-500/50 text-red-400">
+                    <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] font-mono">
                       {alert.change.toFixed(1)} pos
                     </Badge>
                     <Button size="sm" variant="outline" className="h-7 text-xs">
@@ -168,7 +195,7 @@ export default function AdminSeoPage() {
                 </tr>
               </thead>
               <tbody>
-                {INDEXING_STATUS.map((page, i) => (
+                {seo.indexingStatus.map((page, i) => (
                   <tr key={i} className="border-b hover:bg-muted/10 transition-colors">
                     <td className="px-4 py-2.5">
                       <a
@@ -199,24 +226,15 @@ export default function AdminSeoPage() {
                           Pending
                         </Badge>
                       )}
-                      {page.status === "not_indexed" && (
-                        <Badge
-                          variant="outline"
-                          className="border-red-500/50 text-red-400 text-[10px]"
-                        >
-                          <XCircle className="h-2.5 w-2.5 mr-1" />
-                          Not Indexed
-                        </Badge>
-                      )}
                     </td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">
+                    <td className="px-4 py-2.5 text-right text-muted-foreground font-mono">
                       {page.impressions.toLocaleString()}
                     </td>
-                    <td className="px-4 py-2.5 text-right text-muted-foreground">{page.clicks}</td>
+                    <td className="px-4 py-2.5 text-right text-muted-foreground font-mono">{page.clicks}</td>
                     <td className="px-4 py-2.5 text-right">
                       {page.position > 0 ? (
                         <span
-                          className={`font-medium ${
+                          className={`font-semibold font-mono ${
                             page.position <= 3
                               ? "text-emerald-400"
                               : page.position <= 10
@@ -270,7 +288,7 @@ export default function AdminSeoPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2">
-            {KEYWORD_CLUSTERS.map((cluster, i) => (
+            {seo.topicClusters.map((cluster, i) => (
               <div
                 key={i}
                 className="p-4 rounded-xl border bg-muted/20 hover:bg-muted/30 transition-colors space-y-2"
@@ -278,14 +296,14 @@ export default function AdminSeoPage() {
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-foreground">{cluster.cluster}</h4>
                   <Badge variant="glass" className="text-[10px]">
-                    {cluster.articles} articles
+                    {cluster.articles} spoke pages
                   </Badge>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
-                    <p className="text-xs text-muted-foreground">Avg Position</p>
+                    <p className="text-[10px] text-muted-foreground">Avg Position</p>
                     <p
-                      className={`text-sm font-bold ${
+                      className={`text-sm font-bold font-mono ${
                         cluster.avgPosition <= 3
                           ? "text-emerald-400"
                           : cluster.avgPosition <= 10
@@ -297,14 +315,14 @@ export default function AdminSeoPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Impressions</p>
-                    <p className="text-sm font-bold text-foreground">
+                    <p className="text-[10px] text-muted-foreground">Impressions</p>
+                    <p className="text-sm font-bold text-foreground font-mono">
                       {cluster.totalImpressions.toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Top KW</p>
-                    <p className="text-xs font-medium text-primary truncate">
+                    <p className="text-[10px] text-muted-foreground">Top KW</p>
+                    <p className="text-xs font-semibold text-primary truncate max-w-[80px]">
                       {cluster.topKeyword}
                     </p>
                   </div>

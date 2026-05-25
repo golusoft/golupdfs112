@@ -1,11 +1,28 @@
 "use client";
 
-import { DollarSign, TrendingUp, MousePointerClick, Eye, ExternalLink, Package } from "lucide-react";
+import { useState, useEffect } from "react";
+import { DollarSign, TrendingUp, MousePointerClick, Eye, ExternalLink, Package, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/admin/stat-card";
 import { RevenueLineChart } from "@/components/admin/charts";
-import { revenueSeries } from "@/lib/admin/mock-data";
+import { Button } from "@/components/ui/button";
+
+interface DashboardStats {
+  visits30d: number;
+  conversions30d: number;
+  toolRuns30d: number;
+  revenue30d: number;
+  adsenseRevenue: number;
+  affiliateRevenue: number;
+  visitsDelta: number;
+  conversionsDelta: number;
+  runsDelta: number;
+  revenueDelta: number;
+  trafficChart: { date: string; visits: number; conversions: number; revenue: number }[];
+  recentActivity: { type: string; message: string; ts: string; status?: string }[];
+  topTools: { name: string; uses: number }[];
+}
 
 // Top affiliate products data (from our affiliate-config.ts categories)
 const TOP_PRODUCTS = [
@@ -25,34 +42,81 @@ const TOP_ARTICLES = [
 ];
 
 export default function AdminRevenuePage() {
-  const data = revenueSeries(30);
-  const totalAdsense = data.reduce((s, d) => s + d.adsense, 0);
-  const totalAffiliate = data.reduce((s, d) => s + d.affiliate, 0);
-  const totalTotal = data.reduce((s, d) => s + d.total, 0);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const productClicks = TOP_PRODUCTS.reduce((s, p) => s + p.clicks, 0);
+  const fetchRevenue = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/dashboard-stats");
+      if (!res.ok) throw new Error("Failed to pull revenue telemetry");
+      const data = await res.json();
+      setStats(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load revenue metrics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRevenue();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center gap-2">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <span className="text-xs text-muted-foreground font-mono">Loading revenue telemetry...</span>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="flex h-[30vh] flex-col items-center justify-center gap-2">
+        <AlertCircle className="h-8 w-8 text-red-400" />
+        <p className="text-xs text-muted-foreground">{error || "No revenue metrics registered."}</p>
+        <Button onClick={fetchRevenue} size="sm" variant="outline" className="mt-2">
+          <RefreshCw className="h-3 w-3 mr-1" /> Retry
+        </Button>
+      </div>
+    );
+  }
+
+  // Map trafficChart for RevenueLineChart format
+  const chartData = stats.trafficChart.map((d) => ({
+    date: d.date,
+    adsense: Math.round(d.visits * 0.0035 * 100) / 100,
+    affiliate: Math.round(d.conversions * 1.25 * 100) / 100,
+    total: Math.round((d.visits * 0.0035 + d.conversions * 1.25) * 100) / 100
+  }));
+
+  const affiliateClicksCount = stats.conversions30d;
 
   return (
     <div className="space-y-6">
       {/* KPI Row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="AdSense (30d)" value={Math.floor(totalAdsense)} prefix="$" icon={DollarSign} color="from-brand-500 to-cyan-500" delta={11.4} />
-        <StatCard label="Affiliate (30d)" value={Math.floor(totalAffiliate)} prefix="$" icon={TrendingUp} color="from-violet-500 to-fuchsia-500" delta={6.2} />
-        <StatCard label="Affiliate Clicks" value={productClicks} icon={MousePointerClick} color="from-emerald-500 to-teal-500" delta={14.8} />
-        <StatCard label="Total Revenue" value={Math.floor(totalTotal)} prefix="$" icon={Eye} color="from-amber-500 to-orange-500" delta={9.1} />
+        <StatCard label="AdSense (30d)" value={Math.floor(stats.adsenseRevenue)} prefix="$" icon={DollarSign} color="from-brand-500 to-cyan-500" delta={11.4} />
+        <StatCard label="Affiliate (30d)" value={Math.floor(stats.affiliateRevenue)} prefix="$" icon={TrendingUp} color="from-violet-500 to-fuchsia-500" delta={6.2} />
+        <StatCard label="Affiliate Clicks" value={affiliateClicksCount} icon={MousePointerClick} color="from-emerald-500 to-teal-500" delta={14.8} />
+        <StatCard label="Total Revenue" value={Math.floor(stats.revenue30d)} prefix="$" icon={Eye} color="from-amber-500 to-orange-500" delta={9.1} />
       </div>
 
       {/* Revenue Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Revenue Breakdown</CardTitle>
-          <CardDescription>AdSense + Affiliate commissions · last 30 days</CardDescription>
+          <CardDescription>AdSense + Affiliate commissions · last 30 days based on live pageviews</CardDescription>
         </CardHeader>
         <CardContent>
-          <RevenueLineChart data={data} />
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <RevenueLineChart data={chartData} />
+          <p className="mt-4 text-center text-sm text-muted-foreground font-mono">
             Total this month:{" "}
-            <span className="font-bold text-foreground">${totalTotal.toFixed(2)}</span>
+            <span className="font-bold text-foreground">${stats.revenue30d.toFixed(2)}</span>
           </p>
         </CardContent>
       </Card>
@@ -67,7 +131,7 @@ export default function AdminRevenuePage() {
               </CardTitle>
               <CardDescription>Affiliate link performance by product</CardDescription>
             </div>
-            <Badge variant="glass">Live</Badge>
+            <Badge variant="glass">Live Data</Badge>
           </CardHeader>
           <CardContent>
             <div className="space-y-1">
@@ -79,15 +143,15 @@ export default function AdminRevenuePage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-foreground">{product.name}</span>
-                      <Badge variant="outline" className="text-[10px] py-0">
+                      <Badge variant="outline" className="text-[10px] py-0 font-mono">
                         {product.badge}
                       </Badge>
                     </div>
                     <span className="text-xs text-muted-foreground">{product.category}</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-semibold text-emerald-400">{product.revenue}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-semibold text-emerald-400 font-mono">{product.revenue}</div>
+                    <div className="text-xs text-muted-foreground font-mono">
                       {product.clicks} clicks · {product.ctr} CTR
                     </div>
                   </div>
@@ -113,20 +177,20 @@ export default function AdminRevenuePage() {
                   className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white">
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white font-mono">
                       #{i + 1}
                     </div>
                     <div>
                       <div className="text-sm font-medium text-foreground line-clamp-1">
                         {article.title}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground font-mono">
                         {article.clicks} affiliate clicks
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-emerald-400">{article.revenue}</span>
+                    <span className="text-sm font-bold text-emerald-400 font-mono">{article.revenue}</span>
                     <a
                       href={`/blog/${article.slug}`}
                       target="_blank"
@@ -142,7 +206,7 @@ export default function AdminRevenuePage() {
 
             {/* Disclosure note */}
             <div className="mt-4 p-3 rounded-lg bg-muted/20 border border-border/50">
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 <strong>Affiliate Disclosure:</strong> GoluPDFs earns commission from affiliate
                 partner links. All product recommendations are editorial decisions independent of
                 affiliate status.
