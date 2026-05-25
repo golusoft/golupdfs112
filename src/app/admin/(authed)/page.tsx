@@ -1,8 +1,11 @@
-import { Eye, MousePointerClick, Wrench, DollarSign } from "lucide-react";
+"use client";
+
+import { Eye, MousePointerClick, Wrench, DollarSign, RefreshCw, FileText } from "lucide-react";
 import { StatCard } from "@/components/admin/stat-card";
 import { TrafficAreaChart, ToolsBarChart } from "@/components/admin/charts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   trafficSeries,
   topTools,
@@ -114,6 +117,67 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Content Refresh Suggestions */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-amber-400" /> Content Refresh Queue
+            </CardTitle>
+            <CardDescription>Articles needing SEO refresh to prevent rank decay</CardDescription>
+          </div>
+          <Badge variant="outline" className="border-amber-500/50 text-amber-400">
+            2 urgent
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {[
+              {
+                title: "Merge PDF Without Watermark Guide",
+                slug: "merge-pdf-without-watermark",
+                daysSince: 32,
+                seoScore: 78,
+                urgency: "high",
+              },
+              {
+                title: "Best OCR Reader for Scanned PDFs",
+                slug: "best-ocr-reader-scanned-pdfs",
+                daysSince: 28,
+                seoScore: 82,
+                urgency: "medium",
+              },
+            ].map((article, i) => (
+              <div
+                key={i}
+                className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                  article.urgency === "high"
+                    ? "bg-red-500/5 border-red-500/20"
+                    : "bg-amber-500/5 border-amber-500/20"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <FileText
+                    className={`h-4 w-4 ${
+                      article.urgency === "high" ? "text-red-400" : "text-amber-400"
+                    }`}
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{article.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Not updated in {article.daysSince} days · SEO Score: {article.seoScore}/100
+                    </p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="h-7 text-xs">
+                  <RefreshCw className="h-3 w-3 mr-1" /> Refresh
+                </Button>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

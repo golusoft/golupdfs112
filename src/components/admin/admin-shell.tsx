@@ -27,6 +27,7 @@ const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Tool analytics", href: "/admin/tools", icon: Wrench },
   { label: "SEO & Search Console", href: "/admin/seo", icon: Search },
+  { label: "AI Blog Writer", href: "/admin/blog-writer", icon: Sparkles },
   { label: "AdSense revenue", href: "/admin/revenue", icon: DollarSign },
   { label: "Feedback", href: "/admin/feedback", icon: MessagesSquare },
   { label: "Site health", href: "/admin/health", icon: Activity },

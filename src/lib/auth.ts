@@ -46,6 +46,32 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
 
 export const AUTH_COOKIE = COOKIE_NAME;
 
+/**
+ * Verifies admin authentication for API routes.
+ * Checks the admin JWT from either:
+ *  1. The golupdfs_admin cookie
+ *  2. The Authorization: Bearer <token> header
+ *
+ * Returns a 401 NextResponse if not authenticated, or null if OK.
+ */
+export async function verifyAuth(req: Request): Promise<Response | null> {
+  const { NextResponse } = await import("next/server");
+
+  // Try cookie first
+  const session = await getAdminSession();
+  if (session) return null;
+
+  // Try Authorization header as fallback
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const payload = await verifyAdminToken(token);
+    if (payload) return null;
+  }
+
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+
 export function authCookieOptions() {
   return {
     httpOnly: true,

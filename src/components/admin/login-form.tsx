@@ -25,22 +25,24 @@ export function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-      toast.success("Welcome back");
+      toast.success("Identity verified successfully!");
       router.push("/admin");
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Login failed");
+      toast.error(err instanceof Error ? err.message : "Access denied");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="email">Email</Label>
-        <div className="relative mt-1.5">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <form onSubmit={onSubmit} className="space-y-5">
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-xs font-semibold text-slate-300 uppercase tracking-widest">
+          Operator Email
+        </Label>
+        <div className="relative mt-1 group">
+          <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 group-focus-within:text-brand-400 transition-colors" />
           <Input
             id="email"
             type="email"
@@ -49,14 +51,17 @@ export function LoginForm() {
             placeholder="admin@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="pl-9"
+            className="pl-11 h-12 bg-white/[0.02] border-white/10 hover:border-white/20 focus:border-brand-500 focus:ring-brand-500/20 text-slate-100 rounded-xl transition-all duration-200 placeholder:text-slate-600"
           />
         </div>
       </div>
-      <div>
-        <Label htmlFor="password">Password</Label>
-        <div className="relative mt-1.5">
-          <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+      <div className="space-y-2">
+        <Label htmlFor="password" className="text-xs font-semibold text-slate-300 uppercase tracking-widest">
+          Passkey
+        </Label>
+        <div className="relative mt-1 group">
+          <KeyRound className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 group-focus-within:text-brand-400 transition-colors" />
           <Input
             id="password"
             type="password"
@@ -65,13 +70,26 @@ export function LoginForm() {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="pl-9"
+            className="pl-11 h-12 bg-white/[0.02] border-white/10 hover:border-white/20 focus:border-brand-500 focus:ring-brand-500/20 text-slate-100 rounded-xl transition-all duration-200 placeholder:text-slate-600"
           />
         </div>
       </div>
-      <Button type="submit" disabled={loading} variant="gradient" size="lg" className="w-full">
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
-        Sign in
+
+      <Button 
+        type="submit" 
+        disabled={loading} 
+        variant="gradient" 
+        size="lg" 
+        className="w-full h-12 rounded-xl mt-6 font-semibold tracking-wide flex items-center justify-center gap-2 text-white hover:brightness-110 active:scale-[0.98] transition-all"
+      >
+        {loading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <>
+            <LogIn className="h-5 w-5" />
+            Authenticate
+          </>
+        )}
       </Button>
     </form>
   );

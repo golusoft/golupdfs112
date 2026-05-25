@@ -1,0 +1,14 @@
+{
+  "crons": [
+    {
+      "path": "/api/schedule",
+      "schedule": "0 4 * * *"
+    }
+  ],
+  "functions": {
+    "src/app/api/generate-blog/route.ts": { "maxDuration": 60 },
+    "src/app/api/schedule/route.ts": { "maxDuration": 60 },
+    "src/app/api/publish-blog/route.ts": { "maxDuration": 60 },
+    "src/app/api/research-keywords/route.ts": { "maxDuration": 30 }
+  }
+}
