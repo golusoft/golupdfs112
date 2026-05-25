@@ -15,6 +15,7 @@ interface StatCardProps {
   icon: LucideIcon;
   color: string;
   decimals?: number;
+  source?: string;
 }
 
 export function StatCard({
@@ -26,6 +27,7 @@ export function StatCard({
   icon: Icon,
   color,
   decimals = 0,
+  source,
 }: StatCardProps) {
   const isPos = (delta ?? 0) >= 0;
   return (
@@ -38,7 +40,14 @@ export function StatCard({
       <div className={cn("absolute inset-x-0 -top-px h-px bg-gradient-to-r", color)} />
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+            {source && (
+              <span className="text-[9px] font-mono font-medium text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded leading-none">
+                {source}
+              </span>
+            )}
+          </div>
           <p className="mt-2 font-display text-3xl font-bold">
             {prefix}
             <AnimatedCounter value={Math.floor(value)} duration={1.2} />

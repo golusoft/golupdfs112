@@ -27,6 +27,8 @@ interface SeoStats {
   indexingStatus: { url: string; status: string; impressions: number; clicks: number; position: number; ctr: string }[];
   decayAlerts: { keyword: string; previousPos: number; currentPos: number; change: number; article: string }[];
   topicClusters: { cluster: string; articles: number; avgPosition: number; totalImpressions: number; topKeyword: string }[];
+  seoSource: string;
+  indexingSource: string;
 }
 
 export default function AdminSeoPage() {
@@ -86,43 +88,52 @@ export default function AdminSeoPage() {
       {/* KPI Row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground">Total Impressions</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Total Impressions</p>
+            <Badge variant="glass" className="text-[8px] font-mono">[{seo.seoSource}]</Badge>
+          </div>
           <p className="text-2xl font-bold text-foreground">{seo.totalImpressions.toLocaleString()}</p>
-          <Badge variant="glass" className="text-[10px]">
-            Last 30 days
-          </Badge>
+          <p className="text-[10px] text-muted-foreground font-mono">Last 30 days</p>
         </div>
         <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground">Total Clicks</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Total Clicks</p>
+            <Badge variant="glass" className="text-[8px] font-mono">[{seo.seoSource}]</Badge>
+          </div>
           <p className="text-2xl font-bold text-emerald-400">{seo.totalClicks.toLocaleString()}</p>
-          <Badge variant="glass" className="text-[10px]">
-            GSC Live Data
-          </Badge>
+          <p className="text-[10px] text-muted-foreground font-mono">Last 30 days</p>
         </div>
         <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground">Avg CTR</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Avg CTR</p>
+            <Badge variant="glass" className="text-[8px] font-mono">[{seo.seoSource}]</Badge>
+          </div>
           <p className="text-2xl font-bold text-violet-400">{seo.avgCtr}%</p>
-          <Badge variant="glass" className="text-[10px]">
+          <p className="text-[10px] text-muted-foreground font-mono">
             {seo.indexingStatus.filter(s => s.status === 'indexed').length}/{seo.indexingStatus.length} indexed
-          </Badge>
+          </p>
         </div>
         <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground">Rank Decay Alerts</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Rank Decay Alerts</p>
+            <Badge variant="glass" className="text-[8px] font-mono">[{seo.seoSource}]</Badge>
+          </div>
           <p className="text-2xl font-bold text-amber-400">{seo.decayAlertsCount}</p>
-          <Badge variant="outline" className="text-[10px] border-amber-500/50 text-amber-400">
-            Needs attention
-          </Badge>
+          <p className="text-[10px] text-muted-foreground font-mono">Needs attention</p>
         </div>
       </div>
 
       {/* Rank Decay Alerts */}
       {seo.decayAlerts.length > 0 && (
         <Card className="border-amber-500/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-amber-400">
-              <AlertTriangle className="h-4 w-4" /> Rank Decay Alerts
-            </CardTitle>
-            <CardDescription>Keywords losing position — refresh content recommended</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-amber-400">
+                <AlertTriangle className="h-4 w-4" /> Rank Decay Alerts
+              </CardTitle>
+              <CardDescription>Keywords losing position — refresh content recommended</CardDescription>
+            </div>
+            <Badge variant="glass" className="font-mono">[{seo.seoSource}]</Badge>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -167,7 +178,7 @@ export default function AdminSeoPage() {
             </CardTitle>
             <CardDescription>Live index status for all published pages</CardDescription>
           </div>
-          <Badge variant="glass">GSC Connected</Badge>
+          <Badge variant="glass" className="font-mono">[{seo.indexingSource}]</Badge>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
