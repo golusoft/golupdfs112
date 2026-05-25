@@ -125,9 +125,9 @@ export default function AdminToolsPage() {
                       </td>
                       <td className="py-3 text-right font-mono">{formatNumber(t.uses)}</td>
                       <td className="py-3 text-right">
-                        <span className="font-mono text-emerald-600">{t.conversionRate}%</span>
+                        <span className="font-mono text-emerald-600">{Math.max(0, t.conversionRate)}%</span>
                       </td>
-                      <td className="py-3 text-right text-muted-foreground font-mono">{t.avgTime}ms</td>
+                      <td className="py-3 text-right text-muted-foreground font-mono">{Math.max(0, t.avgTime)}ms</td>
                     </tr>
                   );
                 })}

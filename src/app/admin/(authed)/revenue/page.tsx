@@ -155,7 +155,7 @@ export default function AdminRevenuePage() {
                     <div className="text-right">
                       <div className="text-sm font-semibold text-emerald-400 font-mono">{product.revenue}</div>
                       <div className="text-xs text-muted-foreground font-mono">
-                        {product.clicks} clicks · {product.ctr} CTR
+                        {Math.max(0, product.clicks)} clicks · {product.ctr} CTR
                       </div>
                     </div>
                   </div>
@@ -199,7 +199,7 @@ export default function AdminRevenuePage() {
                           {article.title}
                         </div>
                         <div className="text-xs text-muted-foreground font-mono">
-                          {article.clicks} affiliate clicks
+                          {Math.max(0, article.clicks)} affiliate clicks
                         </div>
                       </div>
                     </div>

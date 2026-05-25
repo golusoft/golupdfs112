@@ -229,15 +229,15 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
   const dbViewsSum = publishedPosts.reduce((s, p) => s + (p.views_30d || 0), 0);
   const dbClicksSum = publishedPosts.reduce((s, p) => s + (p.clicks_30d || 0), 0);
 
-  // Compute visits - 100% verified real data!
+  // Compute visits - 100% verified real data with anomaly safeguards!
   let visits30d = 0;
   let visitsSource: LiveDashboardStats["visitsSource"] = "GSC Key Pending";
 
   if (ga4Data) {
-    visits30d = ga4Data.sessions;
+    visits30d = Math.max(0, ga4Data.sessions);
     visitsSource = forceRefresh ? "GA4 Live API" : "GA4 Cached";
   } else if (dbViewsSum > 0) {
-    visits30d = dbViewsSum;
+    visits30d = Math.max(0, dbViewsSum);
     visitsSource = "Supabase DB";
   } else {
     visits30d = 0;
@@ -249,17 +249,17 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
   let conversionsSource: LiveDashboardStats["conversionsSource"] = "GA4 Key Pending";
 
   if (ga4Data) {
-    conversions30d = ga4Data.conversions;
+    conversions30d = Math.max(0, ga4Data.conversions);
     conversionsSource = "GA4 Live API";
   } else if (clickLogs.length > 0) {
-    conversions30d = clickLogs.length;
+    conversions30d = Math.max(0, clickLogs.length);
     conversionsSource = "Supabase DB";
   } else {
-    conversions30d = dbClicksSum;
+    conversions30d = Math.max(0, dbClicksSum);
     conversionsSource = dbClicksSum > 0 ? "Supabase DB" : "GA4 Key Pending";
   }
 
-  // Tool Runs - Actual logged events count in last 30 days strictly
+  // Tool Runs - Actual logged events count in last 30 days strictly (clamped to prevent negative anomalies)
   let toolRuns30d = 0;
   if (supabase) {
     try {
@@ -268,7 +268,7 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
         .select("*", { count: "exact", head: true })
         .eq("action", "tool_run")
         .gte("ts", new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString());
-      if (count !== null) toolRuns30d = count;
+      if (count !== null) toolRuns30d = Math.max(0, count);
     } catch {}
   }
 
@@ -281,7 +281,7 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
         .select("*", { count: "exact", head: true })
         .in("status", ["failed", "error"])
         .gte("ts", new Date(now - 24 * 60 * 60 * 1000).toISOString());
-      if (count !== null) errorsLast24h = count;
+      if (count !== null) errorsLast24h = Math.max(0, count);
     } catch {}
   }
 
@@ -295,13 +295,13 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
         .gte("ts", new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString());
       if (crons && crons.length > 0) {
         const successful = crons.filter(c => c.status === "success").length;
-        uptime30d = Math.round((successful / crons.length) * 100 * 100) / 100;
+        uptime30d = Math.max(0.00, Math.min(100.00, Math.round((successful / crons.length) * 100 * 100) / 100));
       }
     } catch {}
   }
 
   // Average response time calculated from real database latency or crons
-  let avgResponse = dbLatency || 120;
+  let avgResponse = Math.max(0, dbLatency || 120);
   if (supabase) {
     try {
       const { data: crons } = await supabase
@@ -311,16 +311,15 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
         .limit(10);
       if (crons && crons.length > 0) {
         const avgCron = crons.reduce((s, c) => s + (c.duration_ms || 0), 0) / crons.length;
-        // Keep page response distinct from cron execution lengths, but factor database ping
-        avgResponse = Math.round(dbLatency > 0 ? (dbLatency * 0.7 + avgCron * 0.05) : 120);
+        avgResponse = Math.max(0, Math.round(dbLatency > 0 ? (dbLatency * 0.7 + avgCron * 0.05) : 120));
       }
     } catch {}
   }
 
   // Affiliate & AdSense Yields based strictly on telemetry
-  const affiliateRevenue = clickLogs.length * 0.45; // $0.45 avg commission per contextual saas click
-  const adsenseRevenue = visits30d * 0.0035; // Page RPM
-  const revenue30d = Math.round((adsenseRevenue + affiliateRevenue) * 100) / 100;
+  const affiliateRevenue = Math.max(0, clickLogs.length * 0.45); // $0.45 avg commission per contextual saas click
+  const adsenseRevenue = Math.max(0, visits30d * 0.0035); // Page RPM
+  const revenue30d = Math.max(0, Math.round((adsenseRevenue + affiliateRevenue) * 100) / 100);
 
   // Chart date-series matching actual daily values
   const trafficChart = Array.from({ length: 30 }, (_, i) => {
@@ -328,14 +327,14 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
     d.setDate(d.getDate() - (29 - i));
     const dayStr = d.toISOString().slice(5, 10);
     
-    const dayClicks = clickLogs.filter(c => c.ts?.slice(5, 10) === dayStr).length;
-    const dayVisits = Math.round(visits30d / 30);
+    const dayClicks = Math.max(0, clickLogs.filter(c => c.ts?.slice(5, 10) === dayStr).length);
+    const dayVisits = Math.max(0, Math.round(visits30d / 30));
 
     return {
       date: dayStr,
       visits: dayVisits,
       conversions: dayClicks,
-      revenue: Math.round((dayVisits * 0.0035 + dayClicks * 0.45) * 100) / 100
+      revenue: Math.max(0, Math.round((dayVisits * 0.0035 + dayClicks * 0.45) * 100) / 100)
     };
   });
 
@@ -388,14 +387,17 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
         .select("*")
         .limit(6);
       if (products && products.length > 0) {
-        topProducts = products.map(p => ({
-          name: p.product_name,
-          category: "PDF Tools",
-          clicks: p.total_clicks,
-          ctr: p.total_clicks > 0 ? "5.4%" : "0%",
-          revenue: `$${(p.total_clicks * 0.45).toFixed(2)}`,
-          badge: p.total_clicks > 100 ? "🔥 Hot" : "Active"
-        }));
+        topProducts = products.map(p => {
+          const positiveClicks = Math.max(0, p.total_clicks || 0);
+          return {
+            name: p.product_name,
+            category: "PDF Tools",
+            clicks: positiveClicks,
+            ctr: positiveClicks > 0 ? "5.4%" : "0%",
+            revenue: `$${(positiveClicks * 0.45).toFixed(2)}`,
+            badge: positiveClicks > 100 ? "🔥 Hot" : "Active"
+          };
+        });
       }
 
       const { data: articles } = await supabase
@@ -404,12 +406,15 @@ export async function getLiveDashboardStats(forceRefresh = false): Promise<LiveD
         .order("clicks_30d", { ascending: false })
         .limit(5);
       if (articles && articles.length > 0) {
-        topArticles = articles.map(a => ({
-          title: a.title,
-          slug: a.slug,
-          clicks: a.clicks_30d || 0,
-          revenue: `$${((a.clicks_30d || 0) * 0.45).toFixed(2)}`
-        }));
+        topArticles = articles.map(a => {
+          const positiveClicks = Math.max(0, a.clicks_30d || 0);
+          return {
+            title: a.title,
+            slug: a.slug,
+            clicks: positiveClicks,
+            revenue: `$${(positiveClicks * 0.45).toFixed(2)}`
+          };
+        });
       }
     } catch (e) {
       console.warn("Error querying top products/articles views:", e);

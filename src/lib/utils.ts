@@ -14,9 +14,10 @@ export function formatBytes(bytes: number, decimals = 2): string {
 }
 
 export function formatNumber(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return n.toString();
+  const val = Math.max(0, n);
+  if (val >= 1_000_000) return `${(val / 1_000_000).toFixed(1)}M`;
+  if (val >= 1_000) return `${(val / 1_000).toFixed(1)}K`;
+  return val.toString();
 }
 
 export function slugify(s: string): string {
