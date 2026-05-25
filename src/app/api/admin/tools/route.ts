@@ -33,14 +33,18 @@ export async function GET(req: Request) {
     // Map tools with dynamic aggregates
     const toolStats = TOOLS.map((t, i) => {
       // Filter log counts for this specific tool slug
-      const runs = logs.filter(l => l.payload?.tool === t.slug || l.keyword?.includes(t.slug)).length;
+      const runs = logs.filter(l => l.payload?.tool === t.slug || l.keyword?.includes(t.slug));
+      const totalRuns = runs.length;
       
-      // Deterministic, seed-based fallback if no live database logs are active yet
-      const baseUses = Math.round(35000 / (i + 1) + Math.sin(i) * 5000);
-      const totalRuns = runs > 0 ? runs + Math.round(baseUses * 0.1) : baseUses;
+      // Calculate real conversion rate based on actual database logs
+      const successRuns = runs.filter(l => l.status === "success" || l.status === "completed").length;
+      const convRate = totalRuns > 0 ? Math.round((successRuns / totalRuns) * 100 * 10) / 10 : 0.0;
       
-      const convRate = Math.round((78 + Math.cos(i) * 15) * 10) / 10;
-      const latency = Math.round(650 + Math.sin(i * 2) * 200);
+      // Calculate real latency based on payload performance metrics
+      const latencies = runs.map(l => l.payload?.duration_ms || l.payload?.latency).filter(Boolean);
+      const avgTime = latencies.length > 0 
+        ? Math.round(latencies.reduce((s, x) => s + x, 0) / latencies.length) 
+        : 0;
 
       return {
         slug: t.slug,
@@ -48,11 +52,14 @@ export async function GET(req: Request) {
         category: t.category,
         uses: totalRuns,
         conversionRate: convRate,
-        avgTime: latency
+        avgTime: avgTime
       };
     }).sort((a, b) => b.uses - a.uses);
 
-    return NextResponse.json(toolStats);
+    return NextResponse.json({
+      tools: toolStats,
+      source: supabase ? "Supabase DB" : "Fallback Key Pending"
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Failed to fetch tools analytics" },
@@ -62,3 +69,4 @@ export async function GET(req: Request) {
 }
 
 export const dynamic = "force-dynamic";
+

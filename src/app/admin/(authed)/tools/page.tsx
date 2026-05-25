@@ -20,6 +20,7 @@ interface ToolPerformance {
 
 export default function AdminToolsPage() {
   const [data, setData] = useState<ToolPerformance[]>([]);
+  const [source, setSource] = useState<string>("Supabase DB");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +30,9 @@ export default function AdminToolsPage() {
     try {
       const res = await fetch("/api/admin/tools");
       if (!res.ok) throw new Error("Failed to load tools performance metrics");
-      const list = await res.json();
-      setData(list);
+      const result = await res.json();
+      setData(result.tools || []);
+      setSource(result.source || "Supabase DB");
     } catch (err: any) {
       setError(err.message || "Failed to load tools data");
     } finally {
@@ -66,9 +68,12 @@ export default function AdminToolsPage() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Tool usage breakdown</CardTitle>
-          <CardDescription>Top tools by runs dynamically aggregated from Supabase events</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Tool usage breakdown</CardTitle>
+            <CardDescription>Top tools by runs dynamically aggregated from Supabase events</CardDescription>
+          </div>
+          <Badge variant="glass" className="text-[10px] font-mono">[{source}]</Badge>
         </CardHeader>
         <CardContent>
           <ToolsBarChart data={data.slice(0, 10).map((t) => ({ name: t.name, uses: t.uses }))} />
@@ -76,9 +81,12 @@ export default function AdminToolsPage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>All tools — performance</CardTitle>
-          <CardDescription>Conversion rate = % of uploads that complete a successful run</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>All tools — performance</CardTitle>
+            <CardDescription>Conversion rate = % of uploads that complete a successful run</CardDescription>
+          </div>
+          <Badge variant="glass" className="text-[10px] font-mono">[{source}]</Badge>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">

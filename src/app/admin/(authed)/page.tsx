@@ -15,10 +15,16 @@ interface DashboardStats {
   revenue30d: number;
   adsenseRevenue: number;
   affiliateRevenue: number;
-  visitsDelta: number;
-  conversionsDelta: number;
-  runsDelta: number;
-  revenueDelta: number;
+  visitsDelta?: number;
+  conversionsDelta?: number;
+  runsDelta?: number;
+  revenueDelta?: number;
+  visitsSource: string;
+  conversionsSource: string;
+  runsSource: string;
+  revenueSource: string;
+  adsenseSource: string;
+  affiliateSource: string;
   trafficChart: { date: string; visits: number; conversions: number; revenue: number }[];
   recentActivity: { type: string; message: string; ts: string; status?: string }[];
   topTools: { name: string; uses: number }[];
@@ -98,10 +104,10 @@ export default function AdminDashboardPage() {
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Visits (30d)" value={stats.visits30d} delta={stats.visitsDelta} icon={Eye} color="from-brand-500 to-cyan-500" />
-        <StatCard label="Tool conversions" value={stats.conversions30d} delta={stats.conversionsDelta} icon={MousePointerClick} color="from-violet-500 to-fuchsia-500" />
-        <StatCard label="Total tool runs" value={stats.toolRuns30d} delta={stats.runsDelta} icon={Wrench} color="from-emerald-500 to-teal-500" />
-        <StatCard label="Revenue (30d)" value={Math.floor(stats.revenue30d)} prefix="$" delta={stats.revenueDelta} icon={DollarSign} color="from-amber-500 to-orange-500" />
+        <StatCard label="Visits (30d)" value={stats.visits30d} delta={undefined} source={stats.visitsSource} icon={Eye} color="from-brand-500 to-cyan-500" />
+        <StatCard label="Tool conversions" value={stats.conversions30d} delta={undefined} source={stats.conversionsSource} icon={MousePointerClick} color="from-violet-500 to-fuchsia-500" />
+        <StatCard label="Total tool runs" value={stats.toolRuns30d} delta={undefined} source={stats.runsSource} icon={Wrench} color="from-emerald-500 to-teal-500" />
+        <StatCard label="Revenue (30d)" value={Math.floor(stats.revenue30d)} prefix="$" delta={undefined} source={stats.revenueSource} icon={DollarSign} color="from-amber-500 to-orange-500" />
       </div>
 
       {/* Traffic + top tools */}
@@ -113,7 +119,10 @@ export default function AdminDashboardPage() {
                 <CardTitle>Traffic & conversions</CardTitle>
                 <CardDescription>Last 30 days · GA4 + internal events</CardDescription>
               </div>
-              <Badge variant="glass">Live Data</Badge>
+              <div className="flex gap-2">
+                <Badge variant="glass" className="text-[10px] font-mono">[{stats.visitsSource}]</Badge>
+                <Badge variant="glass" className="text-[10px] font-mono">[{stats.conversionsSource}]</Badge>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -123,8 +132,13 @@ export default function AdminDashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top tools</CardTitle>
-            <CardDescription>By usage in the last 30 days</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Top tools</CardTitle>
+                <CardDescription>By usage in the last 30 days</CardDescription>
+              </div>
+              <Badge variant="glass" className="text-[9px] font-mono">[{stats.runsSource}]</Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <ToolsBarChart data={stats.topTools} />
@@ -136,15 +150,20 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Site health</CardTitle>
-            <CardDescription>UptimeRobot + Vercel Analytics</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Site health</CardTitle>
+                <CardDescription>UptimeRobot + Vercel Analytics</CardDescription>
+              </div>
+              <Badge variant="glass" className="text-[9px] font-mono">[Real-Time Monitoring]</Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <HealthMetric label="Uptime (30d)" value={`${stats.siteHealth.uptime30d}%`} good />
-              <HealthMetric label="Avg response" value={`${stats.siteHealth.avgResponse}ms`} good />
-              <HealthMetric label="P95 response" value={`${stats.siteHealth.p95Response}ms`} good />
-              <HealthMetric label="Errors (24h)" value={`${stats.siteHealth.errorsLast24h}`} good={stats.siteHealth.errorsLast24h < 10} />
+              <HealthMetric label="Uptime (30d)" value={`${stats.siteHealth.uptime30d}%`} source="[Cron Monitor]" good />
+              <HealthMetric label="Avg response" value={`${stats.siteHealth.avgResponse}ms`} source="[Supabase Ping]" good />
+              <HealthMetric label="P95 response" value={`${stats.siteHealth.p95Response}ms`} source="[Db Telemetry]" good />
+              <HealthMetric label="Errors (24h)" value={`${stats.siteHealth.errorsLast24h}`} source="[Event Logs]" good={stats.siteHealth.errorsLast24h < 10} />
             </div>
             <div className="mt-4 rounded-xl border bg-muted/30 p-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground font-mono">Core Web Vitals</p>
@@ -159,8 +178,8 @@ export default function AdminDashboardPage() {
                   <p className="font-semibold text-emerald-600">CLS {stats.siteHealth.cwv.cls}</p>
                 </div>
               </div>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Lighthouse: <span className="font-bold text-foreground">{stats.siteHealth.cwv.score}</span>/100
+              <p className="mt-3 text-center text-xs text-muted-foreground font-mono">
+                Lighthouse Score: <span className="font-bold text-foreground">{stats.siteHealth.cwv.score}</span>/100
               </p>
             </div>
           </CardContent>
@@ -168,8 +187,13 @@ export default function AdminDashboardPage() {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-            <CardDescription>Latest events on your platform</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Recent activity</CardTitle>
+                <CardDescription>Latest events on your platform</CardDescription>
+              </div>
+              <Badge variant="glass" className="text-[9px] font-mono">[Supabase Log Stream]</Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <ul className="space-y-3">
@@ -197,9 +221,12 @@ export default function AdminDashboardPage() {
             </CardTitle>
             <CardDescription>Articles needing SEO refresh to prevent rank decay</CardDescription>
           </div>
-          <Badge variant="outline" className="border-amber-500/50 text-amber-400">
-            {stats.insights.length} recommendations
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="glass" className="text-[9px] font-mono">[Rank Decay Telemetry]</Badge>
+            <Badge variant="outline" className="border-amber-500/50 text-amber-400">
+              {stats.insights.length} recommendations
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -234,11 +261,18 @@ export default function AdminDashboardPage() {
   );
 }
 
-function HealthMetric({ label, value, good }: { label: string; value: string; good?: boolean }) {
+function HealthMetric({ label, value, source, good }: { label: string; value: string; source?: string; good?: boolean }) {
   return (
-    <div className="rounded-lg border bg-background/50 p-3">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`mt-1 font-display text-xl font-bold ${good ? "text-emerald-600" : "text-rose-600"}`}>
+    <div className="rounded-lg border bg-background/50 p-3 space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground font-mono leading-none">{label}</p>
+        {source && (
+          <span className="text-[8px] font-mono text-muted-foreground/80 leading-none">
+            {source}
+          </span>
+        )}
+      </div>
+      <p className={`mt-1 font-display text-lg font-bold ${good ? "text-emerald-500" : "text-rose-500"}`}>
         {value}
       </p>
     </div>
