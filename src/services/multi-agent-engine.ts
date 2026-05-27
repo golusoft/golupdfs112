@@ -16,13 +16,19 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let callCounter = 0;
+
 async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
   const geminiKey = process.env.GEMINI_API_KEY;
   const openRouterKey = process.env.OPENROUTER_API_KEY;
 
-  // Try OpenRouter First
-  if (openRouterKey && !openRouterKey.startsWith("replace")) {
+  callCounter++;
+  const useOpenRouter = (callCounter % 2 === 1) && openRouterKey && !openRouterKey.startsWith("replace");
+
+  // Tier 1: Try OpenRouter Free Model (Alternated)
+  if (useOpenRouter) {
     try {
+      console.log(`[Load Balancer] Routing call #${callCounter} to OpenRouter Free (gemini-2.5-flash:free)...`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -32,7 +38,7 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
           "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "google/gemini-2.5-flash:free",
           messages: [
             ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
             { role: "user", content: prompt }
@@ -44,16 +50,20 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
         const data = await response.json();
         const text = data?.choices?.[0]?.message?.content;
         if (text) return text.trim();
+      } else {
+        const errText = await response.text();
+        console.warn(`[Load Balancer] OpenRouter free failed (status ${response.status}): ${errText}. Retrying with Gemini direct...`);
       }
-    } catch (e) {
-      console.error("OpenRouter error, falling back to Gemini direct:", e);
+    } catch (e: any) {
+      console.error("[Load Balancer] OpenRouter free error:", e.message);
     }
   }
 
-  // Try Gemini Direct
+  // Tier 2: Try Google AI Studio Direct (Alternated)
   if (geminiKey && !geminiKey.startsWith("replace")) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
+      console.log(`[Load Balancer] Routing call #${callCounter} to Google AI Studio Direct (gemini-2.0-flash)...`);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,13 +83,48 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
         const data = await response.json();
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) return text.trim();
+      } else {
+        const errText = await response.text();
+        console.warn(`[Load Balancer] Gemini direct failed (status ${response.status}): ${errText}`);
       }
-    } catch (e) {
-      console.error("Gemini direct error:", e);
+    } catch (e: any) {
+      console.error("[Load Balancer] Gemini direct error:", e.message);
     }
   }
 
-  // Graceful Local Fallback Simulation if no keys are active
+  // Tier 3: Cross-Endpoint Failover (If alternating choice hit rate-limit or failed)
+  if (!useOpenRouter && openRouterKey && !openRouterKey.startsWith("replace")) {
+    try {
+      console.log("[Load Balancer] Failover: Attempting OpenRouter free model...");
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openRouterKey}`,
+          "HTTP-Referer": "https://golupdfs112-autz.vercel.app",
+          "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash:free",
+          messages: [
+            ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.7
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const text = data?.choices?.[0]?.message?.content;
+        if (text) return text.trim();
+      }
+    } catch (e: any) {
+      console.error("[Load Balancer] Failover OpenRouter free error:", e.message);
+    }
+  }
+
+  // Graceful Local Fallback Simulation if both active endpoints fail
+  console.log("[Load Balancer] All endpoints exhausted or rate-limited. Falling back to local simulator.");
   return simulateLocalAiResponse(prompt, systemPrompt);
 }
 
