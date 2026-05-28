@@ -3,7 +3,8 @@
 ## Repository
 - GitHub: https://github.com/golusoft/golupdfs112
 - Vercel Project: https://vercel.com/golubhai321lkr-1648s-projects/golupdfs112-autz
-- Production URL: https://golupdfs112-autz.vercel.app
+- Primary Production URL: https://golupdf.online
+- Secondary Staging Alias URL: https://golupdfs112-autz.vercel.app
 
 ---
 
@@ -69,13 +70,13 @@ Go to: Settings → Environment Variables → Add each:
 - ✅ https://golupdfs112-autz.vercel.app/robots.txt — Robots
 - ✅ https://golupdfs112-autz.vercel.app/api/admin/health — Health check
 
-## Step 7 — Custom Domain (Future)
+## Step 7 — Custom Domain Configured (Active)
 
-When you purchase a custom domain:
-1. Vercel Dashboard → Domains → Add Domain
-2. Add DNS A record: `76.76.21.21`
-3. Add CNAME: `www` → `cname.vercel-dns.com`
-4. Update `NEXT_PUBLIC_SITE_URL` env var to your domain
+The platform custom domain is fully configured:
+1. Vercel Dashboard → Domains → Add Domain `golupdf.online` (keeping `golupdfs112-autz.vercel.app` as secondary redirect/alias)
+2. DNS A record: `@` → `76.76.21.21` (Vercel IP)
+3. DNS CNAME: `www` → `cname.vercel-dns.com`
+4. Updated `NEXT_PUBLIC_SITE_URL` env var to `https://golupdf.online`
 5. SSL is auto-provisioned by Vercel
 
 ---

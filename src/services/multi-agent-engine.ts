@@ -34,7 +34,7 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${openRouterKey}`,
-          "HTTP-Referer": "https://golupdfs112-autz.vercel.app",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online",
           "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
         },
         body: JSON.stringify({
@@ -101,7 +101,7 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${openRouterKey}`,
-          "HTTP-Referer": "https://golupdfs112-autz.vercel.app",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online",
           "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
         },
         body: JSON.stringify({
@@ -519,6 +519,7 @@ export async function runPublishingAgent(
 ): Promise<BlogPost> {
   await insertDbLog("publish", "running", `Publishing Agent processing database write commands...`, keyword);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online";
   const slug = keyword.toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
@@ -530,7 +531,7 @@ export async function runPublishingAgent(
   const faqs = extractFaqs(content);
   const faqSchema = faqs.length > 0 ? {
     "@type": "FAQPage",
-    "@id": `https://golupdfs112-autz.vercel.app/blog/${slug}#faq`,
+    "@id": `${siteUrl}/blog/${slug}#faq`,
     "mainEntity": faqs.map(f => ({
       "@type": "Question",
       "name": f.question,
@@ -544,25 +545,25 @@ export async function runPublishingAgent(
   // Compile Breadcrumb schema markup
   const breadcrumbSchema = {
     "@type": "BreadcrumbList",
-    "@id": `https://golupdfs112-autz.vercel.app/blog/${slug}#breadcrumb`,
+    "@id": `${siteUrl}/blog/${slug}#breadcrumb`,
     "itemListElement": [
       {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://golupdfs112-autz.vercel.app"
+        "item": siteUrl
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Blog",
-        "item": "https://golupdfs112-autz.vercel.app/blog"
+        "item": `${siteUrl}/blog`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": title,
-        "item": `https://golupdfs112-autz.vercel.app/blog/${slug}`
+        "item": `${siteUrl}/blog/${slug}`
       }
     ]
   };
@@ -586,7 +587,7 @@ export async function runPublishingAgent(
       "@graph": [
         {
           "@type": "BlogPosting",
-          "@id": `https://golupdfs112-autz.vercel.app/blog/${slug}#blogposting`,
+          "@id": `${siteUrl}/blog/${slug}#blogposting`,
           "headline": title,
           "image": imageMeta.url,
           "author": {
@@ -598,7 +599,7 @@ export async function runPublishingAgent(
             "name": "GoluPDFs",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://golupdfs112-autz.vercel.app/icon.svg"
+              "url": `${siteUrl}/icon.svg`
             }
           },
           "datePublished": new Date().toISOString(),

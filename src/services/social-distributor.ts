@@ -29,7 +29,7 @@ function getSocialTokens(): SocialTokenConfig {
   };
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs112-autz.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online";
 
 /**
  * Post to Dev.to using the public API.

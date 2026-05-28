@@ -262,7 +262,7 @@ Yes. Files are processed locally in-browser for privacy protection. No files are
       "@graph": [
         {
           "@type": "BlogPosting",
-          "@id": "https://golupdfs112-autz.vercel.app/blog/compress-pdf-to-100kb#blogposting",
+          "@id": "https://golupdf.online/blog/compress-pdf-to-100kb#blogposting",
           "headline": "How to Compress a PDF to 100 KB Without Losing Quality",
           "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&h=630&auto=format&fit=crop",
           "author": {
@@ -274,7 +274,7 @@ Yes. Files are processed locally in-browser for privacy protection. No files are
             "name": "GoluPDFs",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://golupdfs112-autz.vercel.app/icon.svg"
+              "url": "https://golupdf.online/icon.svg"
             }
           },
           "datePublished": "2026-05-10T12:00:00Z",
@@ -282,31 +282,31 @@ Yes. Files are processed locally in-browser for privacy protection. No files are
         },
         {
           "@type": "BreadcrumbList",
-          "@id": "https://golupdfs112-autz.vercel.app/blog/compress-pdf-to-100kb#breadcrumb",
+          "@id": "https://golupdf.online/blog/compress-pdf-to-100kb#breadcrumb",
           "itemListElement": [
             {
               "@type": "ListItem",
               "position": 1,
               "name": "Home",
-              "item": "https://golupdfs112-autz.vercel.app"
+              "item": "https://golupdf.online"
             },
             {
               "@type": "ListItem",
               "position": 2,
               "name": "Blog",
-              "item": "https://golupdfs112-autz.vercel.app/blog"
+              "item": "https://golupdf.online/blog"
             },
             {
               "@type": "ListItem",
               "position": 3,
               "name": "How to Compress a PDF to 100 KB Without Losing Quality",
-              "item": "https://golupdfs112-autz.vercel.app/blog/compress-pdf-to-100kb"
+              "item": "https://golupdf.online/blog/compress-pdf-to-100kb"
             }
           ]
         },
         {
           "@type": "FAQPage",
-          "@id": "https://golupdfs112-autz.vercel.app/blog/compress-pdf-to-100kb#faq",
+          "@id": "https://golupdf.online/blog/compress-pdf-to-100kb#faq",
           "mainEntity": [
             {
               "@type": "Question",

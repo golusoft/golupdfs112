@@ -92,7 +92,7 @@ async function fetchGoogleAnalytics4Data(startDate = "30daysAgo", endDate = "tod
 async function fetchGoogleSearchConsoleData(): Promise<any> {
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
   const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs112-autz.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online";
 
   if (!clientEmail || !privateKey || clientEmail.startsWith("replace")) {
     return null; // Key Pending

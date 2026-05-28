@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     // Google Indexing API Automation
     try {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdfs112-autz.vercel.app";
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online";
       await requestGoogleIndexing(`${siteUrl}/blog/${post.slug}`);
     } catch (e: any) {
       console.warn("Google Indexing API call failed:", e);

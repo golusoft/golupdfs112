@@ -264,8 +264,12 @@ export default function AdminSettingsPage() {
             <Input value="https://github.com/golusoft/golupdfs112" readOnly className="mt-1.5 font-mono text-sm" />
           </div>
           <div>
-            <Label>Production URL</Label>
-            <Input value="https://golupdfs112-autz.vercel.app" readOnly className="mt-1.5 font-mono text-sm" />
+            <Label>Primary Production URL</Label>
+            <Input value={process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online"} readOnly className="mt-1.5 font-mono text-sm" />
+          </div>
+          <div>
+            <Label>Secondary Alias URL</Label>
+            <Input value="https://golupdfs112-autz.vercel.app" readOnly className="mt-1.5 font-mono text-sm text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
