@@ -38,7 +38,7 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
           "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash:free",
+          model: "openrouter/free",
           messages: [
             ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
             { role: "user", content: prompt }
@@ -105,7 +105,7 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
           "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash:free",
+          model: "openrouter/free",
           messages: [
             ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
             { role: "user", content: prompt }
