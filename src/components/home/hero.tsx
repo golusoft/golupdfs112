@@ -42,42 +42,22 @@ export function Hero() {
             <ArrowRight className="h-3 w-3 text-muted-foreground" />
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-            className="font-display text-balance text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-[5.25rem]"
-          >
+          <h1 className="font-display text-balance text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl lg:text-[5.25rem]">
             The modern{" "}
             <span className="relative inline-block">
               <span className="gradient-text">PDF Studio</span>
-              <motion.span
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute -bottom-2 left-0 right-0 h-1.5 origin-left rounded-full bg-gradient-to-r from-brand-500 via-violet-500 to-fuchsia-500"
-              />
+              <span className="absolute -bottom-2 left-0 right-0 h-1.5 rounded-full bg-gradient-to-r from-brand-500 via-violet-500 to-fuchsia-500" />
             </span>
             <br />
             built for the web.
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mx-auto mt-7 max-w-2xl text-pretty text-lg text-muted-foreground sm:text-xl"
-          >
+          <p className="mx-auto mt-7 max-w-2xl text-pretty text-lg text-muted-foreground sm:text-xl">
             30+ professional PDF tools that run privately in your browser. No uploads, no
             watermarks, no signups. Just speed.
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
-          >
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild variant="gradient" size="xl" className="w-full sm:w-auto">
               <Link href="/tools">
                 <Sparkles className="h-4 w-4" />
@@ -88,14 +68,9 @@ export function Hero() {
             <Button asChild variant="outline" size="xl" className="w-full sm:w-auto">
               <Link href="/tools/compress-pdf">Try Compress PDF</Link>
             </Button>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground"
-          >
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-emerald-500" /> 100% browser-side
             </span>
@@ -105,7 +80,7 @@ export function Hero() {
             <span className="flex items-center gap-2">
               <Star className="h-4 w-4 fill-amber-500 text-amber-500" /> 4.9 / 5 from 12,000+ users
             </span>
-          </motion.div>
+          </div>
         </div>
 
         {/* Floating tool orbs */}

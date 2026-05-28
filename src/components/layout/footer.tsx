@@ -55,9 +55,9 @@ export function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8 lg:grid-cols-4">
             {(Object.keys(CATEGORIES) as ToolCategory[]).slice(0, 4).map((cat) => (
               <div key={cat}>
-                <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {CATEGORIES[cat].label}
-                </h4>
+                </p>
                 <ul className="space-y-2 text-sm">
                   {TOOLS.filter((t) => t.category === cat)
                     .slice(0, 5)
@@ -79,7 +79,7 @@ export function Footer() {
 
         <div className="mt-12 grid gap-6 border-t pt-8 md:grid-cols-3">
           <div>
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resources</h4>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resources</p>
             <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
               {RESOURCES.map((r) => (
                 <li key={r.label}>
@@ -91,7 +91,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legal</h4>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Legal</p>
             <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
               {LEGAL.map((r) => (
                 <li key={r.label}>

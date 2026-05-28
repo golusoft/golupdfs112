@@ -54,7 +54,7 @@ export function UploadSpotlight() {
               : "border-border hover:border-primary/60 hover:bg-background/80"
           }`}
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps()} aria-label="Upload PDF or image file" />
 
           <div className="absolute inset-0 -z-10 opacity-50 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]">
             <div className="absolute -top-10 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-500/30 blur-3xl" />
@@ -69,9 +69,9 @@ export function UploadSpotlight() {
             >
               <Upload className="h-7 w-7" />
             </motion.div>
-            <h3 className="font-display text-2xl font-bold sm:text-3xl">
+            <h2 className="font-display text-2xl font-bold sm:text-3xl">
               {isDragActive ? "Drop your files here" : "Drop a PDF or image to get started"}
-            </h3>
+            </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-muted-foreground sm:text-base">
               We'll route you to the right tool automatically. Files never leave your device.
             </p>

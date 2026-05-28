@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
 import { Providers } from "@/components/providers";
 import { Analytics } from "@/components/analytics";
 import { StructuredData } from "@/components/structured-data";
@@ -57,10 +58,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jakarta.variable} ${mono.variable}`}>
       <head>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <StructuredData data={[organizationJsonLd(), websiteJsonLd()]} />
-        {/* Google Analytics 4 (Statically rendered in HTML head) */}
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
-        <script
+        {/* Google Analytics 4 (Deferred with lazyOnload for performance) */}
+        <Script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          strategy="lazyOnload"
+        />
+        <Script
+          id="google-analytics"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];

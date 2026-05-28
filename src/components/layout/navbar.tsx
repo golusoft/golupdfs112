@@ -130,9 +130,9 @@ export function Navbar() {
                                 CATEGORIES[cat].color
                               )}
                             />
-                            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               {CATEGORIES[cat].label}
-                            </h4>
+                            </p>
                           </div>
                           <ul className="space-y-1">
                             {tools.map((t) => (
