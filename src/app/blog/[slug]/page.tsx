@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
 import { getDbPostBySlug } from "@/lib/admin/mock-blog-data";
+import { BlogViewsTracker } from "@/components/blog/views-tracker";
 import Link from "next/link";
 
 interface PageProps {
@@ -196,17 +197,20 @@ export default async function BlogPostPage({ params }: PageProps) {
             </h1>
 
             {/* Author card row */}
-            <div className="flex flex-wrap items-center gap-4 py-4 border-t border-b text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center font-bold text-white text-[10px]">
-                  GP
+            <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-t border-b text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-brand-500 to-fuchsia-500 flex items-center justify-center font-bold text-white text-[10px]">
+                    GP
+                  </div>
+                  <span className="font-semibold text-foreground">{post.author}</span>
                 </div>
-                <span className="font-semibold text-foreground">{post.author}</span>
+                <span className="h-4 w-px bg-muted hidden sm:inline" />
+                <div className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formattedDate}</div>
+                <span className="h-4 w-px bg-muted hidden sm:inline" />
+                <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {post.read_time} read</div>
               </div>
-              <span className="h-4 w-px bg-muted" />
-              <div className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formattedDate}</div>
-              <span className="h-4 w-px bg-muted" />
-              <div className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {post.read_time} read</div>
+              <BlogViewsTracker slug={slug} initialViews={post.views_30d || 0} />
             </div>
 
             {/* Featured Image display */}
