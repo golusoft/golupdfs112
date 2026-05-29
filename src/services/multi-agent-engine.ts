@@ -16,53 +16,142 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-let callCounter = 0;
+// Helper to extract keyword context dynamically based on search category
+export function getKeywordContext(keyword: string) {
+  const kw = keyword.toLowerCase();
+  
+  if (kw.includes("compress") || kw.includes("size") || kw.includes("kb")) {
+    return {
+      category: "Compression",
+      lsi: ["reduce PDF file size", "compress PDF online", "PDF size reducer", "optimize PDF for upload", "100KB PDF compressor", "shrink PDF without losing quality"],
+      hook: `"You upload your PDF… and suddenly see: 'File size exceeds 100 KB.' Frustrating, right? Whether you're applying for a government job, submitting a university form, or uploading documents to an online portal, strict PDF size limits can quickly become a headache. The good news? You can compress a PDF to 100 KB without destroying readability or image quality — if you use the right optimization method."`,
+      tutorialTitle: "How to Compress a PDF",
+      tutorialSteps: [
+        "Step 1: Upload PDF - Select and drag your PDF file into the local sandbox.",
+        "Step 2: Choose 100KB Target - Select the targeted compression threshold (e.g., 100KB target preset).",
+        "Step 3: Enable Smart Compression - Turn on smart image downsampling and font subsetting.",
+        "Step 4: Download Optimized File - Process the file and download your optimized PDF instantly."
+      ],
+      faqs: [
+        { q: "Can I compress scanned PDFs to 100 KB?", a: "Yes, but image-heavy scanned documents may require aggressive optimization to fit." },
+        { q: "Will PDF quality decrease?", a: "Slightly, but smart compression preserves readability." },
+        { q: "Is GoluPDFs secure?", a: "Yes. Files are processed locally in-browser for privacy protection." }
+      ],
+      cta: "Need to reduce your PDF instantly?\nUse the GoluPDFs Compress PDF tool to automatically optimize images, fonts, and document layers directly inside your browser — no software installation required.",
+      table: [
+        ["Online Compressors", "Medium", "Fast", "Weak"],
+        ["Desktop Software", "High", "Slow", "Strong"],
+        ["GoluPDFs Browser Compression", "High", "Fast", "Strong"]
+      ]
+    };
+  } else if (kw.includes("merge") || kw.includes("combine") || kw.includes("join")) {
+    return {
+      category: "Merging",
+      lsi: ["combine PDF files", "merge PDF online", "join PDF pages", "pdf joiner no watermark", "combine PDF pages free", "merge documents online"],
+      hook: `"You have 5 different PDF reports that need to go to your boss in 10 minutes, but you're stuck downloading watermarked mergers that charge you $15/month. Frustrating, right? Whether it's compiling monthly financials, merging tax documents, or combining portfolios, watermarks and premium walls are an absolute headache. The good news? You can combine your PDFs online without watermarks for 100% free — and do it securely in seconds."`,
+      tutorialTitle: "How to Merge PDFs Online",
+      tutorialSteps: [
+        "Step 1: Upload PDFs - Select and upload multiple PDF files into our secure local merger.",
+        "Step 2: Arrange Order - Reorder the pages or files exactly how you want them to appear in the merged output.",
+        "Step 3: Click Merge - Tap the 'Merge PDF' button to combine all elements into one cohesive file.",
+        "Step 4: Save & Download - Download your perfectly unified PDF instantly with zero watermarks."
+      ],
+      faqs: [
+        { q: "Can I merge password-protected PDFs?", a: "Yes, but you will need to enter the password first to unlock them before combining." },
+        { q: "Is there a limit on how many files I can merge?", a: "No! Unlike cloud tools, GoluPDFs works locally so you can merge as many files as your browser memory can handle." },
+        { q: "Will merging reduce document quality?", a: "Not at all. GoluPDFs merges files natively, preserving original font vectors, text layouts, and image resolutions." }
+      ],
+      cta: "Need to combine your PDFs instantly?\nUse the GoluPDFs Merge PDF tool to safely join pages and compile clean documents directly inside your browser — no signups, no watermarks.",
+      table: [
+        ["Watermarked Tools", "Low (Watermark)", "Fast", "Weak"],
+        ["Pro Acrobat Suite", "High", "Slow (Install)", "Strong"],
+        ["GoluPDFs Browser Merger", "High (No Watermark)", "Fast", "Strong"]
+      ]
+    };
+  } else if (kw.includes("edit") || kw.includes("modify") || kw.includes("write") || kw.includes("add text")) {
+    return {
+      category: "Editing",
+      lsi: ["free pdf editor", "edit pdf online", "how to edit a pdf file", "modify pdf text", "add text to pdf free", "in-browser pdf editor"],
+      hook: `"You open a PDF, need to change a single sentence or correct a typo, but Adobe wants you to subscribe to an expensive yearly plan just to click 'Edit'. Frustrating, right? Whether you're updating a resume, correcting an invoice, or filling a static application form, standard PDF readers block you from making direct changes. The good news? You can edit any PDF file for free directly inside your browser without uploading your sensitive data to remote servers."`,
+      tutorialTitle: "How to Edit a PDF File for Free",
+      tutorialSteps: [
+        "Step 1: Select File - Drag your PDF into the GoluPDFs secure browser-side editor.",
+        "Step 2: Add or Modify Text - Click anywhere on the document to type new text, correct typos, or draw notes.",
+        "Step 3: Insert Elements - Add custom shapes, lines, or whiteouts to cover old information.",
+        "Step 4: Save Changes - Download your edited PDF instantly with all modifications baked in natively."
+      ],
+      faqs: [
+        { q: "Can I edit the original text in a scanned PDF?", a: "To edit scanned PDFs, you first need to run OCR (optical character recognition) to convert images to text. GoluPDFs has built-in OCR tools to extract and modify scanned text safely." },
+        { q: "Do I need to sign up to edit a PDF?", a: "No. GoluPDFs is 100% free with no signups, no credit cards, and no watermarks." },
+        { q: "Are my documents safe when editing online?", a: "Absolutely. GoluPDFs edits files entirely client-side using JavaScript in your browser sandbox. Your files are never uploaded to our servers, ensuring complete privacy." }
+      ],
+      cta: "Need to edit your PDF document right now?\nUse the GoluPDFs Free PDF Editor to fix typos, add text, and adjust page layouts securely inside your browser — 100% free with zero cloud uploads.",
+      table: [
+        ["Paid PDF Editors", "High", "Slow (Install)", "Strong"],
+        ["Cloud Free Editors", "Medium", "Fast", "Weak (Server uploads)"],
+        ["GoluPDFs Local Editor", "High", "Fast", "Strong (100% private)"]
+      ]
+    };
+  } else if (kw.includes("sign") || kw.includes("signature") || kw.includes("esign")) {
+    return {
+      category: "Signatures",
+      lsi: ["how to sign a pdf online free", "esign act compliance", "cryptographic hash signature", "draw online signature", "add digital signature to pdf", "secure e-sign guide"],
+      hook: `"A client sends a contract, you need to sign it, and you're forced to print it, sign it with a pen, scan it back, and email it. Frustrating, right? In a digital-first world, printing paper just to scribble a signature is a massive waste of time and resources. The good news? You can digitally sign a PDF online for free in under 60 seconds — securely, legally, and entirely inside your browser."`,
+      tutorialTitle: "How to Sign a PDF Online for Free",
+      tutorialSteps: [
+        "Step 1: Upload Contract - Drop your PDF file into our secure, local signing area.",
+        "Step 2: Create Signature - Draw your signature on screen, type your initials, or upload a photo of your pen signature.",
+        "Step 3: Place and Resize - Place the signature block onto the designated line and adjust the size.",
+        "Step 4: Finalize & Download - Apply the signature and download your legally-binding signed PDF."
+      ],
+      faqs: [
+        { q: "Is an online signature legally binding?", a: "Yes, under the ESIGN Act and eIDAS regulations, electronic signatures carry the same legal weight as traditional handwritten signatures for most business documents." },
+        { q: "Can I sign a PDF without uploading it?", a: "Yes! GoluPDFs processes all signature generation inside your local browser. Your confidential contracts never leave your device." },
+        { q: "Is it free to sign documents on GoluPDFs?", a: "Yes, our e-signature tool is 100% free with no signature limits, no watermarks, and no monthly fees." }
+      ],
+      cta: "Need to sign a contract or document instantly?\nUse the GoluPDFs Secure e-Sign tool to draw, place, and embed your signature legally directly inside your browser sandbox.",
+      table: [
+        ["Standard Cloud Signers", "Medium", "Fast", "Low (Server stored)"],
+        ["Enterprise e-Sign Tools", "High", "Slow (Auth setup)", "Strong"],
+        ["GoluPDFs Local e-Sign", "High", "Fast", "Strong (100% local private)"]
+      ]
+    };
+  } else {
+    // Default generic context
+    return {
+      category: "General",
+      lsi: ["browser-based tool", "pdf manipulation", "client-side rendering", "document productivity", "secure pdf processing", "free document manager"],
+      hook: `"You're trying to manage your digital documents, but you keep hitting paywalls, watermarks, or security warnings. Frustrating, right? Managing PDFs should be simple, free, and secure. The good news? GoluPDFs offers a suite of professional tools to help you process, modify, and optimize your files directly in your browser with zero security compromises."`,
+      tutorialTitle: `How to Process Your PDF for Free`,
+      tutorialSteps: [
+        "Step 1: Drag & Drop - Select your PDF and place it into our local browser-side workspace.",
+        "Step 2: Select Action - Choose the tool or operation you want to perform (e.g. compress, merge, sign, edit).",
+        "Step 3: Adjust Settings - Fine-tune any options locally in your browser sandbox.",
+        "Step 4: Get Your File - Process your changes locally and download your new document instantly."
+      ],
+      faqs: [
+        { q: "Is GoluPDFs really free?", a: "Yes! All of our document utilities are 100% free with no hidden charges, limits, or watermark overlays." },
+        { q: "How does GoluPDFs protect my privacy?", a: "We use browser-side processing. All PDF actions occur directly in your browser sandbox via JavaScript. Your files are never uploaded to any remote server." },
+        { q: "Do I need to install any software?", a: "No. GoluPDFs works completely in-browser on all devices (mobile, desktop, tablet) without any installations." }
+      ],
+      cta: `Need professional document solutions right now?\nUse the GoluPDFs suite of tools to process, convert, and secure your files completely in-browser — fast, free, and 100% private.`,
+      table: [
+        ["Online Cloud Platforms", "Medium", "Fast", "Weak (Server uploads)"],
+        ["Heavy Desktop Software", "High", "Slow (Install)", "Strong"],
+        ["GoluPDFs Local Web OS", "High", "Fast", "Strong (100% client-side)"]
+      ]
+    };
+  }
+}
 
 async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
   const geminiKey = process.env.GEMINI_API_KEY;
   const openRouterKey = process.env.OPENROUTER_API_KEY;
 
-  callCounter++;
-  const useOpenRouter = (callCounter % 2 === 1) && openRouterKey && !openRouterKey.startsWith("replace");
-
-  // Tier 1: Try OpenRouter Free Model (Alternated)
-  if (useOpenRouter) {
-    try {
-      console.log(`[Load Balancer] Routing call #${callCounter} to OpenRouter Free (gemini-2.5-flash:free)...`);
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${openRouterKey}`,
-          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://golupdf.online",
-          "X-Title": "GoluPDFs Autonomous SEO Blog Writer"
-        },
-        body: JSON.stringify({
-          model: "openrouter/free",
-          messages: [
-            ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
-            { role: "user", content: prompt }
-          ],
-          temperature: 0.7
-        })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const text = data?.choices?.[0]?.message?.content;
-        if (text) return text.trim();
-      } else {
-        const errText = await response.text();
-        console.warn(`[Load Balancer] OpenRouter free failed (status ${response.status}): ${errText}. Retrying with Gemini direct...`);
-      }
-    } catch (e: any) {
-      console.error("[Load Balancer] OpenRouter free error:", e.message);
-    }
-  }
-
-  // Tier 2: Try Google AI Studio Direct (Alternated)
+  // Tier 1: Try Google AI Studio Direct first (highly efficient)
   if (geminiKey && !geminiKey.startsWith("replace")) {
     try {
-      console.log(`[Load Balancer] Routing call #${callCounter} to Google AI Studio Direct (gemini-2.0-flash)...`);
+      console.log(`[AI Loader] Routing call directly to Google AI Studio (gemini-2.0-flash)...`);
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
       const response = await fetch(url, {
         method: "POST",
@@ -85,17 +174,17 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
         if (text) return text.trim();
       } else {
         const errText = await response.text();
-        console.warn(`[Load Balancer] Gemini direct failed (status ${response.status}): ${errText}`);
+        console.warn(`[AI Loader] Gemini Direct returned status ${response.status}: ${errText}. Recovering via OpenRouter fallback...`);
       }
     } catch (e: any) {
-      console.error("[Load Balancer] Gemini direct error:", e.message);
+      console.warn("[AI Loader] Gemini Direct request exception, failing over to OpenRouter:", e.message);
     }
   }
 
-  // Tier 3: Cross-Endpoint Failover (If alternating choice hit rate-limit or failed)
-  if (!useOpenRouter && openRouterKey && !openRouterKey.startsWith("replace")) {
+  // Tier 2: OpenRouter Failover (using the robust free model router)
+  if (openRouterKey && !openRouterKey.startsWith("replace")) {
     try {
-      console.log("[Load Balancer] Failover: Attempting OpenRouter free model...");
+      console.log(`[AI Loader] Failover: Routing call to OpenRouter Free (openrouter/free)...`);
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -117,14 +206,17 @@ async function callAi(prompt: string, systemPrompt?: string): Promise<string> {
         const data = await response.json();
         const text = data?.choices?.[0]?.message?.content;
         if (text) return text.trim();
+      } else {
+        const errText = await response.text();
+        console.warn(`[AI Loader] OpenRouter Free failed with status ${response.status}: ${errText}`);
       }
     } catch (e: any) {
-      console.error("[Load Balancer] Failover OpenRouter free error:", e.message);
+      console.error("[AI Loader] OpenRouter Free connection exception:", e.message);
     }
   }
 
   // Graceful Local Fallback Simulation if both active endpoints fail
-  console.log("[Load Balancer] All endpoints exhausted or rate-limited. Falling back to local simulator.");
+  console.log("[AI Loader] All providers exhausted. Deploying smart local simulator fallback.");
   return simulateLocalAiResponse(prompt, systemPrompt);
 }
 
@@ -150,6 +242,11 @@ async function callAiWithRetry(prompt: string, systemPrompt?: string, maxRetries
 
 function simulateLocalAiResponse(prompt: string, systemPrompt?: string): string {
   const p = prompt.toLowerCase();
+  
+  // Extract keyword dynamically from prompt text (usually between single quotes)
+  const match = prompt.match(/'([^']+)'/);
+  const keyword = match ? match[1] : "pdf document";
+  const capKeyword = keyword.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   
   if (p.includes("find trending keywords") || p.includes("trending low-competition")) {
     return JSON.stringify([
@@ -187,28 +284,29 @@ function simulateLocalAiResponse(prompt: string, systemPrompt?: string): string 
   }
 
   if (p.includes("create structural markdown outline")) {
-    return `# Outline: e-Signature Guide
-## H2: How to Add a Secure e-Signature to Your PDF
-### H3: Drawing Your Signature Digitally
-### H3: Uploading a Image Signature
-## H2: Electronic Signature vs. Digital Signature: Key Legal Differences
-### H3: The ESIGN Act and European eIDAS Standard
-## H2: How to Secure and Lock a PDF After Signing
-## H2: Frequently Asked Questions About Online e-Signing`;
+    return `# Outline: ${capKeyword} Guide
+## H2: Understanding the Best Way to ${capKeyword}
+### H3: Traditional Methods vs Modern Browser Utilities
+### H3: Why In-Browser Client-Side Processing is the Future
+## H2: Step-by-Step Tutorial: How to ${capKeyword} for Free
+### H3: Uploading Your Document to the Sandbox
+### H3: Applying Changes Natively and Securely
+## H2: Security & Privacy: Why Server-Side Uploads are Dangerous
+## H2: Frequently Asked Questions About ${capKeyword}`;
   }
 
   if (p.includes("generate 5 distinct title variations")) {
     return JSON.stringify([
-      "How to Sign a PDF Online Free: The 2026 Secure e-Sign Guide",
-      "Top Free Ways to e-Sign PDFs in Browser Instantly",
-      "I Tested 8 Free PDF Signers — Here is the Safest One",
-      "Stop Printing Documents: Complete PDF Signing Guide",
-      "Is Signing PDFs Online Legally Binding? What You Need to Know"
+      `How to ${capKeyword}: The Ultimate 2026 Free Guide`,
+      `Best Free Ways to ${capKeyword} in Your Browser Instantly`,
+      `I Tested 8 Ways to ${capKeyword} — Here is the Easiest`,
+      `Stop Paying for Acrobat: Complete ${capKeyword} Tutorial`,
+      `Is it Safe to ${capKeyword} Online? What You Need to Know`
     ]);
   }
 
   // General article fallback text
-  return `An optimized deep dive guide representing the answer to the prompt: ${prompt.substring(0, 150)}...`;
+  return `An optimized deep dive guide representing the answer to the prompt for ${keyword}...`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -292,50 +390,35 @@ Organize headings logically to beat the competitors: ${seoPlan.competitors?.join
 export async function runWriterAgent(keyword: string, outline: string, seoPlan: any): Promise<string> {
   await insertDbLog("writer", "running", `Writer Agent drafting 2,000+ word deep-dive content...`, keyword);
 
+  const context = getKeywordContext(keyword);
+
   const prompt = `Write a comprehensive, professional, 2,000+ word technical guide in Markdown about '${keyword}'.
 Use this structured Outline:
 ${outline}
 
 Integrate these LSI and semantic SEO keywords naturally:
-- reduce PDF file size
-- compress PDF online
-- PDF size reducer
-- optimize PDF for upload
-- 100KB PDF compressor
-- shrink PDF without losing quality
+${context.lsi.map(l => `- ${l}`).join("\n")}
 ${seoPlan.lsiKeywords ? `Other suggested LSI keywords: ${seoPlan.lsiKeywords.join(", ")}` : ""}
 
 Follow these strict structural rules to make the article extremely helpful, authoritative, and engaging:
 1. **Add a Powerful Hook**:
    Start the introduction with a highly relatable, emotional trigger.
    Use this exact phrasing structure to capture direct frustration:
-   "You upload your PDF…
-   and suddenly see:
-   'File size exceeds 100 KB.'
-   Frustrating, right?
-   Whether you're applying for a government job, submitting a university form, or uploading documents to an online portal, strict PDF size limits can quickly become a headache.
-   The good news?
-   You can compress a PDF to 100 KB without destroying readability or image quality — if you use the right optimization method."
+   ${context.hook}
 
 2. **Add a Step-by-Step Tutorial**:
    Create a highly practical, numbered tutorial block.
    Use this exact structure:
-   "### Step-by-Step Tutorial: How to Compress a PDF
-   Step 1: Upload PDF - Select and drag your PDF file into the local sandbox.
-   Step 2: Choose 100KB Target - Select the targeted compression threshold (e.g., 100KB target preset).
-   Step 3: Enable Smart Compression - Turn on smart image downsampling and font subsetting.
-   Step 4: Download Optimized File - Process the file and download your optimized PDF instantly."
+   "### Step-by-Step Tutorial: ${context.tutorialTitle}
+   ${context.tutorialSteps.join("\n   ")}"
 
 3. **Add an FAQ Section**:
    Include a dedicated "Frequently Asked Questions" H2 section. You MUST exactly address these three queries:
-   - **Can I compress scanned PDFs to 100 KB?** Answer: Yes, but image-heavy scanned documents may require aggressive optimization to fit.
-   - **Will PDF quality decrease?** Answer: Slightly, but smart compression preserves readability.
-   - **Is GoluPDFs secure?** Answer: Yes. Files are processed locally in-browser for privacy protection.
+   ${context.faqs.map(f => `- **${f.q}** Answer: ${f.a}`).join("\n   ")}
 
 4. **Add Better CTA**:
    Weave this high-converting call-to-action block:
-   "Need to reduce your PDF instantly?
-   Use the GoluPDFs Compress PDF to 100KB tool to automatically optimize images, fonts, and document layers directly inside your browser — no software installation required."
+   "${context.cta}"
 
 5. **Add strong EEAT & Security Signals**:
    Explicitly weave the following Trust/EEAT details into the content:
@@ -348,9 +431,7 @@ Follow these strict structural rules to make the article extremely helpful, auth
    Include this exact markdown comparison table:
    | Method | Quality | Speed | Privacy |
    | :--- | :--- | :--- | :--- |
-   | Online Compressors | Medium | Fast | Weak |
-   | Desktop Software | High | Slow | Strong |
-   | GoluPDFs Browser Compression | High | Fast | Strong |
+   ${context.table.map(row => `| ${row[0]} | ${row[1]} | ${row[2]} | ${row[3]} |`).join("\n   ")}
 
 7. **Add Internal Links**:
    Make sure to write out the following internal links naturally using markdown relative paths:
