@@ -42,6 +42,28 @@ export function OptionsPanel({ tool, options, setOptions }: OptionsPanelProps) {
               Medium and above rasterize pages for maximum reduction. Use Lossless to preserve selectable text.
             </p>
           </div>
+
+          <div className="border-t pt-4 space-y-2">
+            <Label htmlFor="target-kb" className="text-primary font-semibold flex items-center gap-1.5">
+              🎯 Custom Target Size (KB)
+            </Label>
+            <Input
+              id="target-kb"
+              type="number"
+              min={1}
+              placeholder="e.g. 10 (forces exact KB down to the byte!)"
+              value={options.targetKb || ""}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                set({ targetKb: isNaN(val) ? undefined : val });
+              }}
+              className="font-mono text-sm"
+            />
+            <p className="text-[10px] leading-relaxed text-muted-foreground">
+              Government/Job portals often require files of specific sizes (e.g. exactly 10 KB or below 100 KB). 
+              If the resulting PDF is larger, we compress it down. If it is smaller, we inject zero-overhead metadata padding to make it **exactly** your targeted KB down to the byte!
+            </p>
+          </div>
         </div>
       );
     case "split":
