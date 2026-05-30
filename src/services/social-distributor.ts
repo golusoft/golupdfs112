@@ -13,6 +13,8 @@ export interface SocialTokenConfig {
   hashnodePublicationId?: string;
   mediumIntegrationToken?: string;
   linkedinAccessToken?: string;
+  pinterestAccessToken?: string;
+  pinterestBoardId?: string;
 }
 
 /**
@@ -26,6 +28,8 @@ function getSocialTokens(): SocialTokenConfig {
     hashnodePublicationId: process.env.HASHNODE_PUBLICATION_ID,
     mediumIntegrationToken: process.env.MEDIUM_INTEGRATION_TOKEN,
     linkedinAccessToken: process.env.LINKEDIN_ACCESS_TOKEN,
+    pinterestAccessToken: process.env.PINTEREST_ACCESS_TOKEN,
+    pinterestBoardId: process.env.PINTEREST_BOARD_ID,
   };
 }
 
@@ -244,6 +248,52 @@ async function postToLinkedIn(
 }
 
 /**
+ * Create a pin on Pinterest using the v5 API.
+ * Requires PINTEREST_ACCESS_TOKEN and PINTEREST_BOARD_ID env vars.
+ */
+async function postToPinterest(
+  title: string,
+  excerpt: string,
+  canonicalUrl: string,
+  token: string,
+  boardId: string
+): Promise<DistributionResult> {
+  try {
+    const body = {
+      board_id: boardId,
+      title: title.substring(0, 99),
+      description: excerpt.substring(0, 499),
+      link: canonicalUrl,
+      media_source: {
+        source_type: "image_url",
+        url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80",
+      }
+    };
+    const res = await fetch("https://api.pinterest.com/v5/pins", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        platform: "Pinterest",
+        status: "success",
+        postUrl: `https://www.pinterest.com/pin/${data.id}`,
+        message: `Pinterest Pin successfully published! Pin ID: ${data.id}`,
+      };
+    }
+    const errText = await res.text();
+    throw new Error(`Pinterest API error ${res.status}: ${errText}`);
+  } catch (err: any) {
+    return { platform: "Pinterest", status: "failed", message: err.message };
+  }
+}
+
+/**
  * Main syndication dispatcher.
  * Reads tokens from env vars — fully modular.
  * If a token is not set, platform is skipped gracefully.
@@ -300,6 +350,20 @@ export async function syndicatePost(
       `LinkedIn: ${result.message}`, slug);
   } else {
     results.push({ platform: "LinkedIn", status: "skipped", message: "LINKEDIN_ACCESS_TOKEN not configured" });
+  }
+
+  // Pinterest
+  if (tokens.pinterestAccessToken && tokens.pinterestBoardId &&
+      !tokens.pinterestAccessToken.startsWith("replace")) {
+    const result = await postToPinterest(
+      title, excerpt, canonicalUrl,
+      tokens.pinterestAccessToken, tokens.pinterestBoardId
+    );
+    results.push(result);
+    await insertDbLog("syndication", result.status === 'success' ? 'success' : 'failed',
+      `Pinterest: ${result.message}`, slug);
+  } else {
+    results.push({ platform: "Pinterest", status: "skipped", message: "PINTEREST_ACCESS_TOKEN or PINTEREST_BOARD_ID not configured" });
   }
 
   return results;
