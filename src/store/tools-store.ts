@@ -43,7 +43,9 @@ export const useToolsStore = create<ToolsStore>()(
     }),
     {
       name: "golupdfs:tools-store",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() =>
+        typeof window !== "undefined" ? localStorage : ({} as Storage)
+      ),
       partialize: (s) => ({ recent: s.recent }) as Pick<ToolsStore, "recent">,
     }
   )

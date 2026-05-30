@@ -30,6 +30,11 @@ export function ToolsBrowser() {
 
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState<ToolCategory | "all">(initialCat);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const recent = useToolsStore((s) => s.recent);
   const recentTools = useMemo(
@@ -124,7 +129,7 @@ export function ToolsBrowser() {
       </div>
 
       {/* Recent (only when no filter) */}
-      {category === ALL && !query && recentTools.length > 0 && (
+      {category === ALL && !query && mounted && recentTools.length > 0 && (
         <section className="mt-12">
           <div className="mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
