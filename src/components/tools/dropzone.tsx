@@ -70,7 +70,7 @@ export function ToolDropzone({ files, onFiles, accept, maxFiles, multiple = true
         <p className="mt-3 text-sm text-muted-foreground sm:text-base">
           or click to browse — up to {maxFiles} {maxFiles > 1 ? "files" : "file"}
         </p>
-        <Button variant="gradient" size="lg" className="mt-6" onClick={open}>
+        <Button variant="gradient" size="lg" className="mt-6" onClick={(e) => { e.stopPropagation(); open(); }}>
           Choose files <ArrowRight className="h-4 w-4" />
         </Button>
         <p className="mt-5 text-xs text-muted-foreground">
