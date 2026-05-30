@@ -16,6 +16,8 @@ import type { ProcessOptions, ProcessResult } from "@/lib/pdf/types";
 import { useToolsStore } from "@/store/tools-store";
 import { trackToolUse, trackUpload, trackConversion } from "@/lib/analytics";
 
+import { BusinessToolRunner } from "./business/business-runner";
+
 interface ToolRunnerProps {
   tool: Omit<Tool, "icon">;
 }
@@ -66,6 +68,10 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
       setLastTrackedCount(0);
     }
   }, [files, tool.slug, lastTrackedCount]);
+
+  if (tool.category === "business") {
+    return <BusinessToolRunner slug={tool.slug} />;
+  }
 
   const run = async () => {
     if (!files.length) return;

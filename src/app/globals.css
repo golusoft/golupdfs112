@@ -161,3 +161,116 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+/* Global Print Stylesheet for GoluPDFs SaaS Utilities */
+.print-only {
+  display: none;
+}
+
+@media print {
+  /* Absolute suppression of headers, footers, navbars, sidebars, breadcrumbs, FAQs, related tools, ads, and heroes */
+  header, footer, nav, aside,
+  .no-print,
+  .navbar, .footer,
+  .ad-slot, .share-buttons, .breadcrumbs,
+  section:not(.runner-section),
+  aside.lg\:col-span-5,
+  .tool-page-hero,
+  main > section:not(:nth-child(2)),
+  .breadcrumbs-wrapper,
+  .features-section,
+  #faq-section,
+  #related-section,
+  #ads-section {
+    display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Reset layout constraints on ancestors so print elements flow naturally */
+  html, body, main, .runner-section, .max-w-6xl {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  /* Extreme suppression of any elements with no-print to prevent taking layout space */
+  .no-print, [class*="no-print"] {
+    display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+
+  /* Style the print-only document preview container dominant and A4-flowable */
+  .print-only {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    height: auto !important;
+    min-height: 0 !important; /* Prevents min-h-screen forcing second page */
+    margin: 0 auto !important; /* Center on A4 */
+    background: white !important;
+    color: #18181b !important; /* Zinc 900 */
+    border: 1px solid #e4e4e7 !important; /* Zinc 200 border */
+    border-radius: 16px !important; /* Rounded corners like preview */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    padding: 24px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* Compress excessive spacing inside print element to guarantee a single-page fit */
+  .print-only .space-y-6 > * + * {
+    margin-top: 12px !important;
+  }
+  .print-only .space-y-8 > * + * {
+    margin-top: 16px !important;
+  }
+  .print-only .py-8 {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+  .print-only .py-6 {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+  .print-only .py-4 {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+  .print-only table tr td {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  /* Narrow page margins for maximum print space */
+  @page {
+    size: A4 portrait;
+    margin: 10mm !important;
+  }
+
+  /* Force browsers to print premium background fills, borders, and colors exactly as they appear */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -134,7 +134,7 @@ export default async function ToolPage(
         </section>
 
         {/* RUNNER */}
-        <section className="container mt-12">
+        <section className="runner-section container mt-12">
           {(() => {
             const { icon: _, ...serializedTool } = tool;
             return <ToolRunner tool={serializedTool} />;

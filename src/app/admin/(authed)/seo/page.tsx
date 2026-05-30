@@ -58,8 +58,22 @@ export default function AdminSeoPage() {
 
   const handleReindex = async (url: string) => {
     setReindexing(url);
-    await new Promise((r) => setTimeout(r, 1800));
-    setReindexing(null);
+    try {
+      const res = await fetch("/api/admin/seo/reindex", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to submit indexing request");
+      }
+      await fetchSeoStats();
+    } catch (err: any) {
+      alert(err.message || "Failed to submit indexing request");
+    } finally {
+      setReindexing(null);
+    }
   };
 
   if (loading) {

@@ -42,7 +42,8 @@ export type ToolCategory =
   | "edit"
   | "secure"
   | "optimize"
-  | "ai";
+  | "ai"
+  | "business";
 
 export const CATEGORIES: Record<ToolCategory, { label: string; description: string; color: string }> = {
   organize: { label: "Organize", description: "Merge, split, rotate & rearrange pages", color: "from-blue-500 to-cyan-500" },
@@ -51,6 +52,7 @@ export const CATEGORIES: Record<ToolCategory, { label: string; description: stri
   secure: { label: "Secure", description: "Protect, redact & control access", color: "from-amber-500 to-rose-500" },
   optimize: { label: "Optimize", description: "Compress and reduce PDF size", color: "from-pink-500 to-rose-500" },
   ai: { label: "AI Suite", description: "Intelligent document workflows", color: "from-indigo-500 to-purple-500" },
+  business: { label: "Business Suite", description: "Invoices, quotes, receipts & calculations", color: "from-amber-500 to-orange-500" },
 };
 
 export interface ToolFAQ {
@@ -99,7 +101,17 @@ export interface Tool {
     | "bulk-convert"
     | "ebook"
     | "compare"
-    | "ai-assistant";
+    | "ai-assistant"
+    | "invoice-generator"
+    | "quotation-generator"
+    | "salary-slip-generator"
+    | "rent-receipt-generator"
+    | "gst-calculator"
+    | "profit-margin-calculator"
+    | "roi-calculator"
+    | "emi-calculator"
+    | "gst-invoice-generator"
+    | "purchase-order-generator";
   accept: string[];
   maxFiles: number;
   faq: ToolFAQ[];
@@ -805,6 +817,265 @@ export const TOOLS: Tool[] = [
     ],
     faq: baseFaq("AI PDF Assistant"),
     longDescription: "The AI Assistant turns any PDF into a conversational knowledge base. Summarize 100-page reports in seconds, ask questions, extract key facts.",
+  },
+  // --- BUSINESS SUITE ---
+  {
+    slug: "invoice-generator",
+    name: "Professional Invoice Generator",
+    shortName: "Invoice Generator",
+    tagline: "Create and print professional invoices instantly",
+    description: "Fully client-side invoice generator with tax calculation, discounts, logo upload, and local drafts saving.",
+    category: "business",
+    icon: FileText,
+    badge: "popular",
+    engine: "invoice-generator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Custom branding & company logo uploads",
+      "Dynamic GST & SGST/CGST tax calculations",
+      "Custom discount thresholds per line item",
+      "Local storage draft autosave & restore",
+      "Multi-currency support & custom symbols",
+      "Mobile-friendly sleek spreadsheet editors",
+      "Optimized A4 print page styles",
+    ],
+    faq: [
+      { q: "Is GoluPDFs Invoice Generator completely free?", a: "Yes. GoluPDFs Invoice Generator is 100% free with no registration, watermarks, or usage limits. Everything runs in your browser." },
+      { q: "Are my business invoices saved on a server?", a: "No. Your data is highly confidential. All calculations, logo uploads, and generation happen locally in your device's memory sandbox." },
+      { q: "Can I save my invoice as a draft to edit later?", a: "Yes. The tool automatically saves your latest invoice draft in your browser's localStorage, allowing you to restore it whenever you return." },
+      { q: "How do I download the invoice as a PDF?", a: "Click the 'Print / Save as PDF' button. Your browser's native print interface will open, where you can select 'Save as PDF' to generate the document." },
+      { q: "Does the generator support GST calculations?", a: "Yes, it supports customizable tax percentages that can be calculated as CGST/SGST or IGST based on your transaction type." }
+    ],
+    longDescription: "The Professional Invoice Generator is a clean, Stripe-styled invoice wizard designed for business owners, freelancers, and small teams. It allows you to build custom itemized invoices, calculate complex taxes and discounts, and save files locally. Print directly to your hardware or save to a pixel-perfect PDF in seconds."
+  },
+  {
+    slug: "quotation-generator",
+    name: "Business Quotation Generator",
+    shortName: "Quotation Generator",
+    tagline: "Generate elegant business quotes in seconds",
+    description: "Professional quote creator featuring itemized pricing grids, terms customizer, and signature blocks.",
+    category: "business",
+    icon: FileBarChart,
+    badge: "new",
+    engine: "quotation-generator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Dynamic product grids with inline subtotals",
+      "Adjustable GST and promotional discounts",
+      "Custom business terms & conditions sections",
+      "Client and manager digital signature fields",
+      "Instant print and Save-as-PDF actions",
+    ],
+    faq: [
+      { q: "Can I customize the terms on my quotation?", a: "Yes. The Quotation Generator features an editable Terms & Conditions section where you can list delivery times, validity periods, and terms." },
+      { q: "Does GoluPDFs charge for quotation exports?", a: "No. GoluPDFs Quotation Generator is free with no watermarks or locked corporate templates." },
+      { q: "Is my customer data secure?", a: "Absolutely. GoluPDFs operates 100% client-side, meaning customer details, prices, and signatures never leave your browser." },
+      { q: "Can I sign the quotation digitally?", a: "Yes. The generator includes dedicated signature zones for both the client and the issuing business manager." }
+    ],
+    longDescription: "Create professional, elegant quotations for clients and business stakeholders. With dynamic itemized pricing grids, automated tax breakdowns, and custom signature sections, GoluPDFs helps your sales pipeline operate at enterprise-level speed."
+  },
+  {
+    slug: "salary-slip-generator",
+    name: "Employee Salary Slip Generator",
+    shortName: "Salary Slip Generator",
+    tagline: "Generate employee payslips with automated calculations",
+    description: "Professional payroll slips generator calculating HRA, basic earnings, deductions, PF, and ESI instantly.",
+    category: "business",
+    icon: FileSpreadsheet,
+    badge: "new",
+    engine: "salary-slip-generator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Comprehensive employee & payroll metadata forms",
+      "Automated basic earnings, HRA, & allowances sums",
+      "Dynamic PF (Provident Fund) and ESI deductions",
+      "Instant Net Salary calculations",
+      "Clean corporate design mapped to standard A4 sheets",
+    ],
+    faq: [
+      { q: "How is net salary calculated in GoluPDFs payslips?", a: "Net salary is computed by summing the basic pay and all extra allowances (HRA, DA, Special Allowance), and then subtracting total deductions (PF, ESI, Tax)." },
+      { q: "Can I print a physical salary slip?", a: "Yes. The salary slip generator features a dedicated print action that opens your native operating system print manager for instant physical output." },
+      { q: "Do I need to sign up to generate employee slips?", a: "No. GoluPDFs is non-custodial and requires no registrations or email capture." }
+    ],
+    longDescription: "Manage payroll documentation with speed. The Salary Slip Generator is designed for HR managers, startups, and small businesses to generate professional salary slips. Easily record employee roles, track HRA/PF/ESI percentages, and export standard, clean payslips locally."
+  },
+  {
+    slug: "rent-receipt-generator",
+    name: "Free Rent Receipt Generator",
+    shortName: "Rent Receipt",
+    tagline: "Generate rent receipts instantly for HRA claims",
+    description: "Quick landlord rent receipts creator with tenant info, payment tracking, and digital signatures.",
+    category: "business",
+    icon: Sheet,
+    badge: "popular",
+    engine: "rent-receipt-generator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Tenant, landlord, and property details forms",
+      "Security deposit and monthly rent record tracking",
+      "Support for multiple payment modes (Cash, Online, UPI)",
+      "Digital signature draw pad for landlords",
+      "Optimized format for HRA tax exemption claims",
+    ],
+    faq: [
+      { q: "Are these rent receipts valid for HRA claims?", a: "Yes. The generated receipts capture landlord PANs, monthly payments, tenant info, and signatures, which are fully compliant for HRA exemptions." },
+      { q: "How do I add the landlord's signature?", a: "The rent receipt generator features a high-fidelity digital canvas signature pad where landlords can draw their signature with a mouse or touch screen." }
+    ],
+    longDescription: "GoluPDFs Rent Receipt Generator helps tenants create clean, professional rent receipts to claim HRA (House Rent Allowance) tax exemptions. Capture landlord details, monthly sums, payment modes, and digital signatures instantly without third-party server uploads."
+  },
+  {
+    slug: "gst-calculator",
+    name: "Online Indian GST Calculator",
+    shortName: "GST Calculator",
+    tagline: "Calculate GST addition and removal instantly",
+    description: "Indian GST tax slab calculator with SGST/CGST/IGST breakdown and direct copy options.",
+    category: "business",
+    icon: Hash,
+    badge: "popular",
+    engine: "gst-calculator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Dual calculation mode: Add GST and Remove GST",
+      "Support for standard Indian slabs (5%, 12%, 18%, 28%)",
+      "Dynamic SGST, CGST, and IGST breakdowns",
+      "Clean, mobile-optimized numeric keyboard inputs",
+      "One-click copy clipboard action for tax calculations",
+    ],
+    faq: [
+      { q: "What is the difference between CGST, SGST, and IGST?", a: "CGST and SGST are applied on intra-state supply (within the state), sharing the tax evenly. IGST is applied on inter-state supply (between states)." },
+      { q: "How do I calculate GST removal?", a: "Choose the 'Remove GST' mode, input the total price, select the slab, and our tool will extract the base price and exact tax amount." }
+    ],
+    longDescription: "The Online GST Calculator provides small businesses and retail owners with a fast, mobile-friendly tax utility. Calculate GST addition and removal across all Indian tax slabs (5%, 12%, 18%, 28%) and instantly extract CGST, SGST, and IGST breakdowns."
+  },
+  {
+    slug: "profit-margin-calculator",
+    name: "Business Profit Margin Calculator",
+    shortName: "Profit Calculator",
+    tagline: "Calculate gross profit margins and product markup instantly",
+    description: "Pricing calculator to determine product cost, revenue, gross profit, margin percentage, and markup percentage.",
+    category: "business",
+    icon: Combine,
+    badge: "new",
+    engine: "profit-margin-calculator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Dynamic Cost, Revenue, Margin, and Markup calculations",
+      "Interactive slider controls for pricing simulations",
+      "Calculates required price for target margin goals",
+      "Stripe-inspired clean financial breakdown sheet",
+      "100% confidential and local browser processing",
+    ],
+    faq: [
+      { q: "What is the difference between margin and markup?", a: "Margin is the profit percentage relative to the selling price (revenue), whereas markup is the profit percentage relative to the cost price (cost)." },
+      { q: "How do I calculate gross profit margin?", a: "Gross profit margin is calculated by subtracting Cost from Revenue, and then dividing that profit by Revenue: Margin = (Revenue - Cost) / Revenue * 100." }
+    ],
+    longDescription: "Optimize product pricing with our Profit Margin Calculator. Built for startup owners, retailers, and digital agency teams, it calculates exact gross profits, margins, and markups in real-time, helping you define premium pricing structures with confidence."
+  },
+  {
+    slug: "roi-calculator",
+    name: "Simple & Annualized ROI Calculator",
+    shortName: "ROI Calculator",
+    tagline: "Calculate Return on Investment and CAGR in seconds",
+    description: "Analyze investment returns, capital gains, compound annual growth rate (CAGR), and investment multiples.",
+    category: "business",
+    icon: GitCompare,
+    badge: "new",
+    engine: "roi-calculator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Simple ROI and Annualized ROI (CAGR) calculations",
+      "Support for customizable investment tenure (years/months)",
+      "Tracks net gain, final capital, and investment multiples",
+      "Premium financial visual gauge and progression bars",
+      "Private local browser execution with no cookies",
+    ],
+    faq: [
+      { q: "What is Annualized ROI (CAGR)?", a: "Annualized ROI represents the compound annual growth rate (CAGR) of an investment, reflecting the rate of return per year over the investment period." },
+      { q: "Why is ROI important for small businesses?", a: "Return on Investment (ROI) helps small business owners measure the efficiency of their capital allocation across marketing campaigns, equipment purchases, or software investments." }
+    ],
+    longDescription: "Evaluate the profitability of capital expenditures. The ROI Calculator computes simple capital gains, annualized interest rates, and multiples for business investments, letting you compare marketing campaigns, real estate projects, and asset purchases instantly."
+  },
+  {
+    slug: "emi-calculator",
+    name: "Business Loan EMI Calculator",
+    shortName: "EMI Calculator",
+    tagline: "Calculate monthly loan EMIs and amortization schedules",
+    description: "Loan and lease calculator displaying monthly payments, total interest burden, and detailed principal-vs-interest charts.",
+    category: "business",
+    icon: LayoutGrid,
+    badge: "new",
+    engine: "emi-calculator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Precise monthly EMI loan payment calculations",
+      "Detailed yearly and monthly amortization schedules",
+      "Calculates total interest burden and net payment sums",
+      "Standard printable A4 sheet formatting",
+      "Zero-software local browser memory processing",
+    ],
+    faq: [
+      { q: "What is an EMI?", a: "EMI stands for Equated Monthly Installment — a fixed payment amount made by a borrower to a lender at a specified date each calendar month." },
+      { q: "How does the interest rate affect my total loan cost?", a: "Higher annual interest rates dramatically increase the overall interest payable over long loan tenures, which you can visualize dynamically in our amortization table." }
+    ],
+    longDescription: "Model business loans and equipment leases with the Business EMI Calculator. Input loan principal, annual interest rate, and tenure to instantly extract monthly payments, total interest costs, and a hardware-printable monthly amortization schedule."
+  },
+  {
+    slug: "gst-invoice-generator",
+    name: "Indian GST Tax Invoice Generator",
+    shortName: "GST Invoice Creator",
+    tagline: "Generate GST-compliant tax invoices instantly",
+    description: "Indian GST tax invoice builder capturing HSN/SAC codes, buyer/seller GSTINs, and SGST/CGST/IGST calculations.",
+    category: "business",
+    icon: FileType2,
+    badge: "new",
+    engine: "gst-invoice-generator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Fields for Buyer & Seller GSTIN details",
+      "Dedicated HSN / SAC code columns per line item",
+      "Dynamic intra-state (CGST+SGST) vs inter-state (IGST) math",
+      "Standard printable A4 tax invoice formatting",
+      "Confidential client-side processing",
+    ],
+    faq: [
+      { q: "Is this GST invoice generator valid in India?", a: "Yes. The generated tax invoices capture all statutory GST details, HSN codes, tax slabs, GSTINs, and signatures, conforming to Indian GST rules." },
+      { q: "Do I need to pay or signup?", a: "No, GoluPDFs is completely free, secure, and operates entirely locally in browser RAM." }
+    ],
+    longDescription: "The GST Invoice Generator is a tax-compliant invoicing wizard. Built for Indian merchants and MSMEs, it simplifies intra-state and inter-state GST calculations, tracks HSN codes, and exports clean tax invoice sheets directly from your browser memory."
+  },
+  {
+    slug: "purchase-order-generator",
+    name: "Corporate Purchase Order Generator",
+    shortName: "Purchase Order",
+    tagline: "Generate professional corporate purchase orders",
+    description: "Client-side PO creator with vendor databases, shipping details, and automated price sheets.",
+    category: "business",
+    icon: Presentation,
+    badge: "new",
+    engine: "purchase-order-generator",
+    accept: [],
+    maxFiles: 0,
+    features: [
+      "Vendor and buyer corporate address forms",
+      "Custom shipping terms and delivery dates tracker",
+      "Itemized purchase tables with automatic total sums",
+      "Print and Save-as-PDF optimized A4 sheets",
+      "Secure and private local browser environment",
+    ],
+    faq: [
+      { q: "What is the difference between an invoice and a purchase order?", a: "A Purchase Order is sent by the buyer to order goods, confirming the agreement before shipment. An Invoice is sent by the seller to request payment." },
+      { q: "Can I save custom vendor details?", a: "Yes, you can edit vendor address blocks dynamically and save current layouts directly." }
+    ],
+    longDescription: "Structure corporate purchases with our Purchase Order Generator. Track shipping conditions, detail item lists, configure taxes, and print standard purchase orders directly from your browser memory without cloud database dependencies."
   },
 ];
 
