@@ -169,6 +169,34 @@ export const TOOLS: Tool[] = [
     longDescription:
       "Compress PDF Pro is an enterprise-grade PDF optimizer that uses content-aware compression to dramatically shrink file size without sacrificing readability. Perfect for emailing contracts, uploading to portals with size limits, or archiving thousands of documents.",
   },
+  {
+    slug: "resize-pdf",
+    name: "Resize PDF Pro",
+    shortName: "Resize PDF",
+    tagline: "Resize PDF to custom KB sizes perfectly in one click",
+    description: "Input your target size in KB (e.g. 10 KB, 50 KB) to dynamically compress or upscale with lossless padding.",
+    category: "optimize",
+    icon: ArchiveIcon,
+    badge: "new",
+    engine: "compress",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Target file size in KB down to the byte",
+      "Lossless metadata padding for upscaling smaller PDFs",
+      "Dynamic scale/quality compression for larger PDFs",
+      "Perfect for government, visa & job portal uploads",
+      "100% private in-browser client-side processing",
+      "Instant byte-locked PDF downloads",
+    ],
+    faq: [
+      { q: "How does the target KB resizing work?", a: "If your PDF is larger than your target size, we compress it using smart downscaling. If it is smaller, we inject zero-overhead metadata comments at the end of the file to increase its byte size to exactly your targeted KB without touching your document quality!" },
+      { q: "Will the PDF lose quality when upscaled?", a: "No! When increasing a PDF's size (e.g. from 5 KB to 10 KB), we use lossless stream padding. Your text, vectors, and layouts remain 100% vector-sharp and uncompressed!" },
+      ...baseFaq("Resize PDF Pro").slice(1),
+    ],
+    longDescription:
+      "Resize PDF Pro is a high-precision utility designed for users who need their PDF documents to meet exact file size requirements. Whether you need to compress a 12 KB file to 10 KB, or pad a 5 KB file to exactly 10 KB for a job or government portal, our byte-perfect engine guarantees compliant downloads every single time.",
+  },
   // Organize
   {
     slug: "merge-pdf",
