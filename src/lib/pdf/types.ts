@@ -45,6 +45,10 @@ export interface ProcessOptions {
   imageFormat?: "jpeg" | "png";
   /** Quality 0..1 */
   imageQuality?: number;
+  /** Reordering page index order */
+  order?: number[];
+  /** Visual page rotation map */
+  rotations?: Record<number, number>;
 }
 
 export interface ProcessResult {

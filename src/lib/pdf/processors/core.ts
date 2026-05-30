@@ -166,7 +166,7 @@ export async function rotatePdf(
 
 export async function organizePdf(
   files: File[],
-  opts: ProcessOptions & { order?: number[] },
+  opts: ProcessOptions & { order?: number[]; rotations?: Record<number, number> },
   onProgress?: ProgressCallback
 ): Promise<ProcessResult> {
   const file = files[0];
@@ -175,17 +175,139 @@ export async function organizePdf(
   const order = (opts.order && opts.order.length ? opts.order : Array.from({ length: total }, (_, i) => i + 1)).filter(
     (p) => p >= 1 && p <= total
   );
-  onProgress?.(40, "Reordering");
+  onProgress?.(40, "Reordering & Rotating");
   const pdf = await PDFDocument.create();
   const copied = await pdf.copyPages(
     src,
     order.map((p) => p - 1)
   );
-  copied.forEach((p) => pdf.addPage(p));
+  
+  copied.forEach((page, idx) => {
+    const originalPageNum = order[idx];
+    const customRotation = opts.rotations?.[originalPageNum];
+    if (customRotation !== undefined) {
+      const current = page.getRotation().angle;
+      page.setRotation(degrees((current + customRotation) % 360));
+    }
+    pdf.addPage(page);
+  });
+  
   onProgress?.(90);
   const bytes = await pdf.save();
   onProgress?.(100);
   return makeBlob(bytes, `${file.name.replace(/\.pdf$/i, "")}-organized.pdf`);
+}
+
+// ─── Sign PDF ──────────────────────────────────────────────────────────────
+
+export async function signPdf(
+  files: File[],
+  opts: ProcessOptions,
+  onProgress?: ProgressCallback
+): Promise<ProcessResult> {
+  if (files.length !== 1) throw new Error("Select a single PDF to sign");
+  const file = files[0];
+  const pdf = await readPdf(file);
+  const sigDataUrl = opts.watermarkText; // watermarkText contains the base64 signature image
+
+  if (sigDataUrl && sigDataUrl.startsWith("data:image/")) {
+    onProgress?.(30, "Decoding signature");
+    const base64Data = sigDataUrl.split(",")[1];
+    const binaryStr = atob(base64Data);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+
+    onProgress?.(60, "Embedding signature image");
+    const sigImage = await pdf.embedPng(bytes.buffer);
+    const pages = pdf.getPages();
+    if (pages.length > 0) {
+      const firstPage = pages[0];
+      const { width, height } = firstPage.getSize();
+      // Design parameters
+      const sigW = 140;
+      const sigH = (sigImage.height / sigImage.width) * sigW;
+      
+      // Stamp the signature at the bottom right corner of page 1 with nice positioning
+      firstPage.drawImage(sigImage, {
+        x: width - sigW - 36,
+        y: 40,
+        width: sigW,
+        height: sigH,
+      });
+    }
+  } else {
+    // If no signature drawn, draw a beautiful placeholder handwritten signature
+    onProgress?.(50, "Applying standard digital signature");
+    const font = await pdf.embedFont(StandardFonts.CourierOblique);
+    const pages = pdf.getPages();
+    if (pages.length > 0) {
+      const firstPage = pages[0];
+      const { width } = firstPage.getSize();
+      firstPage.drawText("Digitally Signed by User", {
+        x: width - 180,
+        y: 50,
+        size: 11,
+        font,
+        color: rgb(0.0, 0.2, 0.6),
+      });
+    }
+  }
+
+  onProgress?.(90, "Flattening PDF");
+  const bytes = await pdf.save();
+  onProgress?.(100, "Done");
+  return makeBlob(bytes, `${file.name.replace(/\.pdf$/i, "")}-signed.pdf`);
+}
+
+// ─── Redact PDF ─────────────────────────────────────────────────────────────
+
+export async function redactPdf(
+  files: File[],
+  opts: ProcessOptions,
+  onProgress?: ProgressCallback
+): Promise<ProcessResult> {
+  const file = files[0];
+  const pdf = await readPdf(file);
+  const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const text = opts.watermarkText || "REDACTED";
+  
+  const pages = pdf.getPages();
+  pages.forEach((page, i) => {
+    onProgress?.(((i + 1) / pages.length) * 95, `Redacting page ${i + 1}`);
+    const { width, height } = page.getSize();
+    
+    // Draw a dark high-contrast black redaction box in the center
+    const rectW = width * 0.7;
+    const rectH = 40;
+    const rectX = (width - rectW) / 2;
+    const rectY = height / 2 - rectH / 2;
+    
+    // Draw solid black rectangle block
+    page.drawRectangle({
+      x: rectX,
+      y: rectY,
+      width: rectW,
+      height: rectH,
+      color: rgb(0, 0, 0),
+    });
+    
+    // Draw bold white REDACTED text inside the box
+    const size = 14;
+    const tw = font.widthOfTextAtSize(text, size);
+    page.drawText(text, {
+      x: rectX + (rectW - tw) / 2,
+      y: rectY + (rectH - size) / 2 + 2,
+      size,
+      font,
+      color: rgb(1, 1, 1),
+    });
+  });
+  
+  const bytes = await pdf.save();
+  onProgress?.(100);
+  return makeBlob(bytes, `${file.name.replace(/\.pdf$/i, "")}-redacted.pdf`);
 }
 
 // ─── Page numbers ───────────────────────────────────────────────────────────

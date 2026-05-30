@@ -17,6 +17,7 @@ import { useToolsStore } from "@/store/tools-store";
 import { trackToolUse, trackUpload, trackConversion } from "@/lib/analytics";
 
 import { BusinessToolRunner } from "./business/business-runner";
+import { VisualPageGrid } from "./visual-page-grid";
 
 interface ToolRunnerProps {
   tool: Omit<Tool, "icon">;
@@ -133,13 +134,40 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
             </motion.div>
           ) : (
             <motion.div key="drop" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <ToolDropzone
-                files={files}
-                onFiles={setFiles}
-                accept={tool.accept}
-                maxFiles={tool.maxFiles}
-                multiple={tool.maxFiles > 1}
-              />
+              {files.length === 1 &&
+              files[0].type === "application/pdf" &&
+              (tool.category === "organize" || tool.category === "edit" || tool.slug === "compress-pdf" || tool.slug === "resize-pdf") ? (
+                <div className="rounded-2xl border bg-card p-6 space-y-4 shadow-xl border-border/40 bg-card/40 backdrop-blur-md">
+                  <VisualPageGrid
+                    file={files[0]}
+                    onStateChange={(state) => {
+                      setOptions({
+                        ...options,
+                        pages: state.order,
+                        order: state.order,
+                        pageRange: state.order.join(","),
+                        rotations: state.rotations,
+                      });
+                    }}
+                  />
+                  <div className="flex justify-between items-center border-t pt-4 border-border/40">
+                    <span className="text-xs text-muted-foreground truncate max-w-[200px] font-mono">
+                      📄 {files[0].name}
+                    </span>
+                    <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={reset}>
+                      Cancel / Reset File
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <ToolDropzone
+                  files={files}
+                  onFiles={setFiles}
+                  accept={tool.accept}
+                  maxFiles={tool.maxFiles}
+                  multiple={tool.maxFiles > 1}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
