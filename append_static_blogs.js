@@ -7,6 +7,7 @@ const article2Path = path.join(__dirname, "scratch_blogs", "article2.md");
 const article3Path = path.join(__dirname, "scratch_blogs", "article3.md");
 const article4Path = path.join(__dirname, "scratch_blogs", "article4.md");
 const article5Path = path.join(__dirname, "scratch_blogs", "article5.md");
+const article6Path = path.join(__dirname, "scratch_blogs", "article6.md");
 
 try {
   let mockContent = fs.readFileSync(mockBlogDataPath, "utf8");
@@ -15,6 +16,7 @@ try {
   let article3 = fs.readFileSync(article3Path, "utf8");
   let article4 = fs.readFileSync(article4Path, "utf8");
   let article5 = fs.readFileSync(article5Path, "utf8");
+  let article6 = fs.readFileSync(article6Path, "utf8");
 
   // Escape backticks and dollar signs so they don't break JS template literals
   const escapeStringForTemplate = (str) => {
@@ -29,6 +31,7 @@ try {
   const escapedArticle3 = escapeStringForTemplate(article3);
   const escapedArticle4 = escapeStringForTemplate(article4);
   const escapedArticle5 = escapeStringForTemplate(article5);
+  const escapedArticle6 = escapeStringForTemplate(article6);
 
   // IDEMPOTENCY: Revert previously appended blog posts if this script was run before
   const firstAppendIndex = mockContent.indexOf(',\n  {\n    id: "indian-gst-tax-invoice-guide"');
@@ -196,6 +199,34 @@ try {
     published_at: "2026-06-01T15:00:00Z",
     created_at: "2026-06-01T15:00:00Z",
     updated_at: "2026-06-01T15:00:00Z"
+  },
+  {
+    id: "pdf-permanent-redaction-guide",
+    slug: "how-to-permanently-redact-a-pdf-free",
+    title: "How to Permanently Redact a PDF: Free Secure Black-Box Censoring Guide",
+    excerpt: "Learn how to permanently redact a PDF for free. Avoid insecure draw highlights, understand underlying vector font streams, and strip tracking metadata safely.",
+    category: "Document Security",
+    read_time: "10 min",
+    author: "Golu Kumar",
+    keywords: ["how to permanently redact a pdf free", "secure black box pdf redaction", "hide sensitive information in PDF", "censor pdf text online safe", "remove private metadata PDF"],
+    content: \`${escapedArticle6}\`,
+    is_pillar: true,
+    topic_cluster: "Document Censorship & Security",
+    seo_score: 98,
+    seo_score_details: {
+      keyword_density: 95,
+      structure_score: 99,
+      readability_score: 98,
+      link_score: 98,
+      ctr_score: 98
+    },
+    views_30d: 4900,
+    clicks_30d: 380,
+    ctr_30d: 7.75,
+    avg_position: 1.7,
+    published_at: "2026-06-01T15:00:00Z",
+    created_at: "2026-06-01T15:00:00Z",
+    updated_at: "2026-06-01T15:00:00Z"
   }`;
 
   // Perform split and insert
@@ -205,7 +236,7 @@ try {
   const updatedContent = beforeArrayEnd + insertText + afterArrayEnd;
 
   fs.writeFileSync(mockBlogDataPath, updatedContent, "utf8");
-  console.log("🎉 SUCCESS: Programmatically inserted all 4 E-E-A-T guides into static mock database array!");
+  console.log("🎉 SUCCESS: Programmatically inserted all 6 E-E-A-T guides into static mock database array!");
 
 } catch (err) {
   console.error("Error executing append script:", err.message);
