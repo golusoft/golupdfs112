@@ -47,4 +47,5 @@ insert_two_eeat_blogs*.js
 check_cron.js
 publish_5_viral_pins.js
 run_migration.js
+fix_fallback.js
 
