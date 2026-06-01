@@ -35,3 +35,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 .env*
+
+# Local diagnostic and recovery files
+raw_matches.txt
+diagnose_env.js
+extract_raw.js
+read_logs.js
+restore_env.js
+search_jwt.js
+insert_two_eeat_blogs*.js
+check_cron.js
+publish_5_viral_pins.js
+run_migration.js
+
