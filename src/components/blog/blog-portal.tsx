@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, Sparkles, Eye, Search, Filter, BookOpen, Star, Mail, CheckCircle } from "lucide-react";
+import { ArrowRight, Clock, Sparkles, Eye, Search, BookOpen, Mail, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
@@ -27,19 +27,51 @@ export function BlogPortal({ initialPosts }: BlogPortalProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [subscribed, setSubscribed] = useState(false);
   const [email, setEmail] = useState("");
+  
+  // Real-time posts state to handle client-side view count updates
+  const [posts, setPosts] = useState<BlogPortalPost[]>(initialPosts);
+
+  // Fetch real-time views client-side for all posts on mount via optimized batch same-origin endpoint!
+  useEffect(() => {
+    async function fetchRealViews() {
+      try {
+        const slugsParam = initialPosts.map(p => p.slug).join(",");
+        const res = await fetch(`/api/views?slugs=${slugsParam}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.results) {
+            const updatedPosts = initialPosts.map(post => {
+              const viewCount = data.results[post.slug];
+              return {
+                ...post,
+                views: typeof viewCount === "number" && viewCount > 0 ? viewCount : post.views
+              };
+            });
+            setPosts(updatedPosts);
+          }
+        }
+      } catch (e) {
+        console.warn("Could not retrieve real-time batch views:", e);
+      }
+    }
+
+    if (initialPosts.length > 0) {
+      fetchRealViews();
+    }
+  }, [initialPosts]);
 
   // Extract unique categories for filter badges
   const categories = useMemo(() => {
     const list = new Set<string>();
-    initialPosts.forEach((p) => {
+    posts.forEach((p) => {
       if (p.tag) list.add(p.tag);
     });
     return ["All", ...Array.from(list)];
-  }, [initialPosts]);
+  }, [posts]);
 
   // Filter posts dynamically in real-time
   const filteredPosts = useMemo(() => {
-    return initialPosts.filter((post) => {
+    return posts.filter((post) => {
       const matchesSearch =
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
@@ -49,14 +81,13 @@ export function BlogPortal({ initialPosts }: BlogPortalProps) {
 
       return matchesSearch && matchesCategory;
     });
-  }, [initialPosts, searchQuery, selectedCategory]);
+  }, [posts, searchQuery, selectedCategory]);
 
   // Designate the newest pillar post as the "Featured Hero Post"
   const featuredPost = useMemo(() => {
-    if (initialPosts.length === 0) return null;
-    // Find the first post that has isDynamic = true or is designated as a pillar
-    return initialPosts[0];
-  }, [initialPosts]);
+    if (posts.length === 0) return null;
+    return posts[0];
+  }, [posts]);
 
   // Filter out the featured post from the grid if we are displaying all categories
   const gridPosts = useMemo(() => {
@@ -144,7 +175,7 @@ export function BlogPortal({ initialPosts }: BlogPortalProps) {
                   <span>{featuredPost.readTime}</span>
                 </div>
                 <div className="flex items-center gap-1.5 bg-muted/40 rounded-full px-3 py-1 border">
-                  <Eye className="h-3.5 w-3.5 text-brand-500" />
+                  <Eye className="h-3.5 w-3.5 text-brand-500 animate-pulse" />
                   <span className="font-mono font-semibold text-foreground">
                     {featuredPost.views.toLocaleString()}
                   </span>
@@ -227,7 +258,7 @@ export function BlogPortal({ initialPosts }: BlogPortalProps) {
                 <div className="mt-auto pt-6 flex items-center justify-between border-t border-muted/50 text-[11px] text-muted-foreground font-mono">
                   <div className="flex items-center gap-3">
                     <span className="inline-flex items-center gap-1 bg-muted/40 border px-2 py-0.5 rounded-full select-none">
-                      <Eye className="h-3.5 w-3.5 text-brand-500" /> {p.views.toLocaleString()}
+                      <Eye className="h-3.5 w-3.5 text-brand-500 animate-pulse" /> {p.views.toLocaleString()}
                     </span>
                     <span>{p.date}</span>
                   </div>
@@ -252,7 +283,7 @@ export function BlogPortal({ initialPosts }: BlogPortalProps) {
                   </div>
                   <h3 className="font-display text-xl font-bold leading-tight text-foreground">Get Private Document Hacks</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Subscribe to receive advanced, serverless, and private document processing blueprints compiled byfounder Golu Kumar.
+                    Subscribe to receive advanced, serverless, and private document processing blueprints compiled by founder Golu Kumar.
                   </p>
                 </div>
 
