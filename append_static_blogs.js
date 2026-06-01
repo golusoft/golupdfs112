@@ -8,6 +8,7 @@ const article3Path = path.join(__dirname, "scratch_blogs", "article3.md");
 const article4Path = path.join(__dirname, "scratch_blogs", "article4.md");
 const article5Path = path.join(__dirname, "scratch_blogs", "article5.md");
 const article6Path = path.join(__dirname, "scratch_blogs", "article6.md");
+const article7Path = path.join(__dirname, "scratch_blogs", "article7.md");
 
 try {
   let mockContent = fs.readFileSync(mockBlogDataPath, "utf8");
@@ -17,6 +18,7 @@ try {
   let article4 = fs.readFileSync(article4Path, "utf8");
   let article5 = fs.readFileSync(article5Path, "utf8");
   let article6 = fs.readFileSync(article6Path, "utf8");
+  let article7 = fs.readFileSync(article7Path, "utf8");
 
   // Escape backticks and dollar signs so they don't break JS template literals
   const escapeStringForTemplate = (str) => {
@@ -32,6 +34,7 @@ try {
   const escapedArticle4 = escapeStringForTemplate(article4);
   const escapedArticle5 = escapeStringForTemplate(article5);
   const escapedArticle6 = escapeStringForTemplate(article6);
+  const escapedArticle7 = escapeStringForTemplate(article7);
 
   // IDEMPOTENCY: Revert previously appended blog posts if this script was run before
   const firstAppendIndex = mockContent.indexOf(',\n  {\n    id: "indian-gst-tax-invoice-guide"');
@@ -227,6 +230,34 @@ try {
     published_at: "2026-06-01T15:00:00Z",
     created_at: "2026-06-01T15:00:00Z",
     updated_at: "2026-06-01T15:00:00Z"
+  },
+  {
+    id: "home-loan-emi-manual-calculation-guide",
+    slug: "how-to-calculate-home-loan-emi-manually",
+    title: "How to Calculate Home Loan EMIs in India: The Smart Homebuyer’s Financial Guide",
+    excerpt: "Learn how to calculate home loan EMIs manually. Master the reducing balance amortization formula, simulate prepayment interest savings, and export print-ready PDF schedules.",
+    category: "Financial Calculations",
+    read_time: "12 min",
+    author: "Golu Kumar",
+    keywords: ["how to calculate home loan emi manually", "free loan emi calculator online", "home loan interest calculation formula", "reduce debt mortgage calculator", "reducing balance emi calculations"],
+    content: \`${escapedArticle7}\`,
+    is_pillar: true,
+    topic_cluster: "Financial Calculations & Worksheets",
+    seo_score: 98,
+    seo_score_details: {
+      keyword_density: 95,
+      structure_score: 99,
+      readability_score: 98,
+      link_score: 98,
+      ctr_score: 98
+    },
+    views_30d: 5900,
+    clicks_30d: 460,
+    ctr_30d: 7.79,
+    avg_position: 1.6,
+    published_at: "2026-06-01T15:00:00Z",
+    created_at: "2026-06-01T15:00:00Z",
+    updated_at: "2026-06-01T15:00:00Z"
   }`;
 
   // Perform split and insert
@@ -236,7 +267,7 @@ try {
   const updatedContent = beforeArrayEnd + insertText + afterArrayEnd;
 
   fs.writeFileSync(mockBlogDataPath, updatedContent, "utf8");
-  console.log("🎉 SUCCESS: Programmatically inserted all 6 E-E-A-T guides into static mock database array!");
+  console.log("🎉 SUCCESS: Programmatically inserted all 7 E-E-A-T guides into static mock database array!");
 
 } catch (err) {
   console.error("Error executing append script:", err.message);
