@@ -6,6 +6,7 @@ const article1Path = path.join(__dirname, "scratch_blogs", "article1.md");
 const article2Path = path.join(__dirname, "scratch_blogs", "article2.md");
 const article3Path = path.join(__dirname, "scratch_blogs", "article3.md");
 const article4Path = path.join(__dirname, "scratch_blogs", "article4.md");
+const article5Path = path.join(__dirname, "scratch_blogs", "article5.md");
 
 try {
   let mockContent = fs.readFileSync(mockBlogDataPath, "utf8");
@@ -13,6 +14,7 @@ try {
   let article2 = fs.readFileSync(article2Path, "utf8");
   let article3 = fs.readFileSync(article3Path, "utf8");
   let article4 = fs.readFileSync(article4Path, "utf8");
+  let article5 = fs.readFileSync(article5Path, "utf8");
 
   // Escape backticks and dollar signs so they don't break JS template literals
   const escapeStringForTemplate = (str) => {
@@ -26,6 +28,7 @@ try {
   const escapedArticle2 = escapeStringForTemplate(article2);
   const escapedArticle3 = escapeStringForTemplate(article3);
   const escapedArticle4 = escapeStringForTemplate(article4);
+  const escapedArticle5 = escapeStringForTemplate(article5);
 
   // IDEMPOTENCY: Revert previously appended blog posts if this script was run before
   const firstAppendIndex = mockContent.indexOf(',\n  {\n    id: "indian-gst-tax-invoice-guide"');
@@ -162,6 +165,34 @@ try {
     clicks_30d: 490,
     ctr_30d: 7.65,
     avg_position: 1.8,
+    published_at: "2026-06-01T15:00:00Z",
+    created_at: "2026-06-01T15:00:00Z",
+    updated_at: "2026-06-01T15:00:00Z"
+  },
+  {
+    id: "pdf-ocr-text-extractor-guide",
+    slug: "extract-text-from-scanned-pdf-free",
+    title: "How to Extract Text from Scanned PDFs: Free In-Browser OCR Reader Guide",
+    excerpt: "Learn how to extract text from scanned PDFs online for free using WebAssembly. Discover image pre-processing, character feature extraction, and secure in-browser OCR.",
+    category: "AI Document OCR",
+    read_time: "11 min",
+    author: "Golu Kumar",
+    keywords: ["extract text from scanned pdf free", "make scanned pdf searchable online", "free OCR tool for scanned PDF", "local web browser OCR reader", "scanned PDF to text converter"],
+    content: \`${escapedArticle5}\`,
+    is_pillar: true,
+    topic_cluster: "AI Document OCR Text",
+    seo_score: 98,
+    seo_score_details: {
+      keyword_density: 95,
+      structure_score: 99,
+      readability_score: 98,
+      link_score: 98,
+      ctr_score: 98
+    },
+    views_30d: 5800,
+    clicks_30d: 450,
+    ctr_30d: 7.76,
+    avg_position: 1.9,
     published_at: "2026-06-01T15:00:00Z",
     created_at: "2026-06-01T15:00:00Z",
     updated_at: "2026-06-01T15:00:00Z"
