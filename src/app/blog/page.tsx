@@ -1,152 +1,147 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, Clock, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Badge } from "@/components/ui/badge";
 import { buildMetadata } from "@/lib/seo";
 import { getDbPosts } from "@/lib/admin/mock-blog-data";
+import { BlogPortal, type BlogPortalPost } from "@/components/blog/blog-portal";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Blog — PDF guides & best practices",
+  title: "Blog — PDF Guides & Document Blueprints",
   description:
-    "Tutorials, deep dives and best practices for working with PDFs — from compression to digital signing.",
+    "Masterclass tutorials, deep-dives and secure local best practices for working with PDFs — from compression to digital signing.",
   path: "/blog",
 });
 
 const STATIC_POSTS = [
   {
     slug: "best-pdf-compressor-2026",
-    title: "The best free PDF compressor in 2026",
-    excerpt: "We tested 12 popular compressors against 50 real-world PDFs. Here's what won.",
+    title: "The Best Free PDF Compressor in 2026",
+    excerpt: "We tested 12 popular compressors against 50 real-world PDFs. Here is what won and why browser-side compression is a security must.",
     tag: "Guide",
     readTime: "8 min",
-    date: "May 2026",
+    publishedAt: "2026-05-01T10:00:00Z",
+    views: 12450
   },
   {
     slug: "compress-pdf-to-100kb",
-    title: "How to compress a PDF to 100 KB without losing quality",
-    excerpt: "A practical walkthrough of the settings that actually matter for tiny PDFs.",
+    title: "How to Compress a PDF to 100 KB Without Losing Quality",
+    excerpt: "Need a tiny PDF for an online job board or passport portal? Learn how to compress PDFs under 100 KB using advanced sub-sampling locally.",
     tag: "Tutorial",
     readTime: "6 min",
-    date: "May 2026",
+    publishedAt: "2026-05-10T12:00:00Z",
+    views: 8320
   },
   {
     slug: "merge-vs-combine-pdf",
-    title: "Merge vs combine: how PDF tools differ (and when to use each)",
-    excerpt: "Two terms, subtly different workflows. Choosing the right one saves hours.",
+    title: "Merge vs Combine: How PDF Tools Differ (And When to Use Each)",
+    excerpt: "Two terms, subtly different workflows. Choosing the right file consolidation method saves hours and keeps your vectors sharp.",
     tag: "Guide",
     readTime: "5 min",
-    date: "April 2026",
+    publishedAt: "2026-04-15T09:00:00Z",
+    views: 3120
   },
   {
     slug: "pdf-privacy-explained",
-    title: "Browser-side vs server-side PDF tools: a privacy guide",
-    excerpt: "Why local processing matters — and how to verify a tool is really browser-based.",
+    title: "Browser-side vs Server-side PDF Tools: A Complete Privacy Guide",
+    excerpt: "Why local sandbox processing matters — and how to verify a tool is really browser-based using Chrome DevTools.",
     tag: "Privacy",
     readTime: "7 min",
-    date: "April 2026",
+    publishedAt: "2026-04-05T14:30:00Z",
+    views: 4500
   },
   {
     slug: "esign-vs-digital-signature",
-    title: "Electronic signature vs digital signature: what's the difference?",
-    excerpt: "ESIGN, eIDAS, and PKI — explained for non-lawyers in plain English.",
+    title: "Electronic Signature vs Digital Signature: What's the Difference?",
+    excerpt: "ESIGN Act, eIDAS, and PKI cryptography guidelines — explained for non-lawyers in plain, simple English.",
     tag: "Legal",
     readTime: "9 min",
-    date: "March 2026",
+    publishedAt: "2026-03-22T11:15:00Z",
+    views: 2900
   },
   {
     slug: "ocr-best-practices",
-    title: "OCR best practices for clean, searchable PDFs",
-    excerpt: "From scanning resolution to language packs — a primer on getting OCR right.",
+    title: "OCR Best Practices for Clean, Searchable PDFs",
+    excerpt: "From original scanning resolution levels to local language packs — a complete primer on getting browser-side OCR right.",
     tag: "Tutorial",
     readTime: "11 min",
-    date: "March 2026",
+    publishedAt: "2026-03-10T16:00:00Z",
+    views: 6100
   },
 ];
 
 export default async function BlogPage() {
   const dbPosts = await getDbPosts();
   
-  // Map dynamic posts to fit layout
-  const dynamicPosts = dbPosts.map(p => ({
+  // 1. Map dynamic database/mock posts to unified portal format
+  const dynamicPosts: BlogPortalPost[] = dbPosts.map(p => ({
     slug: p.slug,
     title: p.title,
     excerpt: p.excerpt,
     tag: p.category || "Guide",
     readTime: p.read_time,
-    date: p.published_at ? new Date(p.published_at).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Draft",
-    isDynamic: true
+    date: p.published_at 
+      ? new Date(p.published_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }) 
+      : "Draft Guide",
+    views: p.views_30d || 0,
+    isDynamic: true,
+    publishedAt: p.published_at || new Date().toISOString()
   }));
 
-  // Deduplicate and combine, prioritizing dynamic posts
-  const combined = [...dynamicPosts];
+  // 2. Map static posts to portal format, ensuring deduplication
+  const combinedPosts = [...dynamicPosts];
+  
   STATIC_POSTS.forEach(s => {
-    if (!combined.some(c => c.slug === s.slug)) {
-      combined.push({
+    if (!combinedPosts.some(c => c.slug === s.slug)) {
+      combinedPosts.push({
         slug: s.slug,
         title: s.title,
         excerpt: s.excerpt,
         tag: s.tag,
         readTime: s.readTime,
-        date: s.date,
-        isDynamic: false
+        date: new Date(s.publishedAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
+        views: s.views,
+        isDynamic: false,
+        publishedAt: s.publishedAt
       });
     }
+  });
+
+  // 3. Strict chronological sorting: Newest posts ALWAYS go at the very top!
+  combinedPosts.sort((a, b) => {
+    const timeA = new Date(a.publishedAt).getTime();
+    const timeB = new Date(b.publishedAt).getTime();
+    return timeB - timeA;
   });
 
   return (
     <>
       <Navbar />
       <main className="pt-32 pb-24 relative overflow-hidden bg-background">
+        {/* Ambient mesh background effects */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-40 right-10 w-80 h-80 bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="container">
-          <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="glass" className="mb-4">
-              GOLUPDFS BLOG
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <Badge variant="glass" className="mb-4 uppercase tracking-widest text-[10px] font-bold">
+              GoluPDFs Masterclass
             </Badge>
             <h1 className="font-display text-balance text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl text-foreground">
-              PDF wisdom, served fresh.
+              Document secrets, served fresh.
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-pretty text-muted-foreground sm:text-lg">
-              Guides, deep dives and best practices from the team building GoluPDFs.
+              High-fidelity E-E-A-T guides, secure local tools showcases, and financial planning blueprints.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {combined.map((p) => (
-              <Link
-                key={p.slug}
-                href={`/blog/${p.slug}`}
-                className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
-              >
-                <div className="flex items-center gap-2 text-xs">
-                  <Badge variant={p.isDynamic ? "glass" : "secondary"}>{p.tag}</Badge>
-                  <span className="inline-flex items-center gap-1 text-muted-foreground">
-                    <Clock className="h-3 w-3" /> {p.readTime}
-                  </span>
-                  {p.isDynamic && (
-                    <span className="text-[10px] text-primary font-mono ml-auto flex items-center gap-0.5"><Sparkles className="h-3 w-3" /> AI</span>
-                  )}
-                </div>
-                <h3 className="mt-4 font-display text-xl font-bold leading-tight group-hover:text-primary transition-colors">{p.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{p.excerpt}</p>
-                <div className="mt-auto flex items-center justify-between pt-5 text-xs text-muted-foreground">
-                  <span>{p.date}</span>
-                  <span className="flex items-center gap-1 text-primary opacity-0 transition-opacity group-hover:opacity-100 font-semibold">
-                    Read <ArrowRight className="h-3 w-3" />
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {/* Interactive Blog Portal rendering search, filters, featured hero, and news updates */}
+          <BlogPortal initialPosts={combinedPosts} />
         </div>
       </main>
       <Footer />
     </>
   );
 }
-
