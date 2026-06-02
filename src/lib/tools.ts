@@ -116,6 +116,9 @@ export interface Tool {
   maxFiles: number;
   faq: ToolFAQ[];
   longDescription: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  h1?: string;
 }
 
 const baseFaq = (name: string): ToolFAQ[] => [
@@ -162,12 +165,27 @@ export const TOOLS: Tool[] = [
       "Smart optimization suggestions",
     ],
     faq: [
-      { q: "How small can I compress a PDF?", a: "Our extreme compression preset can reduce most PDFs by 60–90% while keeping text crisp. For image-heavy PDFs, we typically achieve 80%+ reduction." },
-      { q: "Will compression affect quality?", a: "Choose Lossless mode for zero quality loss, or use one of four presets (Light, Medium, Strong, Extreme) to balance size vs visual quality." },
-      ...baseFaq("Compress PDF Pro").slice(1),
+      { q: "How do I compress PDF to 100KB?", a: "Use GoluPDFs' free compressor, upload your document, select the '100KB' target size preset or manually adjust the compression level, and click compress. The system will subset fonts and downsample images client-side to target exactly 100KB." },
+      { q: "How do I compress PDF to 200KB?", a: "Simply drag and drop your file, select the '200KB' target preset, and download. Processing is done entirely in-browser, preserving visual clarity while targeting 200KB." },
+      { q: "How do I compress PDF to 500KB?", a: "For larger multi-page reports, select the '500KB' target size preset. This allows for higher DPI image quality while ensuring the file size stays below 500KB." },
+      { q: "How do I reduce PDF size for email?", a: "Most email clients (like Gmail or Outlook) limit attachments to 25MB. Simply select our 'Medium' or 'Strong' compression preset to instantly compress files down to email-friendly sizes." },
+      { q: "Can I compress PDF on mobile?", a: "Absolutely! GoluPDFs is fully optimized for mobile browsers. You can compress, edit, and download PDFs on iOS Safari or Android Chrome with no apps or signups." },
+      { q: "Is PDF compression free?", a: "Yes. GoluPDFs is 100% free with no watermarks, no registration, and no hidden subscriptions." },
+      { q: "Can I compress multiple PDFs at once?", a: "Yes, our tool supports batch processing. You can upload up to 50 files simultaneously, and they will be compressed locally and packaged into a convenient ZIP archive." },
+      { q: "How can I compress a PDF without losing quality?", a: "Choose our 'Lossless' mode or 'Light' preset. These configurations remove unused metadata, subset fonts, and optimize code structures without altering the visual DPI of your graphics." },
+      { q: "Is GoluPDFs safe for confidential documents?", a: "Yes. We use local WebAssembly processing. Your files are never uploaded to any remote server. Your private contracts, financial statements, and personal identity documents remain 100% on your device." },
+      { q: "Do I need to sign up or log in?", a: "No signup or registration is required. All our features are fully unlocked and accessible immediately without entering an email or password." },
+      { q: "How does browser-side compression work?", a: "We run high-performance JavaScript/WebAssembly libraries (like pdf-lib) directly inside your browser. Your device's processor handles the document rendering, font subsetting, and image compression locally." },
+      { q: "Will GoluPDFs put a watermark on my compressed files?", a: "No. GoluPDFs does not add any branding, logo, or watermark to your output documents. Your files remain clean and professional." },
+      { q: "Can I compress password-protected PDFs?", a: "You must unlock the PDF first using our 'Unlock PDF' tool before compressing. Once unlocked, you can compress it to your desired target size." },
+      { q: "Why is the compressed PDF still larger than my target size?", a: "If a PDF is already optimized or consists mostly of non-compressable vector elements (like CAD drawings or clean text paths), further image-based downsampling will have limited impact." },
+      { q: "Does GoluPDFs work offline?", a: "Yes! Once the page is loaded, the tools can run entirely offline since the compression libraries are loaded into your browser's local sandbox memory." }
     ],
     longDescription:
       "Compress PDF Pro is an enterprise-grade PDF optimizer that uses content-aware compression to dramatically shrink file size without sacrificing readability. Perfect for emailing contracts, uploading to portals with size limits, or archiving thousands of documents.",
+    metaTitle: "Compress PDF Online Free | Reduce PDF Size to 100KB, 200KB & More",
+    metaDescription: "Compress PDF online for free. Reduce PDF file size to 100KB, 200KB, 500KB or any custom size without losing quality. Secure browser-based compression.",
+    h1: "Compress PDF Online Free – Reduce PDF File Size Without Losing Quality"
   },
   {
     slug: "resize-pdf",

@@ -11,6 +11,7 @@ import { ShareButtons } from "@/components/tools/share-buttons";
 import { AdSlot } from "@/components/tools/ad-slot";
 import { StructuredData } from "@/components/structured-data";
 import { Badge } from "@/components/ui/badge";
+import { CompressPdfSeoContent } from "@/components/tools/seo/compress-pdf-seo";
 import {
   TOOLS,
   CATEGORIES,
@@ -26,6 +27,11 @@ import {
 } from "@/lib/seo";
 import { absoluteUrl, cn } from "@/lib/utils";
 
+// Mapping of custom, rich React components for SEO block sections (avoids HTML strings/XSS risks)
+const SEO_COMPONENTS: Record<string, React.ComponentType> = {
+  "compress-pdf": CompressPdfSeoContent,
+};
+
 export async function generateStaticParams() {
   return TOOLS.map((t) => ({ slug: t.slug }));
 }
@@ -37,8 +43,8 @@ export async function generateMetadata(
   const tool = getToolBySlug(slug);
   if (!tool) return buildMetadata({ title: "Tool not found", noindex: true });
   return buildMetadata({
-    title: `${tool.name} — Free Online`,
-    description: `${tool.tagline} ${tool.description}`,
+    title: tool.metaTitle || `${tool.name} — Free Online`,
+    description: tool.metaDescription || `${tool.tagline} ${tool.description}`,
     path: `/tools/${tool.slug}`,
     keywords: [
       tool.name,
@@ -64,6 +70,8 @@ export default async function ToolPage(
     { name: "Tools", url: absoluteUrl("/tools") },
     { name: tool.shortName, url },
   ];
+
+  const SeoComponent = SEO_COMPONENTS[slug];
 
   return (
     <>
@@ -109,7 +117,7 @@ export default async function ToolPage(
                   )}
                 </div>
                 <h1 className="mt-4 font-display text-balance text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
-                  {tool.name}
+                  {tool.h1 || tool.name}
                 </h1>
                 <p className="mt-4 max-w-2xl text-pretty text-lg text-muted-foreground sm:text-xl">
                   {tool.tagline}
@@ -163,6 +171,13 @@ export default async function ToolPage(
                 <FeatureList features={tool.features} />
               </div>
             </div>
+
+            {/* Custom component SEO extensions (e.g. key-specific content, comparison tables) */}
+            {SeoComponent && (
+              <div className="mt-12">
+                <SeoComponent />
+              </div>
+            )}
           </div>
 
           <aside className="lg:col-span-5">
