@@ -127,9 +127,9 @@ export function VisualPageGrid({ files, onStateChange }: VisualPageGridProps) {
       try {
         // Attempt to load workspace from local storage first to resume session
         if (workspaceKey) {
-          const cached = localStorage.getItem(workspaceKey);
-          if (cached) {
-            try {
+          try {
+            const cached = typeof window !== "undefined" ? localStorage.getItem(workspaceKey) : null;
+            if (cached) {
               const parsed = JSON.parse(cached) as PageItem[];
               if (Array.isArray(parsed) && parsed.length > 0) {
                 setPages(parsed);
@@ -139,9 +139,9 @@ export function VisualPageGrid({ files, onStateChange }: VisualPageGridProps) {
                 toast.success("Resumed previously saved merging workspace session!");
                 return;
               }
-            } catch (e) {
-              console.warn("Cached workspace parsing failed:", e);
             }
+          } catch (e) {
+            console.warn("Failed to load workspace from localStorage:", e);
           }
         }
 
@@ -218,7 +218,11 @@ export function VisualPageGrid({ files, onStateChange }: VisualPageGridProps) {
   // Sync workspace auto-save
   useEffect(() => {
     if (workspaceKey && pages.length > 0) {
-      localStorage.setItem(workspaceKey, JSON.stringify(pages));
+      try {
+        localStorage.setItem(workspaceKey, JSON.stringify(pages));
+      } catch (e) {
+        console.warn("Failed to auto-save workspace to localStorage:", e);
+      }
     }
   }, [pages, workspaceKey]);
 
@@ -383,7 +387,11 @@ export function VisualPageGrid({ files, onStateChange }: VisualPageGridProps) {
 
   const handleClearWorkspace = () => {
     if (workspaceKey) {
-      localStorage.removeItem(workspaceKey);
+      try {
+        localStorage.removeItem(workspaceKey);
+      } catch (e) {
+        console.warn("Failed to remove workspace from localStorage:", e);
+      }
     }
     // Reload original thumbnails
     window.location.reload();

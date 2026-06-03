@@ -88,7 +88,11 @@ export function InvoiceGenerator() {
   };
 
   const handleReset = () => {
-    localStorage.removeItem("golu_invoice_draft");
+    try {
+      localStorage.removeItem("golu_invoice_draft");
+    } catch (e) {
+      console.warn("Failed to remove invoice draft from localStorage:", e);
+    }
     setCompanyName("Acme Global Services");
     setCompanyEmail("finance@acmeglobal.com");
     setCompanyAddress("100 Innovation Way, Suite 500\nNew York, NY 10001");

@@ -407,8 +407,12 @@ function HTML5SignaturePad({ options, set }: { options: ProcessOptions; set: (pa
 
   useEffect(() => {
     // Attempt to load reusable signature from local storage
-    const saved = localStorage.getItem("golu_signature_preset");
-    if (saved) setSignatureSaved(saved);
+    try {
+      const saved = localStorage.getItem("golu_signature_preset");
+      if (saved) setSignatureSaved(saved);
+    } catch (e) {
+      console.warn("Failed to load signature preset from localStorage:", e);
+    }
   }, []);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -486,7 +490,11 @@ function HTML5SignaturePad({ options, set }: { options: ProcessOptions; set: (pa
     }
 
     const dataUrl = canvas.toDataURL("image/png");
-    localStorage.setItem("golu_signature_preset", dataUrl);
+    try {
+      localStorage.setItem("golu_signature_preset", dataUrl);
+    } catch (e) {
+      console.warn("Failed to save signature preset to localStorage:", e);
+    }
     setSignatureSaved(dataUrl);
     set({ watermarkText: dataUrl }); // Pass signature base64 as options parameter
     toast.success("Signature saved securely in local preset!");
