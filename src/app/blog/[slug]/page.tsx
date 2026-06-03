@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
 import { getDbPostBySlug } from "@/lib/admin/mock-blog-data";
 import { BlogViewsTracker } from "@/components/blog/views-tracker";
+import { BlogComments } from "@/components/blog/blog-comments";
 import Link from "next/link";
 
 interface PageProps {
@@ -233,6 +234,9 @@ export default async function BlogPostPage({ params }: PageProps) {
             <article className="prose prose-invert max-w-none pt-4 text-pretty">
               {parseMarkdown(post.content)}
             </article>
+
+            {/* Discussion & Feedback comments section */}
+            <BlogComments postSlug={slug} />
 
             {/* Conversion CTA Block */}
             <div className="mt-16 rounded-2xl border border-primary/20 bg-gradient-to-br from-card to-primary/5 p-6 md:p-8 text-center space-y-6 relative overflow-hidden">
