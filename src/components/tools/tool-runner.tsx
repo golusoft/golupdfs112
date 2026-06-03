@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -36,6 +36,23 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
   const [progress, setProgress] = useState({ value: 0, message: "" });
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleStateChange = useCallback((state: {
+    order: number[];
+    rotations: Record<number, number>;
+    deletedPages: number[];
+    mergePageMap?: { type?: "page" | "blank"; fileIndex: number; pageNumber: number; rotation?: number }[];
+  }) => {
+    setOptions((prev) => ({
+      ...prev,
+      pages: state.order,
+      order: state.order,
+      pageRange: state.order.join(","),
+      rotations: state.rotations,
+      mergePageMap: state.mergePageMap,
+    }));
+  }, []);
+
 
   const consumeQueuedFiles = useToolsStore((s) => s.consumeQueuedFiles);
   const trackUse = useToolsStore((s) => s.trackUse);
@@ -160,16 +177,7 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
                 <div className="rounded-2xl border bg-card p-6 space-y-4 shadow-xl border-border/40 bg-card/40 backdrop-blur-md">
                   <VisualPageGrid
                     files={files}
-                    onStateChange={(state) => {
-                      setOptions({
-                        ...options,
-                        pages: state.order,
-                        order: state.order,
-                        pageRange: state.order.join(","),
-                        rotations: state.rotations,
-                        mergePageMap: state.mergePageMap,
-                      });
-                    }}
+                    onStateChange={handleStateChange}
                   />
                   <div className="flex justify-between items-center border-t pt-4 border-border/40">
                     <span className="text-xs text-muted-foreground truncate max-w-[280px] font-mono">
