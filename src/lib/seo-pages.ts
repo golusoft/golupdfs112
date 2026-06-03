@@ -712,7 +712,27 @@ const BANKS = [
   { name: "Chase Bank", key: "chase" },
   { name: "Wells Fargo", key: "wells-fargo" },
   { name: "Bank of America", key: "bank-of-america" },
-  { name: "Barclays", key: "barclays" }
+  { name: "Barclays", key: "barclays" },
+  { name: "Lloyds Bank", key: "lloyds" },
+  { name: "TD Bank", key: "td" },
+  { name: "Royal Bank of Canada", key: "rbc" },
+  { name: "ANZ Bank", key: "anz" },
+  { name: "Westpac", key: "westpac" },
+  { name: "Bank of India", key: "boi" },
+  { name: "UCO Bank", key: "uco" },
+  { name: "Central Bank of India", key: "central-bank" },
+  { name: "Bandhan Bank", key: "bandhan" },
+  { name: "RBL Bank", key: "rbl" },
+  { name: "DBS Bank", key: "dbs" },
+  { name: "Citibank India", key: "citi-india" },
+  { name: "Standard Chartered India", key: "standard-chartered-india" },
+  { name: "Paytm Payments Bank", key: "paytm" },
+  { name: "HSBC India", key: "hsbc-india" },
+  { name: "NatWest", key: "natwest" },
+  { name: "Santander", key: "santander" },
+  { name: "Halifax", key: "halifax" },
+  { name: "Societe Generale", key: "socgen" },
+  { name: "Deutsche Bank", key: "deutsche" }
 ];
 
 const PLATFORMS = [
@@ -735,7 +755,27 @@ const PLATFORMS = [
   { name: "Harvest", key: "harvest" },
   { name: "Toggl", key: "toggl" },
   { name: "Fiserv", key: "fiserv" },
-  { name: "Adyen", key: "adyen" }
+  { name: "Adyen", key: "adyen" },
+  { name: "Zoho Books", key: "zoho-books" },
+  { name: "Stripe Billing", key: "stripe-billing" },
+  { name: "Gumroad", key: "gumroad" },
+  { name: "Payoneer", key: "payoneer" },
+  { name: "Wise", key: "wise" },
+  { name: "Revolut", key: "revolut" },
+  { name: "Monzo", key: "monzo" },
+  { name: "N26", key: "n26" },
+  { name: "Mercury Bank", key: "mercury" },
+  { name: "Brex", key: "brex" },
+  { name: "Ramp", key: "ramp" },
+  { name: "Deel", key: "deel" },
+  { name: "Gusto", key: "gusto" },
+  { name: "Rippling", key: "rippling" },
+  { name: "Etsy", key: "etsy" },
+  { name: "Amazon Seller Central", key: "amazon-seller" },
+  { name: "eBay Seller", key: "ebay-seller" },
+  { name: "FastSpring", key: "fastspring" },
+  { name: "Paddle", key: "paddle" },
+  { name: "GoCardless", key: "gocardless" }
 ];
 
 const INDUSTRIES = [
@@ -748,7 +788,68 @@ const INDUSTRIES = [
   { name: "Human Resources (HR)", key: "human-resources" },
   { name: "Software & IT Services", key: "software-it" },
   { name: "Retail & E-commerce Operations", key: "retail" },
-  { name: "Marketing & Creative Agencies", key: "marketing" }
+  { name: "Marketing & Creative Agencies", key: "marketing" },
+  { name: "Consulting Firms", key: "consulting" },
+  { name: "Hospitality & Tourism", key: "hospitality" },
+  { name: "Construction & Engineering", key: "construction" },
+  { name: "Logistics & Supply Chain", key: "logistics" },
+  { name: "Education & Schools", key: "education" },
+  { name: "Nonprofit Organizations", key: "nonprofit" },
+  { name: "Government & Public Sector", key: "government" },
+  { name: "Architecture & Design", key: "architecture" },
+  { name: "Media & Entertainment", key: "media" },
+  { name: "Energy & Utilities", key: "energy" },
+  { name: "Agriculture & Farming", key: "agriculture" },
+  { name: "Automotive & Transport", key: "automotive" },
+  { name: "Freelancers & Solopreneurs", key: "freelance" },
+  { name: "E-commerce Operations", key: "ecommerce" },
+  { name: "Venture Capital & Private Equity", key: "vc-pe" }
+];
+
+const CREDIT_CARDS = [
+  { name: "Chase Credit Card", key: "chase-cc" },
+  { name: "American Express (Amex)", key: "amex" },
+  { name: "Capital One Credit Card", key: "capital-one-cc" },
+  { name: "Citi Credit Card", key: "citi-cc" },
+  { name: "Bank of America Credit Card", key: "boa-cc" },
+  { name: "Apple Card", key: "apple-card" },
+  { name: "Wells Fargo Credit Card", key: "wells-fargo-cc" },
+  { name: "Barclays Credit Card", key: "barclays-cc" },
+  { name: "HDFC Credit Card", key: "hdfc-cc" },
+  { name: "SBI Credit Card", key: "sbi-cc" },
+  { name: "Axis Credit Card", key: "axis-cc" },
+  { name: "ICICI Credit Card", key: "icici-cc" },
+  { name: "Kotak Credit Card", key: "kotak-cc" },
+  { name: "Discover Credit Card", key: "discover" },
+  { name: "Amazon Prime Rewards Visa", key: "amazon-visa" },
+  { name: "Fidelity Rewards Visa", key: "fidelity-visa" },
+  { name: "USAA Credit Card", key: "usaa-cc" },
+  { name: "Navy Federal Credit Card", key: "navy-federal-cc" },
+  { name: "Discover IT Card", key: "discover-it" },
+  { name: "Chase Freedom", key: "chase-freedom" }
+];
+
+const UTILITIES = [
+  { name: "PG&E (Pacific Gas & Electric)", key: "pge" },
+  { name: "Comcast Xfinity", key: "comcast" },
+  { name: "Verizon Wireless", key: "verizon" },
+  { name: "AT&T Business", key: "att" },
+  { name: "T-Mobile", key: "tmobile" },
+  { name: "Duke Energy", key: "duke-energy" },
+  { name: "Southern California Edison", key: "sce" },
+  { name: "National Grid", key: "national-grid" },
+  { name: "Con Edison", key: "coned" },
+  { name: "British Gas", key: "british-gas" },
+  { name: "EDF Energy", key: "edf" },
+  { name: "Telstra", key: "telstra" },
+  { name: "Rogers Communications", key: "rogers" },
+  { name: "Bell Canada", key: "bell" },
+  { name: "Orange Telecom", key: "orange" },
+  { name: "Vodafone", key: "vodafone" },
+  { name: "Airtel Bill", key: "airtel" },
+  { name: "Jio Postpaid", key: "jio" },
+  { name: "Tata Power", key: "tata-power" },
+  { name: "BESCOM", key: "bescom" }
 ];
 
 // Generate bank statement routes programmatically
@@ -795,7 +896,7 @@ const INVOICE_SEO_PAGES: SeoPagePreset[] = PLATFORMS.map((platform) => ({
   keywords: [`extract ${platform.key} invoice pdf to excel`, `convert ${platform.key} invoice to csv`, `${platform.key} pdf invoice parser`]
 }));
 
-// Generate industry tool template directories programmatically (10 industries * 6 tool mappings = 60 pages)
+// Generate industry tool template directories programmatically (25 industries * 6 tool mappings = 150 pages)
 const INDUSTRY_PDF_TOOLS = [
   { slug: "compress-pdf", suffix: "compress", label: "Compress PDFs" },
   { slug: "merge-pdf", suffix: "merge", label: "Merge PDFs" },
@@ -827,8 +928,58 @@ const INDUSTRY_SEO_PAGES: SeoPagePreset[] = INDUSTRIES.flatMap((industry) =>
   }))
 );
 
+// Generate credit card statement routes programmatically
+const CREDIT_CARD_SEO_PAGES: SeoPagePreset[] = CREDIT_CARDS.map((card) => ({
+  slug: `extract-${card.key}-statement-pdf-to-excel`,
+  tool: "pdf-table-extractor",
+  toolQuery: `preset=credit-card&card=${card.key}`,
+  h1: `Extract ${card.name} PDF Statement to Excel`,
+  title: `Convert ${card.name} Statement PDF to Excel Online`,
+  description: `Extract transaction tables from ${card.name} statements directly into clean Excel (.xlsx) or CSV sheets. 100% browser-side, secure, and free.`,
+  intro: `Need to export transaction details from your ${card.name} PDF credit card statements into Excel or CSV for budgeting or auditing? GoluPDF does it client-side without storing your financial records.`,
+  whyBullets: [
+    `Optimized parsing matching standard ${card.name} header schemas`,
+    `Automatic transaction date and amount column identification`,
+    `100% browser-based processing keeps your card records safe`,
+    `Multi-page statement support merges split tables onto one sheet`,
+  ],
+  faq: [
+    { q: `How do I extract a ${card.name} PDF statement to Excel?`, a: `Upload your PDF statement to GoluPDF's Table Extractor, configure the Credit Card Statement mapping options, and click 'Run Table Extractor'. Your tables will compile instantly to download as an Excel workbook.` },
+    { q: `Are my credit card details or statements stored?`, a: `Never. GoluPDF operates entirely client-side using local WebAssembly modules. Your statements are parsed in your browser cache and never hit our web servers.` }
+  ],
+  keywords: [`extract ${card.key} statement pdf to excel`, `${card.key} statement converter`, `${card.key} pdf to csv`]
+}));
+
+// Generate utility bill routes programmatically
+const UTILITY_SEO_PAGES: SeoPagePreset[] = UTILITIES.map((utility) => ({
+  slug: `extract-${utility.key}-bill-pdf-to-excel`,
+  tool: "pdf-table-extractor",
+  toolQuery: `preset=utility-bill&utility=${utility.key}`,
+  h1: `Extract ${utility.name} Bill PDF to Excel`,
+  title: `Convert ${utility.name} Bill PDF to Excel Online`,
+  description: `Extract transaction tables and item lists from ${utility.name} bills directly into clean Excel (.xlsx) or CSV sheets. 100% browser-side, secure, and free.`,
+  intro: `Need to export transaction details and charge tables from your ${utility.name} utility bills into Excel or CSV? GoluPDF does it client-side without storing your records.`,
+  whyBullets: [
+    `Optimized parsing matching standard ${utility.name} bill schemas`,
+    `Automatic billing period and amount column identification`,
+    `100% browser-based processing keeps your details safe`,
+    `Multi-page statement support merges split tables onto one sheet`,
+  ],
+  faq: [
+    { q: `How do I extract a ${utility.name} PDF bill to Excel?`, a: `Upload your PDF bill to GoluPDF's Table Extractor, configure the Utility Bill mapping options, and click 'Run Table Extractor'. Your tables will compile instantly to download as an Excel workbook.` },
+    { q: `Are my billing details or bills stored?`, a: `Never. GoluPDF operates entirely client-side using local WebAssembly modules. Your statements are parsed in your browser cache and never hit our web servers.` }
+  ],
+  keywords: [`extract ${utility.key} bill pdf to excel`, `${utility.key} bill converter`, `${utility.key} pdf to csv`]
+}));
+
 // Append dynamic programmatic lists to the main list
-SEO_PAGES.push(...BANK_SEO_PAGES, ...INVOICE_SEO_PAGES, ...INDUSTRY_SEO_PAGES);
+SEO_PAGES.push(
+  ...BANK_SEO_PAGES, 
+  ...INVOICE_SEO_PAGES, 
+  ...INDUSTRY_SEO_PAGES,
+  ...CREDIT_CARD_SEO_PAGES,
+  ...UTILITY_SEO_PAGES
+);
 
 export const SEO_PAGES_BY_SLUG: Record<string, SeoPagePreset> = Object.fromEntries(
   SEO_PAGES.map((p) => [p.slug, p])
