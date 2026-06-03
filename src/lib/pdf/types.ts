@@ -49,6 +49,14 @@ export interface ProcessOptions {
   order?: number[];
   /** Visual page rotation map */
   rotations?: Record<number, number>;
+  /** Advanced visual workspace merge options */
+  addPageNumbers?: boolean;
+  mergePageMap?: {
+    type?: "page" | "blank";
+    fileIndex: number;
+    pageNumber: number;
+    rotation?: number;
+  }[];
 }
 
 export interface ProcessResult {

@@ -28,17 +28,78 @@ function makeBlob(bytes: Uint8Array, filename: string): ProcessResult {
 
 export async function mergePdfs(
   files: File[],
-  _opts: ProcessOptions,
+  opts: ProcessOptions,
   onProgress?: ProgressCallback
 ): Promise<ProcessResult> {
   const merged = await PDFDocument.create();
-  for (let i = 0; i < files.length; i++) {
-    onProgress?.(((i + 1) / (files.length + 1)) * 90, `Merging ${files[i].name}`);
-    const src = await readPdf(files[i]);
-    const copied = await merged.copyPages(src, src.getPageIndices());
-    copied.forEach((p) => merged.addPage(p));
+
+  if (opts.mergePageMap && opts.mergePageMap.length > 0) {
+    // 1. ADVANCED VISUAL WORKSPACE COMPILATION
+    // Pre-load all source PDF documents
+    const loadedDocs: PDFDocument[] = [];
+    for (let i = 0; i < files.length; i++) {
+      onProgress?.(((i + 1) / (files.length + 1)) * 25, `Loading ${files[i].name}`);
+      loadedDocs.push(await readPdf(files[i]));
+    }
+
+    // Process each page according to the visual map
+    for (let j = 0; j < opts.mergePageMap.length; j++) {
+      const pageInfo = opts.mergePageMap[j];
+      onProgress?.(
+        25 + ((j + 1) / opts.mergePageMap.length) * 60,
+        `Adding page ${j + 1} of ${opts.mergePageMap.length}`
+      );
+      
+      if (pageInfo.type === "blank") {
+        // Insert a blank page (standard letter/A4 dimensions: 612x792)
+        merged.addPage([612, 792]);
+      } else {
+        const srcDoc = loadedDocs[pageInfo.fileIndex];
+        if (srcDoc) {
+          // copyPages takes a 0-indexed page number array
+          const [copiedPage] = await merged.copyPages(srcDoc, [pageInfo.pageNumber - 1]);
+          
+          // Apply rotation if defined
+          if (pageInfo.rotation) {
+            copiedPage.setRotation(degrees(pageInfo.rotation));
+          }
+          
+          merged.addPage(copiedPage);
+        }
+      }
+    }
+  } else {
+    // 2. STANDARD SEQUENTIAL MERGING
+    for (let i = 0; i < files.length; i++) {
+      onProgress?.(((i + 1) / (files.length + 1)) * 90, `Merging ${files[i].name}`);
+      const src = await readPdf(files[i]);
+      const copied = await merged.copyPages(src, src.getPageIndices());
+      copied.forEach((p) => merged.addPage(p));
+    }
   }
-  onProgress?.(95, "Finalizing");
+
+  // 3. OPTIONAL PAGE NUMBERS OVERLAY
+  if (opts.addPageNumbers) {
+    onProgress?.(90, "Applying page numbers overlay");
+    try {
+      const font = await merged.embedFont(StandardFonts.Helvetica);
+      const pagesList = merged.getPages();
+      pagesList.forEach((page, idx) => {
+        const text = `Page ${idx + 1} of ${pagesList.length}`;
+        page.drawText(text, {
+          x: page.getWidth() / 2 - 30,
+          y: 20,
+          size: 9,
+          font,
+          color: rgb(0.3, 0.3, 0.3),
+        });
+      });
+    } catch (e) {
+      console.warn("Failed to apply page numbers overlay:", e);
+    }
+  }
+
+  onProgress?.(95, "Finalizing file");
   const bytes = await merged.save({ useObjectStreams: true });
   onProgress?.(100, "Done");
   return makeBlob(bytes, `merged-${Date.now()}.pdf`);

@@ -134,12 +134,16 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
             </motion.div>
           ) : (
             <motion.div key="drop" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {files.length === 1 &&
-              files[0].type === "application/pdf" &&
-              (tool.category === "organize" || tool.category === "edit" || tool.slug === "compress-pdf" || tool.slug === "resize-pdf") ? (
+              {files.length > 0 &&
+              files.every((f) => f.type === "application/pdf") &&
+              (tool.category === "organize" ||
+                tool.category === "edit" ||
+                tool.slug === "compress-pdf" ||
+                tool.slug === "resize-pdf" ||
+                tool.slug === "merge-pdf") ? (
                 <div className="rounded-2xl border bg-card p-6 space-y-4 shadow-xl border-border/40 bg-card/40 backdrop-blur-md">
                   <VisualPageGrid
-                    file={files[0]}
+                    files={files}
                     onStateChange={(state) => {
                       setOptions({
                         ...options,
@@ -147,15 +151,16 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
                         order: state.order,
                         pageRange: state.order.join(","),
                         rotations: state.rotations,
+                        mergePageMap: state.mergePageMap,
                       });
                     }}
                   />
                   <div className="flex justify-between items-center border-t pt-4 border-border/40">
-                    <span className="text-xs text-muted-foreground truncate max-w-[200px] font-mono">
-                      📄 {files[0].name}
+                    <span className="text-xs text-muted-foreground truncate max-w-[280px] font-mono">
+                      📄 {files.length === 1 ? files[0].name : `${files.length} documents loaded`}
                     </span>
                     <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={reset}>
-                      Cancel / Reset File
+                      Cancel / Reset Workspace
                     </Button>
                   </div>
                 </div>

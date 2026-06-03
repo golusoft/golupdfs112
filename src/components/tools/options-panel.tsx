@@ -43,6 +43,29 @@ export function OptionsPanel({ tool, options, setOptions }: OptionsPanelProps) {
   const set = (patch: Partial<ProcessOptions>) => setOptions({ ...options, ...patch });
 
   switch (tool.engine) {
+    case "merge":
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-xl border p-3 bg-muted/20 select-none">
+            <div className="space-y-0.5">
+              <Label className="text-sm font-semibold cursor-pointer" htmlFor="toggle-numbers">
+                🔢 Add Page Numbers
+              </Label>
+              <p className="text-[10px] text-muted-foreground leading-normal">
+                Overlay page numbers at the bottom center of each page
+              </p>
+            </div>
+            <input
+              id="toggle-numbers"
+              type="checkbox"
+              checked={options.addPageNumbers || false}
+              onChange={(e) => set({ addPageNumbers: e.target.checked })}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary"
+            />
+          </div>
+        </div>
+      );
+
     case "compress":
       return (
         <div className="space-y-5">
