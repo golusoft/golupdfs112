@@ -222,12 +222,7 @@ export function OptionsPanel({ tool, options, setOptions }: OptionsPanelProps) {
       );
 
     case "unlock":
-      return (
-        <div className="space-y-3">
-          <Label htmlFor="upwd">Current password</Label>
-          <Input id="upwd" type="password" placeholder="Enter PDF password" value={options.password || ""} onChange={(e) => set({ password: e.target.value })} />
-        </div>
-      );
+      return <UnlockOptionsPanel options={options} set={set} />;
 
     case "metadata":
       return (
@@ -747,6 +742,105 @@ function AiAssistantSandbox() {
             <Send className="h-3 w-3" />
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── PDF Unlock Options Panel Component ─────────────────────────────────────
+
+function UnlockOptionsPanel({ options, set }: { options: ProcessOptions; set: (patch: any) => void }) {
+  const [useAadharHelper, setUseAadharHelper] = useState(false);
+  const [aadharName, setAadharName] = useState("");
+  const [aadharYear, setAadharYear] = useState("");
+
+  // Update password automatically when helper inputs change
+  useEffect(() => {
+    if (useAadharHelper) {
+      const cleanName = aadharName
+        .replace(/[^A-Za-z. ]/g, "") // Keep only letters, dots and spaces
+        .replace(/\s+/g, "") // Remove spaces
+        .toUpperCase();
+      const firstFour = cleanName.substring(0, 4);
+      const year = aadharYear.trim().substring(0, 4);
+      if (firstFour && year.length === 4) {
+        set({ password: `${firstFour}${year}` });
+      }
+    }
+  }, [useAadharHelper, aadharName, aadharYear, set]);
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="upwd" className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
+          <Key className="h-3.5 w-3.5 text-primary" /> ENTER PDF PASSWORD
+        </Label>
+        <Input
+          id="upwd"
+          type="password"
+          placeholder="Enter PDF password"
+          value={options.password || ""}
+          onChange={(e) => set({ password: e.target.value })}
+          className="border-primary/20 bg-background/50 focus-visible:ring-primary"
+        />
+        <p className="text-[10px] text-muted-foreground leading-normal">
+          Enter the current password to decrypt and strip protection from the document.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3 shadow-sm">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="aadhar-helper" className="text-xs font-semibold cursor-pointer flex items-center gap-1.5 select-none">
+            🇮🇳 Aadhaar Card Helper
+          </Label>
+          <input
+            id="aadhar-helper"
+            type="checkbox"
+            checked={useAadharHelper}
+            onChange={(e) => {
+              setUseAadharHelper(e.target.checked);
+              if (!e.target.checked) {
+                set({ password: "" });
+              }
+            }}
+            className="h-4 w-4 rounded border-primary/30 text-primary focus:ring-primary accent-primary cursor-pointer"
+          />
+        </div>
+        
+        {useAadharHelper && (
+          <div className="space-y-2 pt-2 border-t border-primary/10">
+            <div>
+              <Label htmlFor="aadhar-name" className="text-[10px] text-muted-foreground font-medium">First Name (e.g. AMIT KUMAR to AMIT)</Label>
+              <Input
+                id="aadhar-name"
+                placeholder="Name on Aadhaar (first 4 letters used)"
+                className="h-8 text-xs mt-1 border-primary/10 focus-visible:ring-primary"
+                value={aadharName}
+                onChange={(e) => setAadharName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="aadhar-year" className="text-[10px] text-muted-foreground font-medium">Year of Birth (YYYY)</Label>
+              <Input
+                id="aadhar-year"
+                type="number"
+                placeholder="e.g. 1989"
+                className="h-8 text-xs mt-1 border-primary/10 focus-visible:ring-primary"
+                value={aadharYear}
+                onChange={(e) => setAadharYear(e.target.value)}
+              />
+            </div>
+            {options.password && (
+              <div className="text-[10px] font-mono bg-zinc-950 border border-emerald-500/20 rounded px-2.5 py-1.5 flex items-center justify-between text-emerald-400">
+                <span className="text-muted-foreground">Generated Password:</span>
+                <span className="font-bold tracking-wider">{options.password}</span>
+              </div>
+            )}
+            <p className="text-[9px] text-muted-foreground italic leading-normal">
+              Note: Password format is hamesha Name ke pehle 4 characters in CAPITAL + Year of Birth (e.g. AMIT1989).
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

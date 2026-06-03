@@ -9,6 +9,7 @@ import {
 } from "pdf-lib";
 import type { ProcessOptions, ProcessResult, ProgressCallback } from "../types";
 import { parsePageRange } from "../range";
+import { decryptPDF } from "@pdfsmaller/pdf-decrypt";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -476,19 +477,61 @@ export async function protectPdf(
 
 export async function unlockPdf(
   files: File[],
-  _opts: ProcessOptions,
+  opts: ProcessOptions,
   onProgress?: ProgressCallback
 ): Promise<ProcessResult> {
   const file = files[0];
   const buffer = await file.arrayBuffer();
-  // pdf-lib can't decrypt strongly-encrypted PDFs from the browser yet —
-  // `ignoreEncryption: true` works for weakly protected files. The full
-  // server-side WASM-qpdf bridge handles AES-256.
-  const pdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
-  onProgress?.(80);
-  const bytes = await pdf.save();
-  onProgress?.(100);
-  return makeBlob(bytes, `${file.name.replace(/\.pdf$/i, "")}-unlocked.pdf`);
+  const uint8 = new Uint8Array(buffer);
+  const password = opts.password || "";
+
+  onProgress?.(15, "Verifying encryption status...");
+
+  // 1. Try loading directly without password first (in case it is already unlocked or not encrypted)
+  try {
+    const pdf = await PDFDocument.load(buffer);
+    onProgress?.(70, "Document has no encryption. Generating copy...");
+    const bytes = await pdf.save();
+    onProgress?.(100, "Done");
+    return makeBlob(bytes, `${file.name.replace(/\.pdf$/i, "")}-unlocked.pdf`);
+  } catch (loadErr) {
+    console.log("PDF is encrypted. Starting client-side decryption engine...");
+  }
+
+  // 2. Perform client-side decryption using the password
+  onProgress?.(45, "Decrypting security streams...");
+  let decryptedBytes: Uint8Array;
+  try {
+    decryptedBytes = await decryptPDF(uint8, password);
+  } catch (err: any) {
+    console.error("Decryption error:", err);
+    throw new Error(
+      "Incorrect password or unsupported encryption format. Please verify the password and try again."
+    );
+  }
+
+  // 3. Load the decrypted bytes into pdf-lib to strip encryption trailer metadata and re-save
+  onProgress?.(75, "Removing password-protection wrappers...");
+  try {
+    const cleanPdf = await PDFDocument.load(decryptedBytes, { ignoreEncryption: true });
+    
+    // Clear encrypt metadata markers if any
+    cleanPdf.setTitle(cleanPdf.getTitle()?.replace(" (locked)", "") || "");
+    
+    const finalBytes = await cleanPdf.save();
+    onProgress?.(100, "Done");
+    return makeBlob(finalBytes, `${file.name.replace(/\.pdf$/i, "")}-unlocked.pdf`);
+  } catch (saveErr: any) {
+    console.error("Error saving clean PDF:", saveErr);
+    // If saving via pdf-lib fails (rare), return raw decrypted bytes directly as fallback
+    const blob = new Blob([decryptedBytes as any], { type: "application/pdf" });
+    onProgress?.(100, "Done (decrypted binary pass-through)");
+    return {
+      blob,
+      filename: `${file.name.replace(/\.pdf$/i, "")}-unlocked.pdf`,
+      bytes: blob.size
+    };
+  }
 }
 
 // ─── Metadata ───────────────────────────────────────────────────────────────
