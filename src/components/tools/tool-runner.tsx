@@ -19,6 +19,10 @@ import { trackToolUse, trackUpload, trackConversion } from "@/lib/analytics";
 import { BusinessToolRunner } from "./business/business-runner";
 import { VisualPageGrid } from "./visual-page-grid";
 
+import { MetadataViewerWorkspace } from "./metadata-viewer-workspace";
+import { BlankPageDetectorWorkspace } from "./blank-page-detector-workspace";
+import { TableExtractorWorkspace } from "./table-extractor-workspace";
+
 interface ToolRunnerProps {
   tool: Omit<Tool, "icon">;
 }
@@ -70,8 +74,28 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
     }
   }, [files, tool.slug, lastTrackedCount]);
 
+  const reset = () => {
+    setFiles([]);
+    setOptions({});
+    setResult(null);
+    setStage("idle");
+    setError(null);
+  };
+
   if (tool.category === "business") {
     return <BusinessToolRunner slug={tool.slug} />;
+  }
+
+  if (tool.slug === "pdf-metadata-viewer") {
+    return <MetadataViewerWorkspace tool={tool} files={files} setFiles={setFiles} onReset={reset} />;
+  }
+
+  if (tool.slug === "pdf-blank-page-detector") {
+    return <BlankPageDetectorWorkspace tool={tool} files={files} setFiles={setFiles} onReset={reset} />;
+  }
+
+  if (tool.slug === "pdf-table-extractor") {
+    return <TableExtractorWorkspace tool={tool} files={files} setFiles={setFiles} onReset={reset} />;
   }
 
   const run = async () => {
@@ -102,14 +126,6 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
       setStage("configuring");
       toast.error("Something went wrong", { description: msg });
     }
-  };
-
-  const reset = () => {
-    setFiles([]);
-    setOptions({});
-    setResult(null);
-    setStage("idle");
-    setError(null);
   };
 
   return (

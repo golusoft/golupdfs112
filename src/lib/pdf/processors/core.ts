@@ -501,13 +501,22 @@ export async function editMetadata(
   const file = files[0];
   const pdf = await readPdf(file);
   const m = opts.metadata || {};
-  if (m.title !== undefined) pdf.setTitle(m.title);
-  if (m.author !== undefined) pdf.setAuthor(m.author);
-  if (m.subject !== undefined) pdf.setSubject(m.subject);
-  if (m.keywords !== undefined)
-    pdf.setKeywords(m.keywords.split(",").map((k) => k.trim()).filter(Boolean));
-  if (m.creator !== undefined) pdf.setCreator(m.creator);
-  if (m.producer !== undefined) pdf.setProducer(m.producer);
+  if (m.scrub) {
+    pdf.setTitle("");
+    pdf.setAuthor("");
+    pdf.setSubject("");
+    pdf.setKeywords([]);
+    pdf.setCreator("");
+    pdf.setProducer("");
+  } else {
+    if (m.title !== undefined) pdf.setTitle(m.title);
+    if (m.author !== undefined) pdf.setAuthor(m.author);
+    if (m.subject !== undefined) pdf.setSubject(m.subject);
+    if (m.keywords !== undefined)
+      pdf.setKeywords(m.keywords.split(",").map((k) => k.trim()).filter(Boolean));
+    if (m.creator !== undefined) pdf.setCreator(m.creator);
+    if (m.producer !== undefined) pdf.setProducer(m.producer);
+  }
   pdf.setModificationDate(new Date());
   onProgress?.(85);
   const bytes = await pdf.save();

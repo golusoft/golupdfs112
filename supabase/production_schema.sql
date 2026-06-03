@@ -289,3 +289,27 @@ DO $$ BEGIN
       USING (bucket_id = 'blog-images') WITH CHECK (bucket_id = 'blog-images');
   END IF;
 END $$;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- PDF Analysis Shareable Reports Table (NEW)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.pdf_reports (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  stats JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
+);
+
+ALTER TABLE public.pdf_reports ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='pdf_reports' AND policyname='public_select_reports') THEN
+    CREATE POLICY "public_select_reports" ON public.pdf_reports FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='pdf_reports' AND policyname='public_insert_reports') THEN
+    CREATE POLICY "public_insert_reports" ON public.pdf_reports FOR INSERT WITH CHECK (true);
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_pdf_reports_created ON public.pdf_reports(created_at DESC);
+

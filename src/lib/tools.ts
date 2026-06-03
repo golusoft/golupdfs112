@@ -111,7 +111,9 @@ export interface Tool {
     | "roi-calculator"
     | "emi-calculator"
     | "gst-invoice-generator"
-    | "purchase-order-generator";
+    | "purchase-order-generator"
+    | "blank-page-detector"
+    | "table-extractor";
   accept: string[];
   maxFiles: number;
   faq: ToolFAQ[];
@@ -1122,6 +1124,93 @@ export const TOOLS: Tool[] = [
       { q: "Can I save custom vendor details?", a: "Yes, you can edit vendor address blocks dynamically and save current layouts directly." }
     ],
     longDescription: "Structure corporate purchases with our Purchase Order Generator. Track shipping conditions, detail item lists, configure taxes, and print standard purchase orders directly from your browser memory without cloud database dependencies."
+  },
+  {
+    slug: "pdf-metadata-viewer",
+    name: "PDF Metadata Viewer & Editor Pro",
+    shortName: "Metadata Editor",
+    tagline: "View, edit, compare, and safely scrub PDF metadata client-side",
+    description: "Inspect PDF properties, audit tracking signatures, compare metadata logs, and perform GDPR-compliant sanitization.",
+    category: "edit",
+    icon: Tag,
+    badge: "popular",
+    engine: "metadata",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "View and edit document title, author, subject, keywords, creator, and producer",
+      "GDPR Privacy Check: Identify timezone leaks, timestamps, and software footprints",
+      "Hidden Metadata Detection: Inspect embedded XML/XMP payload streams",
+      "Metadata History Log: Review edits chronologically during your session",
+      "Metadata Compare Mode: Side-by-side verification of original vs edited values",
+      "Safe Scrub Anonymization: Wipe all identifiers in one click",
+      "Export metadata reports to JSON or CSV formats",
+    ],
+    faq: [
+      { q: "Is PDF metadata editing secure on GoluPDF?", a: "Absolutely. All processing occurs locally in your browser using pdf-lib and WebAssembly. Your files are never uploaded to any server, ensuring 100% privacy and GDPR compliance." },
+      { q: "What fields can I modify in a PDF?", a: "You can view and modify standard properties like Title, Author, Subject, Keywords, Creator (the tool that created the PDF), and Producer (the PDF engine used)." },
+      { q: "What is Safe Scrub mode?", a: "Safe Scrub is an anonymization feature that removes all trace metadata, creation dates, modification dates, software footprints, and unique document IDs in a single click." },
+      { q: "Can I compare metadata between two files?", a: "Yes, our metadata workspace includes a side-by-side comparison panel to verify edits before saving or compare two different documents." },
+      { q: "How do I download the edited PDF?", a: "Once you have completed your modifications or run a Safe Scrub, simply click the 'Download PDF' button to compile the new version client-side." },
+    ],
+    longDescription: "PDF Metadata Viewer & Editor Pro is an advanced utility built for security auditors, lawyers, and privacy-conscious professionals. It allows you to examine structural document schemas, clean tracking fingerprints, compare files, and edit metadata properties instantly with zero server overhead."
+  },
+  {
+    slug: "pdf-blank-page-detector",
+    name: "PDF Blank Page Detector Pro",
+    shortName: "Blank Page Detector",
+    tagline: "Highlight and delete blank, scanned, or duplicate pages visually",
+    description: "Scan documents client-side using pixel canvas analysis, check duplicate layout hashes, and calculate printing cost savings.",
+    category: "organize",
+    icon: EyeOff,
+    badge: "new",
+    engine: "blank-page-detector",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Dynamic Canvas Scanner: Analyzes page pixel densities in milliseconds",
+      "Sensitivity Adjuster: Threshold sliders for blank, near-blank, or ink-light pages",
+      "Empty Scanned Page Scan: Detects blank sheets with background scanner noise",
+      "Duplicate Page Grouping: Layout hashing to locate identical pages",
+      "Print Cost Calculator: Dynamic sheet and ink cost estimators",
+      "One-Click Removal: Batch delete selected pages and download optimized PDF",
+    ],
+    faq: [
+      { q: "How does GoluPDF detect blank pages?", a: "Our tool renders each page client-side to a temporary canvas buffer, scanning the pixel grid to calculate the percentage of colored vs. white/transparent pixels based on your threshold." },
+      { q: "What is the Print Cost Calculator?", a: "It is a utility that estimates the money, sheets, and ink volume you save by removing blank and duplicate pages before sending files to a physical printer." },
+      { q: "Can it identify duplicate pages?", a: "Yes, it computes visual hashes of page layouts to group pages that are duplicates or near-duplicates, allowing you to clean redundant slides or documents easily." },
+      { q: "Will deleting blank pages affect layout structure?", a: "No, the tool compiles a fresh PDF using WebAssembly, retaining links, annotations, and formatting on the remaining pages." },
+    ],
+    longDescription: "Optimize your documents before archiving or printing. PDF Blank Page Detector Pro scans your files in-browser to identify blank, empty scanned, or duplicate pages, offering a Print Cost Calculator and instant removal utilities to save money and paper."
+  },
+  {
+    slug: "pdf-table-extractor",
+    name: "PDF Table Extractor Pro",
+    shortName: "Table Extractor",
+    tagline: "Extract tables and export to multi-sheet Excel spreadsheets",
+    description: "Visual grid mapping, OCR recovery fallback, financial statement template mappings, and column mapping tools.",
+    category: "convert",
+    icon: Sheet,
+    badge: "popular",
+    engine: "table-extractor",
+    accept: ["application/pdf"],
+    maxFiles: 1,
+    features: [
+      "Visual Table Grid Editor: Select, edit cells, delete rows/columns manually",
+      "OCR Table Recovery Mode: Simulated parser interface to digitize scanned documents",
+      "Merged Cells & Multi-Page Joining: Clean row grouping across pages",
+      "Smart Column Mapper: Dropdown categorizer (Date, Description, Debit, Credit, etc.)",
+      "Financial Template Presets: Invoice, Bank Statement, and Income Statement parser options",
+      "Multi-Sheet Excel Export: Compile multiple parsed tables into separate sheet tabs natively",
+      "Export formats: XLSX/XLS (XML Excel Spreadsheet), CSV, JSON",
+    ],
+    faq: [
+      { q: "How accurate is the client-side table extraction?", a: "For native PDFs, GoluPDF extracts text layouts with 98%+ accuracy. For scanned PDFs, our OCR Recovery Mode helps reconstruct tabular grids visually." },
+      { q: "Can I export multiple tables into separate Excel sheets?", a: "Yes! If our engine detects multiple tables, GoluPDF packs them into distinct tabs inside a single XML Excel workbook." },
+      { q: "How do I map columns manually?", a: "You can click on the headers in the visual spreadsheet preview and use the Column Mapper dropdown to assign semantic tags (e.g. Date, Credit, Debit)." },
+      { q: "Is this safe for financial statements and bank data?", a: "Completely. Because the extraction engine runs entirely in your browser using local resources, your confidential financial logs are never sent to external servers." },
+    ],
+    longDescription: "PDF Table Extractor Pro converts PDF bank statements, corporate invoices, and research tables into editable formats. Modify cells in our spreadsheet UI, map columns, run OCR simulators, and export clean sheets natively."
   },
 ];
 

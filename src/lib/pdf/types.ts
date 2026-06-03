@@ -40,6 +40,7 @@ export interface ProcessOptions {
     keywords?: string;
     creator?: string;
     producer?: string;
+    scrub?: boolean;
   };
   /** PDF to image */
   imageFormat?: "jpeg" | "png";

@@ -435,7 +435,400 @@ export const SEO_PAGES: SeoPagePreset[] = [
     ],
     keywords: ["watermark pdf online", "add watermark pdf", "pdf watermark tool"],
   },
+  // ─── Metadata Editor Pro Slugs ──────────────────────────────────────────
+  {
+    slug: "remove-pdf-metadata",
+    tool: "pdf-metadata-viewer",
+    toolQuery: "action=scrub",
+    h1: "Remove PDF Metadata Online",
+    title: "Remove PDF Metadata Online — Free GDPR Scrub",
+    description: "Safely strip author tags, tracking signatures, creation dates, and XML objects from your PDF in your browser.",
+    intro: "Remove all metadata from your PDFs in one click. Our client-side GDPR Safe Scrub ensures your document details remain private before sharing.",
+    whyBullets: [
+      "Wipes Title, Author, Creator, and modification stamps instantly",
+      "Clears hidden XMP XML payload streams client-side",
+      "No upload — PDF is scrubbed inside browser memory",
+      "Completely free with no limit on file size",
+    ],
+    keywords: ["remove pdf metadata", "delete pdf metadata", "strip pdf metadata free"],
+  },
+  {
+    slug: "check-pdf-metadata",
+    tool: "pdf-metadata-viewer",
+    h1: "Check PDF Metadata Online",
+    title: "Check PDF Metadata Online — Free Document Inspector",
+    description: "Check embedded properties and keywords in any PDF. Inspect headers and tags client-side for tracking signatures.",
+    intro: "Verify what metadata properties are hidden in your PDF files. Upload your document to inspect its properties instantly in your browser.",
+    whyBullets: [
+      "View standard fields: Title, Author, Creator, Subject",
+      "Check modification dates and PDF version details",
+      "Identify tracking tags and unique catalog IDs",
+      "No registration or signups required",
+    ],
+    keywords: ["check pdf metadata", "inspect pdf properties", "view hidden pdf tags"],
+  },
+  {
+    slug: "pdf-author-checker",
+    tool: "pdf-metadata-viewer",
+    h1: "PDF Author Checker & Editor",
+    title: "PDF Author Checker — Check & Change PDF Authorship",
+    description: "Inspect or change the author name tag in any PDF document. Quick client-side author metadata editing.",
+    intro: "Need to verify or remove the author tag in a PDF before submitting it for double-blind review or public release? Edit it instantly on GoluPDF.",
+    whyBullets: [
+      "Instantly read the Author property of any PDF",
+      "Modify or delete author tags in seconds",
+      "100% private — your document never leaves your machine",
+      "Maintains PDF formatting and layout structure",
+    ],
+    keywords: ["pdf author checker", "change pdf author name", "edit pdf author metadata"],
+  },
+  {
+    slug: "pdf-properties-viewer",
+    tool: "pdf-metadata-viewer",
+    h1: "PDF Properties Viewer online",
+    title: "PDF Properties Viewer — Inspect Document Metadata",
+    description: "View standard PDF properties, catalog versions, page sizes, and fonts client-side for free.",
+    intro: "Gain full transparency into your PDF documents. View creation dates, creator software, layout details, and catalog structures instantly.",
+    whyBullets: [
+      "Displays standard catalog tags and properties",
+      "Find out which tool or software generated the PDF",
+      "Private and browser-based, no uploads or signups",
+      "Fast, sub-second execution",
+    ],
+    keywords: ["pdf properties viewer", "read pdf metadata", "view pdf creator software"],
+  },
+  {
+    slug: "pdf-privacy-checker",
+    tool: "pdf-metadata-viewer",
+    h1: "PDF Privacy Checker & GDPR Audit",
+    title: "PDF Privacy Checker — Detect Hidden Tracking Data",
+    description: "Audit your PDF documents for GDPR privacy leaks. Scan for timezone logs, creator footprints, and unique IDs.",
+    intro: "Are you leaking confidential metadata in your corporate PDFs? Scan your files client-side to verify if their properties comply with privacy audits.",
+    whyBullets: [
+      "Identifies software tags and document GUID structures",
+      "Checks for creation time zone and device stamps",
+      "Rates document privacy health with an audit score",
+      "One-click scrub to anonymize files instantly",
+    ],
+    keywords: ["pdf privacy checker", "gdpr pdf audit", "anonymize pdf metadata"],
+  },
+
+  // ─── Blank Page Detector Pro Slugs ──────────────────────────────────────
+  {
+    slug: "remove-blank-pages-pdf",
+    tool: "pdf-blank-page-detector",
+    toolQuery: "action=remove-blanks",
+    h1: "Remove blank pages from PDF online",
+    title: "Remove Blank Pages from PDF Online — Free & Visual",
+    description: "Detect and delete blank pages from any PDF document. Adjust sensitivity, estimate paper savings, and download.",
+    intro: "Clean up your document layouts. Automatically locate blank or near-blank pages and remove them visually in one click.",
+    whyBullets: [
+      "Adjustable blankness threshold to catch watermarks or light lines",
+      "Estimate print budget and ink cartridge volume savings",
+      "Visual page selector with bulk deletion",
+      "100% browser-based, keeping your documents private",
+    ],
+    keywords: ["remove blank pages pdf", "delete empty pages pdf", "clean pdf pages"],
+  },
+  {
+    slug: "delete-empty-pages-pdf",
+    tool: "pdf-blank-page-detector",
+    h1: "Delete empty pages in PDF files",
+    title: "Delete Empty Pages in PDF — Free Visual Deletion",
+    description: "Scan your PDF for empty pages and delete them. Optimize documents for print and email attachments.",
+    intro: "Remove unwanted space from your PDF reports or presentations. Our empty page scanner helps keep your documents compact and professional.",
+    whyBullets: [
+      "Instantly identifies empty sheet layouts",
+      "Side-by-side zoom preview of flagged pages",
+      "Saves paper sheets and ink cartridges",
+      "Completely free to use with no registrations",
+    ],
+    keywords: ["delete empty pages pdf", "delete blank pdf pages", "pdf empty page remover"],
+  },
+  {
+    slug: "clean-pdf-before-printing",
+    tool: "pdf-blank-page-detector",
+    h1: "Clean PDF before printing — save paper & ink",
+    title: "Clean PDF Before Printing — Ink & Paper Savings Calculator",
+    description: "Check your PDF for blank sheets, duplicates, and near-duplicates to minimize printing cost and ink volume.",
+    intro: "Reduce print cost and carbon footprint. Detect empty pages, calculate savings in real-time, and download a printer-optimized file.",
+    whyBullets: [
+      "Estimates total printing cost based on sheets count",
+      "Ink cartridge calculator displays estimated savings",
+      "Identifies identical duplicate pages client-side",
+      "Prints clean documents without wasted blank pages",
+    ],
+    keywords: ["clean pdf before printing", "save paper printing pdf", "reduce print cost pdf"],
+  },
+
+  // ─── Table Extractor Pro Slugs ──────────────────────────────────────────
+  {
+    slug: "extract-invoice-table-from-pdf",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=invoice",
+    h1: "Extract invoice table from PDF to Excel",
+    title: "Extract Invoice Tables from PDF — Convert to Excel",
+    description: "Extract line item tables from invoice PDFs into clean Excel or CSV sheets. Free browser-side converter.",
+    intro: "Automate invoice audits. Extract bill tables, item descriptions, quantities, unit prices, and tax columns instantly in your browser.",
+    whyBullets: [
+      "Pre-defined column templates for invoices",
+      "Grid editor to adjust unit values and tax percentages",
+      "Fast client-side tabular data compilation",
+      "Keep invoice records private on your device",
+    ],
+    keywords: ["extract invoice table from pdf", "convert invoice pdf to excel", "pdf invoice parser"],
+  },
+  {
+    slug: "extract-research-tables-from-pdf",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=research",
+    h1: "Extract scientific research tables from PDF",
+    title: "Extract Scientific Tables from PDF — Excel & CSV Export",
+    description: "Digitize research tables, matrices, and data charts from PDF papers. Map columns and export to Excel.",
+    intro: "Extract research data tables from academic papers, journals, and reports. Adjust merged cell mappings and download structured CSVs.",
+    whyBullets: [
+      "Merged Cell Detection and multi-page tables joining",
+      "Reconstruct complex research grids accurately",
+      "Export to XLS (Excel XML), CSV, and JSON",
+      "Free to use, keeping your draft files secure",
+    ],
+    keywords: ["extract research tables from pdf", "pdf table extraction tool", "academic table converter"],
+  },
+
+  // ─── Comparisons & FAQ Slugs ────────────────────────────────────────────
+  {
+    slug: "golupdf-vs-ilovepdf",
+    tool: "compress-pdf",
+    h1: "GoluPDF vs iLovePDF — why browser-side is better",
+    title: "GoluPDF vs iLovePDF — Complete Security & Speed Comparison",
+    description: "Compare GoluPDF and iLovePDF. Discover why WebAssembly-based client processing is safer and faster than cloud uploads.",
+    intro: "Evaluating GoluPDF and iLovePDF for your company? Read our complete comparison highlighting local browser-side execution vs. server-side cloud uploads.",
+    whyBullets: [
+      "GoluPDF runs 100% locally in your browser cache",
+      "Zero file uploads means absolute confidentiality and compliance",
+      "No subscription gates or daily tool limits",
+      "Vibrant modern UI with instant previews",
+    ],
+    keywords: ["golupdf vs ilovepdf", "ilovepdf alternative", "browser-side pdf compression"],
+  },
+  {
+    slug: "golupdf-vs-smallpdf",
+    tool: "compress-pdf",
+    h1: "GoluPDF vs Smallpdf — comparison of PDF tools",
+    title: "GoluPDF vs Smallpdf — Free Local PDF Editor Comparison",
+    description: "Compare GoluPDF and Smallpdf. Learn how client-side WebAssembly saves time and secures private files.",
+    intro: "Compare GoluPDF vs Smallpdf. See how GoluPDF offers free visual editing, page organization, and metadata scrubbing without subscription prompts.",
+    whyBullets: [
+      "No signup prompts or mandatory email registers",
+      "WASM tools compile PDFs locally at offline speeds",
+      "Includes advanced tools like GDPR Metadata Scrub",
+      "Unlimited batch conversions for free",
+    ],
+    keywords: ["golupdf vs smallpdf", "smallpdf alternative", "free pdf editors 2026"],
+  },
+  {
+    slug: "golupdf-vs-adobe",
+    tool: "compress-pdf",
+    h1: "GoluPDF vs Adobe Acrobat Web alternative",
+    title: "GoluPDF vs Adobe Acrobat Web — Free PDF Tools Comparison",
+    description: "Compare GoluPDF and Adobe Acrobat web services. Discover a lightweight, client-side alternative with zero subscription gates.",
+    intro: "Looking for an Adobe Acrobat Web alternative? Discover how GoluPDF runs high-fidelity PDF editing and combining features directly inside browser memory.",
+    whyBullets: [
+      "Runs instantly without installing heavyweight desktop clients",
+      "No account or creative cloud subscription required",
+      "WASM-powered rendering maintains vector-sharp details",
+      "Private and safe for corporate contracts",
+    ],
+    keywords: ["golupdf vs adobe", "adobe acrobat alternative", "free online pdf editor alternative"],
+  },
+  {
+    slug: "how-to-extract-table-from-pdf",
+    tool: "pdf-table-extractor",
+    h1: "How to extract table from PDF to Excel",
+    title: "How to Extract Tables from PDF to Excel — Step-by-Step Guide",
+    description: "Step-by-step guide to extract tabular data from PDFs online without copy-pasting. Visual column mapper tutorial.",
+    intro: "Learn how to parse table grids from any PDF. GoluPDF makes it easy to map columns and download clean multi-sheet Excel files locally.",
+    whyBullets: [
+      "Step 1: Upload PDF to GoluPDF Table Extractor",
+      "Step 2: Check detected tables on page preview panels",
+      "Step 3: Modify cells in the spreadsheet UI if needed",
+      "Step 4: Click export and download as Excel XLSX",
+    ],
+    keywords: ["how to extract table from pdf", "pdf to excel table conversion", "parse table data from pdf"],
+  },
+  {
+    slug: "how-to-remove-blank-pages-from-pdf",
+    tool: "pdf-blank-page-detector",
+    h1: "How to remove blank pages from PDF online",
+    title: "How to Remove Blank Pages from PDF Online — Visual Guide",
+    description: "Learn how to detect and remove empty pages in a PDF document. Quick visual instructions using GoluPDF.",
+    intro: "Strip blank pages or empty scanned drafts from your document in minutes. Follow this visual step-by-step tutorial.",
+    whyBullets: [
+      "Step 1: Upload document to Blank Page Detector",
+      "Step 2: Adjust sensitivity sliders to scan for blank sheets",
+      "Step 3: Auto-select and double check thumbnails",
+      "Step 4: Delete pages and download optimized PDF",
+    ],
+    keywords: ["how to remove blank pages from pdf", "delete blank sheets pdf", "pdf clean blank pages guide"],
+  },
+  {
+    slug: "how-to-remove-metadata-from-pdf",
+    tool: "pdf-metadata-viewer",
+    h1: "How to remove metadata from PDF online",
+    title: "How to Remove Metadata from PDF — GDPR Safe Scrub Guide",
+    description: "Learn how to audit and remove hidden metadata, author tags, and software footprints from PDFs client-side.",
+    intro: "Keep your files confidential. Our step-by-step guide walks you through checking properties and scrubbing document tags client-side.",
+    whyBullets: [
+      "Step 1: Upload PDF to Metadata Viewer & Editor",
+      "Step 2: Inspect title, author, software, and timestamps",
+      "Step 3: Run GDPR Safe Scrub to wipe all identifiers",
+      "Step 4: Save the anonymized PDF to your device",
+    ],
+    keywords: ["how to remove metadata from pdf", "strip pdf author tags", "sanitize pdf files gdpr"],
+  },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROGRAMMATIC SEO DYNAMIC GENERATOR (100+ SEO pages)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BANKS = [
+  { name: "HDFC Bank", key: "hdfc" },
+  { name: "State Bank of India (SBI)", key: "sbi" },
+  { name: "Axis Bank", key: "axis" },
+  { name: "ICICI Bank", key: "icici" },
+  { name: "Kotak Mahindra Bank", key: "kotak" },
+  { name: "Punjab National Bank (PNB)", key: "pnb" },
+  { name: "Bank of Baroda (BOB)", key: "bob" },
+  { name: "Canara Bank", key: "canara" },
+  { name: "Union Bank of India", key: "union" },
+  { name: "Yes Bank", key: "yes" },
+  { name: "IDFC First Bank", key: "idfc" },
+  { name: "IndusInd Bank", key: "indusind" },
+  { name: "Federal Bank", key: "federal" },
+  { name: "HSBC Bank", key: "hsbc" },
+  { name: "Standard Chartered", key: "standard-chartered" },
+  { name: "Citi Bank", key: "citi" },
+  { name: "Chase Bank", key: "chase" },
+  { name: "Wells Fargo", key: "wells-fargo" },
+  { name: "Bank of America", key: "bank-of-america" },
+  { name: "Barclays", key: "barclays" }
+];
+
+const PLATFORMS = [
+  { name: "Stripe", key: "stripe" },
+  { name: "QuickBooks", key: "quickbooks" },
+  { name: "Xero", key: "xero" },
+  { name: "Zoho Invoice", key: "zoho" },
+  { name: "FreshBooks", key: "freshbooks" },
+  { name: "Wave Accounting", key: "wave" },
+  { name: "PayPal", key: "paypal" },
+  { name: "Square", key: "square" },
+  { name: "Shopify", key: "shopify" },
+  { name: "Bill.com", key: "bill" },
+  { name: "Sage", key: "sage" },
+  { name: "Salesforce", key: "salesforce" },
+  { name: "HubSpot", key: "hubspot" },
+  { name: "Chargebee", key: "chargebee" },
+  { name: "Recurly", key: "recurly" },
+  { name: "Invoicera", key: "invoicera" },
+  { name: "Harvest", key: "harvest" },
+  { name: "Toggl", key: "toggl" },
+  { name: "Fiserv", key: "fiserv" },
+  { name: "Adyen", key: "adyen" }
+];
+
+const INDUSTRIES = [
+  { name: "Legal & Law Firms", key: "legal" },
+  { name: "Financial & Wealth Management", key: "financial" },
+  { name: "Real Estate & Housing", key: "real-estate" },
+  { name: "Academic & Scientific Research", key: "academic" },
+  { name: "Medical & Healthcare", key: "medical" },
+  { name: "Insurance & Auditing", key: "insurance" },
+  { name: "Human Resources (HR)", key: "human-resources" },
+  { name: "Software & IT Services", key: "software-it" },
+  { name: "Retail & E-commerce Operations", key: "retail" },
+  { name: "Marketing & Creative Agencies", key: "marketing" }
+];
+
+// Generate bank statement routes programmatically
+const BANK_SEO_PAGES: SeoPagePreset[] = BANKS.map((bank) => ({
+  slug: `extract-${bank.key}-statement-pdf-to-excel`,
+  tool: "pdf-table-extractor",
+  toolQuery: `preset=bank-statement&bank=${bank.key}`,
+  h1: `Extract ${bank.name} PDF Statement to Excel`,
+  title: `Convert ${bank.name} Statement PDF to Excel Online`,
+  description: `Extract transaction tables from ${bank.name} statements directly into clean Excel (.xlsx) sheets. 100% browser-side, secure, and free.`,
+  intro: `Need to export transaction details from your ${bank.name} PDF bank statements into Excel or CSV for budgeting or auditing? GoluPDF does it client-side without storing your financial records.`,
+  whyBullets: [
+    `Optimized parsing matching standard ${bank.name} header schemas`,
+    `Automatic Debit, Credit, and Balance column identification`,
+    `100% browser-based processing keeps your bank accounts safe`,
+    `Multi-page statement support merges split tables onto one sheet`,
+  ],
+  faq: [
+    { q: `How do I extract a ${bank.name} PDF statement to Excel?`, a: `Upload your PDF statement to GoluPDF's Table Extractor, configure the Bank Statement mapping options, and click 'Run Table Extractor'. Your tables will compile instantly to download as an Excel workbook.` },
+    { q: `Are my banking credentials or statements stored?`, a: `Never. GoluPDF operates entirely client-side using local WebAssembly modules. Your statements are parsed in your browser cache and never hit our web servers.` }
+  ],
+  keywords: [`extract ${bank.key} statement pdf to excel`, `${bank.key} statement converter`, `${bank.key} pdf to csv`]
+}));
+
+// Generate software invoice routes programmatically
+const INVOICE_SEO_PAGES: SeoPagePreset[] = PLATFORMS.map((platform) => ({
+  slug: `extract-${platform.key}-invoice-pdf-to-excel`,
+  tool: "pdf-table-extractor",
+  toolQuery: `preset=invoice&platform=${platform.key}`,
+  h1: `Extract ${platform.name} Invoice PDF to Excel`,
+  title: `Convert ${platform.name} Invoice PDF to Excel Online`,
+  description: `Extract line item tables from ${platform.name} invoices directly into clean Excel (.xlsx) or CSV sheets. Free browser-side converter.`,
+  intro: `Automate audits and tracking. Extract bill tables, item descriptions, quantities, unit prices, and tax columns from ${platform.name} invoices instantly.`,
+  whyBullets: [
+    `Pre-defined column templates matching ${platform.name} invoices`,
+    `Adjust unit values, totals, and tax slabs in the grid editor`,
+    `Instant XML Excel and CSV downloads in your browser`,
+    `No software installs or credit card signups required`,
+  ],
+  faq: [
+    { q: `How do I extract a ${platform.name} invoice PDF?`, a: `Upload the invoice document to GoluPDF Table Extractor, choose the Invoice structure mapping option, review the lines in the grid editor, and click download.` },
+    { q: `Does this support batch processing of ${platform.name} receipts?`, a: `Yes, you can extract tables from multiple documents or process multi-page invoice items continuously.` }
+  ],
+  keywords: [`extract ${platform.key} invoice pdf to excel`, `convert ${platform.key} invoice to csv`, `${platform.key} pdf invoice parser`]
+}));
+
+// Generate industry tool template directories programmatically (10 industries * 6 tool mappings = 60 pages)
+const INDUSTRY_PDF_TOOLS = [
+  { slug: "compress-pdf", suffix: "compress", label: "Compress PDFs" },
+  { slug: "merge-pdf", suffix: "merge", label: "Merge PDFs" },
+  { slug: "sign-pdf", suffix: "sign", label: "Sign PDFs" },
+  { slug: "pdf-table-extractor", suffix: "extract-tables", label: "Extract Tables" },
+  { slug: "pdf-metadata-viewer", suffix: "scrub-metadata", label: "Scrub Metadata" },
+  { slug: "pdf-blank-page-detector", suffix: "remove-blank-pages", label: "Remove Empty Pages" }
+];
+
+const INDUSTRY_SEO_PAGES: SeoPagePreset[] = INDUSTRIES.flatMap((industry) => 
+  INDUSTRY_PDF_TOOLS.map((tool) => ({
+    slug: `templates/${industry.key}/${tool.suffix}`,
+    tool: tool.slug,
+    h1: `${tool.label} for ${industry.name} — Free & Secure`,
+    title: `${tool.label} for ${industry.name} | Online Document Templates`,
+    description: `Optimize, organize, and manage documents for ${industry.name}. Professional, client-side PDF utility built for ${industry.name.toLowerCase()} workflows.`,
+    intro: `Streamline operations in ${industry.name}. Use our premium browser-based ${tool.label.toLowerCase()} utility to customize, sanitize, and verify your document assets instantly.`,
+    whyBullets: [
+      `Tailored templates matching standard ${industry.name.toLowerCase()} folders`,
+      `100% browser-based security for highly sensitive regulatory records`,
+      `No file limits, signups, or subscription prompts`,
+      `Frictionless and fast operation in sub-seconds`,
+    ],
+    faq: [
+      { q: `Why should I use GoluPDF for ${industry.name}?`, a: `Because we process documents 100% inside your browser using WebAssembly. This ensures absolute privacy and compliance with HIPAA, GDPR, and legal confidentiality standards.` },
+      { q: `Is it free for large teams in ${industry.name}?`, a: `Yes. All GoluPDF utilities are fully unlocked and free for everyone with no watermarks or registrations.` }
+    ],
+    keywords: [`${industry.key} pdf tools`, `${tool.suffix} for ${industry.key}`, `${industry.key} document templates`]
+  }))
+);
+
+// Append dynamic programmatic lists to the main list
+SEO_PAGES.push(...BANK_SEO_PAGES, ...INVOICE_SEO_PAGES, ...INDUSTRY_SEO_PAGES);
 
 export const SEO_PAGES_BY_SLUG: Record<string, SeoPagePreset> = Object.fromEntries(
   SEO_PAGES.map((p) => [p.slug, p])
@@ -444,3 +837,4 @@ export const SEO_PAGES_BY_SLUG: Record<string, SeoPagePreset> = Object.fromEntri
 export function getSeoPage(slug: string): SeoPagePreset | undefined {
   return SEO_PAGES_BY_SLUG[slug];
 }
+
