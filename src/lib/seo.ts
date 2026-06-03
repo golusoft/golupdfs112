@@ -154,3 +154,19 @@ export function softwareJsonLd(name: string, description: string, url: string) {
     },
   };
 }
+
+export function howToJsonLd(name: string, description: string, steps: string[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name,
+    description,
+    step: steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.split(":")[0] || s,
+      text: s,
+    })),
+  };
+}
+

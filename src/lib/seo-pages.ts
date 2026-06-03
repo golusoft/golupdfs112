@@ -972,13 +972,106 @@ const UTILITY_SEO_PAGES: SeoPagePreset[] = UTILITIES.map((utility) => ({
   keywords: [`extract ${utility.key} bill pdf to excel`, `${utility.key} bill converter`, `${utility.key} pdf to csv`]
 }));
 
+const COUNTRY_BANKS = [
+  { name: "Indian Bank", key: "indian-bank", keyword: "indian bank" },
+  { name: "US Bank", key: "us-bank", keyword: "us bank" },
+  { name: "UK Bank", key: "uk-bank", keyword: "uk bank" },
+  { name: "Canadian Bank", key: "canadian-bank", keyword: "canadian bank" }
+];
+
+const COUNTRY_BANK_SEO_PAGES: SeoPagePreset[] = COUNTRY_BANKS.map((cb) => ({
+  slug: `extract-${cb.key}-statement-pdf-to-excel`,
+  tool: "pdf-table-extractor",
+  toolQuery: `preset=country-bank&country=${cb.key}`,
+  h1: `Extract ${cb.name} Statement PDF to Excel`,
+  title: `Convert ${cb.name} Statement PDF to Excel Online`,
+  description: `Extract transaction tables from ${cb.name} statements directly into clean Excel (.xlsx) or CSV sheets. 100% browser-side, secure, and free.`,
+  intro: `Need to export transaction details from your ${cb.name} PDF bank statements into Excel or CSV? GoluPDF does it client-side without storing your financial records.`,
+  whyBullets: [
+    `Optimized parsing matching standard ${cb.name} header schemas`,
+    `Automatic Debit, Credit, and Balance column identification`,
+    `100% browser-based processing keeps your bank accounts safe`,
+    `Multi-page statement support merges split tables onto one sheet`,
+  ],
+  faq: [
+    { q: `How do I extract a ${cb.name} PDF statement to Excel?`, a: `Upload your PDF statement to GoluPDF's Table Extractor, configure the Bank Statement mapping options, and click 'Run Table Extractor'. Your tables will compile instantly to download as an Excel workbook.` },
+    { q: `Are my banking credentials or statements stored?`, a: `Never. GoluPDF operates entirely client-side using local WebAssembly modules. Your statements are parsed in your browser cache and never hit our web servers.` }
+  ],
+  keywords: [`extract ${cb.keyword} statement pdf to excel`, `${cb.keyword} statement converter`, `${cb.keyword} pdf to csv`]
+}));
+
+const ADDITIONAL_COMPARISON_PAGES: SeoPagePreset[] = [
+  {
+    slug: "smallpdf-vs-golupdf",
+    tool: "compress-pdf",
+    h1: "Smallpdf vs GoluPDF — comparison of PDF tools",
+    title: "Smallpdf vs GoluPDF — Free Local PDF Editor Comparison",
+    description: "Compare Smallpdf and GoluPDF. Learn how client-side WebAssembly saves time and secures private files.",
+    intro: "Compare Smallpdf vs GoluPDF. See how GoluPDF offers free visual editing, page organization, and metadata scrubbing without subscription prompts.",
+    whyBullets: [
+      "No signup prompts or mandatory email registers",
+      "WASM tools compile PDFs locally at offline speeds",
+      "Includes advanced tools like GDPR Metadata Scrub",
+      "Unlimited batch conversions for free",
+    ],
+    keywords: ["smallpdf vs golupdf", "smallpdf alternative", "free pdf editors 2026"],
+  },
+  {
+    slug: "ilovepdf-vs-golupdf",
+    tool: "compress-pdf",
+    h1: "iLovePDF vs GoluPDF — why browser-side is better",
+    title: "iLovePDF vs GoluPDF — Complete Security & Speed Comparison",
+    description: "Compare iLovePDF and GoluPDF. Discover why WebAssembly-based client processing is safer and faster than cloud uploads.",
+    intro: "Evaluating iLovePDF and GoluPDF for your company? Read our complete comparison highlighting local browser-side execution vs. server-side cloud uploads.",
+    whyBullets: [
+      "GoluPDF runs 100% locally in your browser cache",
+      "Zero file uploads means absolute confidentiality and compliance",
+      "No subscription gates or daily tool limits",
+      "Vibrant modern UI with instant previews",
+    ],
+    keywords: ["ilovepdf vs golupdf", "ilovepdf alternative", "browser-side pdf compression"],
+  },
+  {
+    slug: "pdfgear-vs-golupdf",
+    tool: "compress-pdf",
+    h1: "PDFgear vs GoluPDF — comparison of PDF tools",
+    title: "PDFgear vs GoluPDF — Free WebAssembly PDF Editor Comparison",
+    description: "Compare PDFgear and GoluPDF. Learn how GoluPDF's client-side browser tools require zero installations and offer premium security.",
+    intro: "Compare PDFgear vs GoluPDF. See how GoluPDF provides advanced browser-based tools with zero software downloads or system permissions.",
+    whyBullets: [
+      "No desktop application installs required",
+      "WASM-powered in-browser speed and privacy",
+      "Granular metadata editors and empty page scanners included",
+      "Runs on all devices (mobile, desktop, Chromebook) instantly",
+    ],
+    keywords: ["pdfgear vs golupdf", "pdfgear alternative", "free browser pdf editor"],
+  },
+  {
+    slug: "adobe-vs-golupdf",
+    tool: "compress-pdf",
+    h1: "Adobe Acrobat vs GoluPDF Web alternative",
+    title: "Adobe Acrobat vs GoluPDF — Free Online PDF Tools Comparison",
+    description: "Compare Adobe Acrobat and GoluPDF. Discover a lightweight, client-side alternative with zero subscription gates.",
+    intro: "Looking for an Adobe Acrobat alternative? Discover how GoluPDF runs high-fidelity PDF editing and combining features directly inside browser memory.",
+    whyBullets: [
+      "Runs instantly without installing heavyweight desktop clients",
+      "No account or creative cloud subscription required",
+      "WASM-powered rendering maintains vector-sharp details",
+      "Private and safe for corporate contracts",
+    ],
+    keywords: ["adobe vs golupdf", "adobe acrobat alternative", "free online pdf editor alternative"],
+  }
+];
+
 // Append dynamic programmatic lists to the main list
 SEO_PAGES.push(
   ...BANK_SEO_PAGES, 
   ...INVOICE_SEO_PAGES, 
   ...INDUSTRY_SEO_PAGES,
   ...CREDIT_CARD_SEO_PAGES,
-  ...UTILITY_SEO_PAGES
+  ...UTILITY_SEO_PAGES,
+  ...COUNTRY_BANK_SEO_PAGES,
+  ...ADDITIONAL_COMPARISON_PAGES
 );
 
 export const SEO_PAGES_BY_SLUG: Record<string, SeoPagePreset> = Object.fromEntries(

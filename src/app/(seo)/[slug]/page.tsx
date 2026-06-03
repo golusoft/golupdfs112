@@ -18,9 +18,11 @@ import {
   breadcrumbJsonLd,
   faqJsonLd,
   softwareJsonLd,
+  howToJsonLd,
   SITE,
 } from "@/lib/seo";
 import { absoluteUrl, cn } from "@/lib/utils";
+import { SeoGuideContent } from "@/components/tools/seo-guide-content";
 
 export async function generateStaticParams() {
   return SEO_PAGES.map((p) => ({ slug: p.slug }));
@@ -55,6 +57,25 @@ export default async function SeoLandingPage(
     .map((c) => SEO_PAGES.find((p) => p.slug === c))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
+  // Dynamic Internal Linking Engine
+  let dynamicCluster = cluster;
+  if (dynamicCluster.length === 0) {
+    if (page.slug.startsWith("extract-") && page.slug.endsWith("-statement-pdf-to-excel")) {
+      const isCard = page.slug.includes("-cc-") || page.slug.includes("amex") || page.slug.includes("apple-card") || page.slug.includes("discover") || page.slug.includes("visa") || page.slug.includes("freedom");
+      dynamicCluster = SEO_PAGES.filter((p) => {
+        const otherIsCard = p.slug.includes("-cc-") || p.slug.includes("amex") || p.slug.includes("apple-card") || p.slug.includes("discover") || p.slug.includes("visa") || p.slug.includes("freedom");
+        return p.slug.startsWith("extract-") && p.slug.endsWith("-statement-pdf-to-excel") && p.slug !== page.slug && (isCard === otherIsCard);
+      }).slice(0, 5);
+    } else if (page.slug.startsWith("extract-") && page.slug.endsWith("-invoice-pdf-to-excel")) {
+      dynamicCluster = SEO_PAGES.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-invoice-pdf-to-excel") && p.slug !== page.slug).slice(0, 5);
+    } else if (page.slug.startsWith("extract-") && page.slug.endsWith("-bill-pdf-to-excel")) {
+      dynamicCluster = SEO_PAGES.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-bill-pdf-to-excel") && p.slug !== page.slug).slice(0, 5);
+    } else if (page.slug.startsWith("templates/")) {
+      const industryKey = page.slug.split("/")[1];
+      dynamicCluster = SEO_PAGES.filter((p) => p.slug.startsWith(`templates/${industryKey}/`) && p.slug !== page.slug).slice(0, 5);
+    }
+  }
+
   // Pull related tools by category for sidebar
   const related = TOOLS.filter((t) => t.category === tool.category && t.slug !== tool.slug).slice(0, 4);
 
@@ -68,6 +89,7 @@ export default async function SeoLandingPage(
             { name: page.h1, url },
           ]),
           faqJsonLd(faq),
+          howToJsonLd(page.h1, page.description, page.whyBullets),
         ]}
       />
 
@@ -156,16 +178,19 @@ export default async function SeoLandingPage(
                 ))}
               </ul>
             </div>
+
+            {/* In-depth guide content to remove Thin Content risk */}
+            <SeoGuideContent slug={page.slug} h1={page.h1} keywords={page.keywords} whyBullets={page.whyBullets} />
           </div>
 
           <aside className="lg:col-span-5">
-            {cluster.length > 0 && (
+            {dynamicCluster.length > 0 && (
               <div className="rounded-2xl border bg-card p-6">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                   Related guides
                 </h3>
                 <ul className="mt-4 space-y-3">
-                  {cluster.map((c) => (
+                  {dynamicCluster.map((c) => (
                     <li key={c.slug}>
                       <Link
                         href={`/${c.slug}`}
