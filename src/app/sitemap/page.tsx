@@ -24,7 +24,7 @@ import {
   Clock
 } from "lucide-react";
 import { TOOLS } from "@/lib/tools";
-import { SEO_PAGES } from "@/lib/seo-pages";
+import { SEO_PAGES_ACTIVE } from "@/lib/seo-pages";
 import { SITE, buildMetadata } from "@/lib/seo";
 import { getDbPosts } from "@/lib/admin/mock-blog-data";
 
@@ -40,7 +40,7 @@ export default async function SitemapPage() {
   const now = new Date();
   
   // Group programmatic pages
-  const bankPages = SEO_PAGES.filter(
+  const bankPages = SEO_PAGES_ACTIVE.filter(
     (p) => p.slug.startsWith("extract-") && 
     p.slug.endsWith("-statement-pdf-to-excel") && 
     !p.slug.includes("-cc-") && 
@@ -51,16 +51,16 @@ export default async function SitemapPage() {
     !p.slug.includes("visa")
   );
 
-  const cardPages = SEO_PAGES.filter(
+  const cardPages = SEO_PAGES_ACTIVE.filter(
     (p) => p.slug.startsWith("extract-") && 
     p.slug.endsWith("-statement-pdf-to-excel") && 
     (p.slug.includes("-cc-") || p.slug.includes("amex") || p.slug.includes("card") || p.slug.includes("discover") || p.slug.includes("freedom") || p.slug.includes("visa"))
   );
 
-  const invoicePages = SEO_PAGES.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-invoice-pdf-to-excel"));
-  const utilityPages = SEO_PAGES.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-bill-pdf-to-excel"));
-  const industryPages = SEO_PAGES.filter((p) => p.slug.startsWith("templates/"));
-  const generalPages = SEO_PAGES.filter((p) => !p.slug.startsWith("extract-") && !p.slug.startsWith("templates/"));
+  const invoicePages = SEO_PAGES_ACTIVE.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-invoice-pdf-to-excel"));
+  const utilityPages = SEO_PAGES_ACTIVE.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-bill-pdf-to-excel"));
+  const industryPages = SEO_PAGES_ACTIVE.filter((p) => p.slug.startsWith("templates/"));
+  const generalPages = SEO_PAGES_ACTIVE.filter((p) => !p.slug.startsWith("extract-") && !p.slug.startsWith("templates/"));
 
   // Fetch blog posts from DB
   let blogPosts: any[] = [];
@@ -326,7 +326,7 @@ export default async function SitemapPage() {
                     </div>
                     <div className="rounded-lg bg-background/50 border p-2.5">
                       <p className="text-xs text-muted-foreground">SEO Pages</p>
-                      <p className="text-lg font-bold mt-0.5">{SEO_PAGES.length}</p>
+                      <p className="text-lg font-bold mt-0.5">{SEO_PAGES_ACTIVE.length}</p>
                     </div>
                   </div>
                   <p className="text-[10px] text-muted-foreground text-center font-mono">

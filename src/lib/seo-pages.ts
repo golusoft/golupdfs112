@@ -1176,6 +1176,24 @@ const INDIAN_UTILITY_SEO_PAGES: SeoPagePreset[] = [
       { q: "How do I convert MSEB bill PDF to Excel?", a: "Drag and drop the Mahadiscom bill PDF, select MSEB bill preset, run the local extractor, and save as Excel." }
     ],
     keywords: ["extract mseb bill pdf to excel", "mahadiscom bill converter", "mseb pdf bill parser"]
+  },
+  {
+    slug: "extract-nps-statement-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=nps",
+    h1: "Extract National Pension System (NPS) PDF Statement to Excel",
+    title: "Convert NPS Statement PDF to Excel Online Free",
+    description: "Extract transaction summaries, tier contributions, and holdings tables from National Pension System (NPS) PDFs into clean Excel sheets. Secure local extractor.",
+    intro: "Export transaction records and asset allocations from your NPS CRA account statement PDF into clean Excel sheets. GoluPDF processes your files locally.",
+    whyBullets: [
+      "Predefined mapping for NSDL / KFintech NPS account statements",
+      "Separates Tier-I and Tier-II account transactions and investment values",
+      "100% browser-based calculations protect your PRAN and personal finance details"
+    ],
+    faq: [
+      { q: "How do I convert NPS statement to Excel?", a: "Upload your CRA NPS statement PDF to GoluPDF's Table Extractor, select NPS mapping, and run. The holdings and transactions will parse to Excel." }
+    ],
+    keywords: ["extract nps statement pdf to excel", "convert nps statement to excel", "nps statement to csv"]
   }
 ];
 
@@ -1190,6 +1208,38 @@ SEO_PAGES.push(
   ...ADDITIONAL_COMPARISON_PAGES,
   ...INDIAN_UTILITY_SEO_PAGES
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PHASE-WISE RELEASE CONFIGURATION (To prevent Thin Content / Spam penalties)
+// ─────────────────────────────────────────────────────────────────────────────
+export const PHASE_1_SLUGS = new Set([
+  // Core size resizers
+  "compress-pdf-to-100kb",
+  "compress-pdf-to-200kb",
+  "compress-pdf-to-500kb",
+  // Top Indian bank statements
+  "extract-sbi-statement-pdf-to-excel",
+  "extract-hdfc-statement-pdf-to-excel",
+  "extract-icici-statement-pdf-to-excel",
+  "extract-axis-statement-pdf-to-excel",
+  "extract-kotak-statement-pdf-to-excel",
+  "extract-bob-statement-pdf-to-excel",
+  "extract-paytm-statement-pdf-to-excel",
+  // High-traffic Indian utilities & funds
+  "extract-epfo-passbook-pdf-to-excel",
+  "extract-cams-mutual-fund-cas-pdf-to-excel",
+  "extract-itr-verification-pdf-to-excel",
+  "extract-lic-receipt-pdf-to-excel",
+  "extract-nps-statement-pdf-to-excel",
+  // Main competitor comparisons
+  "smallpdf-vs-golupdf",
+  "ilovepdf-vs-golupdf",
+  "pdfgear-vs-golupdf",
+  "adobe-vs-golupdf"
+]);
+
+// Only expose Phase 1 pages in search indexing pipelines, sitemaps, and link arrays
+export const SEO_PAGES_ACTIVE = SEO_PAGES.filter((p) => PHASE_1_SLUGS.has(p.slug));
 
 export const SEO_PAGES_BY_SLUG: Record<string, SeoPagePreset> = Object.fromEntries(
   SEO_PAGES.map((p) => [p.slug, p])

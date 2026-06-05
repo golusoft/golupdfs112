@@ -11,7 +11,10 @@ import {
   Layers, 
   Sparkles,
   CheckCircle2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Wallet,
+  UserCheck,
+  Percent
 } from "lucide-react";
 
 interface SeoGuideProps {
@@ -24,17 +27,28 @@ interface SeoGuideProps {
 export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: SeoGuideProps) {
   // Determine page type from slug
   const isCreditCard = slug.includes("-cc-") || slug.includes("amex") || slug.includes("apple-card") || slug.includes("discover") || slug.includes("visa") || slug.includes("freedom");
-  const isUtility = slug.includes("-bill-") || slug.includes("pge") || slug.includes("comcast") || slug.includes("verizon") || slug.includes("att") || slug.includes("tmobile") || slug.includes("energy") || slug.includes("grid") || slug.includes("coned") || slug.includes("telecom") || slug.includes("vodafone") || slug.includes("airtel") || slug.includes("jio") || slug.includes("power") || slug.includes("bescom");
+  const isUtility = slug.includes("-bill-") || slug.includes("pge") || slug.includes("comcast") || slug.includes("verizon") || slug.includes("att") || slug.includes("tmobile") || slug.includes("energy") || slug.includes("grid") || slug.includes("coned") || slug.includes("telecom") || slug.includes("vodafone") || slug.includes("airtel") || slug.includes("jio") || slug.includes("power") || slug.includes("bescom") || slug.includes("uppcl") || slug.includes("mseb");
   const isComparison = slug.includes("-vs-") || slug.includes("-alternative");
   const isIndustry = slug.startsWith("templates/");
   const isCountry = slug.includes("indian-bank") || slug.includes("us-bank") || slug.includes("uk-bank") || slug.includes("canadian-bank");
-  const isBankStatement = slug.includes("-statement-") && !isCreditCard && !isCountry;
+  
+  // High-traffic Indian Financial Instruments
+  const isEpfo = slug.includes("epfo");
+  const isCams = slug.includes("cams");
+  const isItr = slug.includes("itr");
+  const isLic = slug.includes("lic");
+  const isNps = slug.includes("nps");
+
+  const isBankStatement = slug.includes("-statement-") && !isCreditCard && !isCountry && !isNps;
+
+  // Render variables
+  let guideJsx: React.ReactNode = null;
 
   // 1. BANK STATEMENT SECTION
   if (isBankStatement) {
     const bankName = h1.replace("Extract ", "").replace(" PDF Statement to Excel", "").trim();
-    return (
-      <div className="mt-16 space-y-12 border-t pt-16">
+    guideJsx = (
+      <div className="space-y-12">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" /> Technical Guide: Extracting {bankName} Transaction Logs
@@ -159,8 +173,8 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
   // 2. CREDIT CARD SECTION
   if (isCreditCard) {
     const cardName = h1.replace("Extract ", "").replace(" PDF Statement to Excel", "").trim();
-    return (
-      <div className="mt-16 space-y-12 border-t pt-16">
+    guideJsx = (
+      <div className="space-y-12">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <CreditCard className="h-8 w-8 text-primary" /> Technical Guide: Reconciling {cardName} Logs
@@ -251,19 +265,19 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
             Follow these steps to clean and audit your statements for business accounting:
           </p>
           <div className="mt-6 grid gap-6 sm:grid-cols-4 text-xs text-muted-foreground">
-            <div className="border-l-2 border-primary pl-4">
+            <div className="border-l-2 border-primary block-step pl-4">
               <span className="font-bold text-primary block text-sm">STEP 1</span>
               Upload statement and run the grid extractor mapping date, merchant, and decimal amounts.
             </div>
-            <div className="border-l-2 border-primary pl-4">
+            <div className="border-l-2 border-primary block-step pl-4">
               <span className="font-bold text-primary block text-sm">STEP 2</span>
               Identify refunds and adjustments (marked with negative symbols or credit signs) and reconcile with invoices.
             </div>
-            <div className="border-l-2 border-primary pl-4">
+            <div className="border-l-2 border-primary block-step pl-4">
               <span className="font-bold text-primary block text-sm">STEP 3</span>
               Sort by merchant name or spend category to group software subscriptions, travel expenditures, and office tools.
             </div>
-            <div className="border-l-2 border-primary pl-4">
+            <div className="border-l-2 border-primary block-step pl-4">
               <span className="font-bold text-primary block text-sm">STEP 4</span>
               Export to XLSX and import directly to corporate ledger systems to avoid manual journal entries.
             </div>
@@ -276,8 +290,8 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
   // 3. UTILITY BILL SECTION
   if (isUtility) {
     const utilityName = h1.replace("Extract ", "").replace(" Bill PDF to Excel", "").trim();
-    return (
-      <div className="mt-16 space-y-12 border-t pt-16">
+    guideJsx = (
+      <div className="space-y-12">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <Activity className="h-8 w-8 text-primary" /> Technical Guide: Parsing {utilityName} Invoices
@@ -339,8 +353,8 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
   // 4. COMPARISON PAGES SECTION
   if (isComparison) {
     const competitor = h1.split(" vs ")[0] || "Competitor";
-    return (
-      <div className="mt-16 space-y-12 border-t pt-16">
+    guideJsx = (
+      <div className="space-y-12">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <ShieldCheck className="h-8 w-8 text-primary" /> Security & Performance: GoluPDF vs {competitor}
@@ -441,8 +455,8 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
   // 5. INDUSTRY SPECIFIC SECTION
   if (isIndustry) {
     const industryName = h1.split(" for ")[1]?.split(" — ")[0] || "Your Industry";
-    return (
-      <div className="mt-16 space-y-12 border-t pt-16">
+    guideJsx = (
+      <div className="space-y-12">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" /> Document Workflows in {industryName}
@@ -494,8 +508,8 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
     const countryName = slug.includes("indian-bank") ? "India" : 
                         slug.includes("us-bank") ? "United States" : 
                         slug.includes("uk-bank") ? "United Kingdom" : "Canada";
-    return (
-      <div className="mt-16 space-y-12 border-t pt-16">
+    guideJsx = (
+      <div className="space-y-12">
         <div className="max-w-3xl">
           <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <Building2 className="h-8 w-8 text-primary" /> Regional Banking Formats & Extraction in {countryName}
@@ -557,5 +571,375 @@ export function SeoGuideContent({ slug, h1, keywords = [], whyBullets = [] }: Se
     );
   }
 
-  return null;
+  // 7. EPFO PASSOOK E-E-A-T GUIDE
+  if (isEpfo) {
+    guideJsx = (
+      <div className="space-y-12">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <Wallet className="h-8 w-8 text-primary" /> Comprehensive Guide: Exporting EPF Passbooks to Excel
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            The Employees&apos; Provident Fund Organisation (EPFO) provides members with a monthly contribution ledger, also known as the EPF Passbook. This PDF contains critical fields: employer contributions, employee share deductions, pension fund credits, interest transactions, and cumulative balances.
+          </p>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            For individuals auditing their pension funds, checking employer compliance, or calculating interest compounding payouts, copying data directly from the EPFO portal PDF is highly frustrating. It contains complex multi-page tables, headers, and footer details that break grid row mappings when copied.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-6">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-500" /> Mapped EPF Passbook Ledger Columns
+            </h3>
+            <p className="mt-2 text-xs text-muted-foreground">
+              GoluPDF isolates the transaction tables of the passbook and structures them into six distinct ledger fields:
+            </p>
+            <div className="mt-4 overflow-hidden rounded-lg border text-xs">
+              <table className="min-w-full divide-y divide-border text-left">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-4 py-2 font-medium">Excel Header</th>
+                    <th className="px-4 py-2 font-medium">EPF Matching Field</th>
+                    <th className="px-4 py-2 font-medium">Type</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border bg-card">
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Date/Month</td>
+                    <td className="px-4 py-2">Transaction deposit timestamp</td>
+                    <td className="px-4 py-2">Date</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Particulars</td>
+                    <td className="px-4 py-2">Wage month description (e.g. &quot;03/2026&quot;)</td>
+                    <td className="px-4 py-2">Text</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Employee Share</td>
+                    <td className="px-4 py-2">Employee EPF deduction (12% of basic wage)</td>
+                    <td className="px-4 py-2">Decimal</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Employer Share</td>
+                    <td className="px-4 py-2">Employer share (3.67% of wage)</td>
+                    <td className="px-4 py-2">Decimal</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Pension Fund</td>
+                    <td className="px-4 py-2">Pension contribution (8.33% of wage)</td>
+                    <td className="px-4 py-2">Decimal</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Cr / Dr</td>
+                    <td className="px-4 py-2">Interest additions or withdrawal debits</td>
+                    <td className="px-4 py-2">Decimal</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Security & Decryption Details
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              EPF passbooks downloaded directly from the EPFO unified member portal are standard PDFs but contain sensitive financial identity tags like your **Universal Account Number (UAN)**, PAN, and Member IDs.
+            </p>
+            <div className="rounded-xl bg-muted p-4 text-xs space-y-2 text-muted-foreground">
+              <p><strong>🔒 Browser Sandbox Decryption:</strong> GoluPDF performs all decryption, text indexing, and table building locally on your device. We do not use third-party APIs or upload passbooks to servers. Your UAN, wage records, and provident balance remain private.</p>
+              <p><strong>💡 Password Hint:</strong> If your EPF statement PDF is encrypted, the default password is usually a set combination of your birth year or account identifier. Input the decryption key locally when prompted.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-8">
+          <h3 className="text-lg font-bold text-foreground">EPFO Passbook Download & Verification Checklist</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Verify your employer monthly credits with these simple auditing steps:
+          </p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-4 text-xs text-muted-foreground">
+            <div className="border-l-2 border-primary pl-4">
+              <span className="font-bold text-primary block text-sm">STEP 1</span>
+              Log in to the official EPFO Member Portal (passbook.epfindia.gov.in) using your UAN and Password.
+            </div>
+            <div className="border-l-2 border-primary pl-4">
+              <span className="font-bold text-primary block text-sm">STEP 2</span>
+              Select your Member ID block and download the PDF passbook for the current or previous financial year.
+            </div>
+            <div className="border-l-2 border-primary pl-4">
+              <span className="font-bold text-primary block text-sm">STEP 3</span>
+              Drag and drop the PDF into GoluPDF and select the EPFO passbook mapping configuration.
+            </div>
+            <div className="border-l-2 border-primary pl-4">
+              <span className="font-bold text-primary block text-sm">STEP 4</span>
+              Compare the Employee Share (12%) and Pension Share (8.33%) totals with your salary slips to detect credits mismatches.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 8. CAMS MUTUAL FUND CAS E-E-A-T GUIDE
+  if (isCams) {
+    guideJsx = (
+      <div className="space-y-12">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <Building2 className="h-8 w-8 text-primary" /> Technical Guide: Extracting CAMS Mutual Fund CAS Logs
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            A Consolidated Account Statement (CAS) issued by CAMS (Computer Age Management Services) or Karvy (KFintech) compiles your entire mutual fund holdings across different asset management companies (AMCs) and folios. These statements are vital for portfolio consolidation, tax audit reporting, and wealth planning.
+          </p>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            However, CAS PDFs are multi-column, densely formatted, and typically spread across dozens of pages. Direct copying results in broken rows, mixed folios, and misaligned transaction numbers.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-500" /> CAS Holdings Mapping Schema
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Our WebAssembly utility extracts both transaction histories and asset summary valuations, structuring them into clean columns:
+            </p>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><strong>Folio Number & AMC:</strong> Groups transactions by specific AMC and account folios.</li>
+              <li><strong>Scheme Name:</strong> Identifies Direct vs Regular plans and debt vs equity schemes.</li>
+              <li><strong>Transaction Type:</strong> Categorizes purchase, SIP installments, redemptions, switches, and dividend payouts.</li>
+              <li><strong>NAV & Units:</strong> Isolates transaction pricing (Net Asset Value), units allocated, and transaction totals.</li>
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border bg-card p-6">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Absolute Confidentiality for Portfolio Data
+            </h3>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              Your CAMS Consolidated Account Statement contains your full portfolio valuation, PAN, email, residential address, and folio balances. Uploading this to standard cloud converters exposes your sensitive financial assets to third-party databases.
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground font-semibold text-emerald-500">
+              🔒 GoluPDF processes CAS decryption and grid building locally on your device. No financial records ever touch our web servers.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-gradient-to-br from-primary/5 to-secondary/5 p-8">
+          <h3 className="text-xl font-bold text-foreground">Mutual Fund Tax Auditing & Capital Gains Reconciliation</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Auditing Long-Term Capital Gains (LTCG) and Short-Term Capital Gains (STCG) for tax returns is simple with Excel:
+          </p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-3 text-xs text-muted-foreground">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-foreground">SIP Compounding Audit</h4>
+              <p>Reconcile each SIP transaction date and rate against bank auto-debits to identify payment delay charges or missed portfolio logs.</p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-foreground">Weighted Cost of Acquisition</h4>
+              <p>Calculate the average cost of acquisition for equity units easily using Excel formulas on the extracted tabular columns.</p>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-foreground">Grandfathered NAV Tracking</h4>
+              <p>Isolate units purchased before January 31, 2018, and apply grandfathering rules for Indian equity LTCG audits in your spreadsheet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 9. ITR VERIFICATION E-E-A-T GUIDE
+  if (isItr) {
+    guideJsx = (
+      <div className="space-y-12">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <UserCheck className="h-8 w-8 text-primary" /> Technical Guide: Parsing ITR-V PDF Acknowledgments
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            The Income Tax Return Verification form (ITR-V) is a single-page or short PDF document issued by the Income Tax Department of India after e-filing. It summarises your total gross income, tax deductions under Chapter VI-A, net taxable income, self-assessment tax paid, TDS credits, and refund or tax due balances.
+          </p>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            For individuals compiling tax logs, applying for loans, or performing financial audits, extracting figures from several assessment years is a key step. GoluPDF reads e-filing schedules client-side, structuring numbers into clean spreadsheets.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-500" /> Mapped ITR Tax Fields
+            </h3>
+            <p className="text-xs text-muted-foreground font-mono">
+              The parser captures these critical tax parameters:
+            </p>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><strong>Assessment Year (AY) & PAN:</strong> Identifies tax years and unique taxpayer IDs.</li>
+              <li><strong>Gross Total Income:</strong> Captures income from salary, house property, business, and capital gains.</li>
+              <li><strong>Chapter VI-A Deductions:</strong> Extracts total investments under 80C, 80D, 80G, and 80TTA.</li>
+              <li><strong>Tax Payable & TDS:</strong> Parses total tax payable, TDS deducted, self-assessment paid, and refunds.</li>
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border bg-card p-6 space-y-3">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" /> Accessing Encrypted ITR PDFs
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              ITR-V and tax logs are password-secured. The standard password format for ITR statements is your PAN (in lowercase) combined with your date of birth (DDMMYYYY).
+            </p>
+            <div className="bg-muted p-4 rounded-xl text-xs text-muted-foreground">
+              GoluPDF prompts for this password locally in your browser to decrypt the file before parsing. We never see, store, or transmit your password or tax returns.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 10. LIC PREMIUM RECEIPT E-E-A-T GUIDE
+  if (isLic) {
+    guideJsx = (
+      <div className="space-y-12">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <Percent className="h-8 w-8 text-primary" /> Tax Savings Audit: Extracting LIC Premium Receipts
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            Life Insurance Corporation (LIC) premium receipts serve as official proof of payment for tax exemptions. Under Section 80C of the Income Tax Act, life insurance premiums paid for self, spouse, and children are deductible from gross income (up to ₹1.5 Lakhs annually).
+          </p>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            Auditors and taxpayers handling multiple policies face a major chore during tax filing season. Converting LIC receipt PDFs into structured spreadsheets speeds up the verification of premium splits, base premiums, and GST components.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-6">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-500" /> Mapped Premium Receipt Fields
+            </h3>
+            <div className="mt-4 overflow-hidden rounded-lg border text-xs">
+              <table className="min-w-full divide-y divide-border text-left">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="px-4 py-2 font-medium">Header Field</th>
+                    <th className="px-4 py-2 font-medium">Description</th>
+                    <th className="px-4 py-2 font-medium">Tax Utility</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border bg-card">
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Policy Number</td>
+                    <td className="px-4 py-2">Unique life insurance policy ID</td>
+                    <td className="px-4 py-2">Reconciliation matching</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Receipt Date</td>
+                    <td className="px-4 py-2">The exact date of premium receipting</td>
+                    <td className="px-4 py-2">FY assessment tagging</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Base Premium</td>
+                    <td className="px-4 py-2">Premium amount excluding GST</td>
+                    <td className="px-4 py-2">Primary 80C deduction base</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">CGST / SGST</td>
+                    <td className="px-4 py-2">Service tax and central/state levies</td>
+                    <td className="px-4 py-2">GST tracking audits</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-2 font-medium font-mono">Total Paid</td>
+                    <td className="px-4 py-2">Final gross premium debited</td>
+                    <td className="px-4 py-2">Cash outflow verification</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border bg-card p-6 space-y-3">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Local Processing Compliance
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Insurance receipts include policy terms, customer names, addresses, and premium amounts. GoluPDF operates entirely inside your local browser. All text vector mapping and formatting occur client-side, ensuring that your insurance policies are never sent online.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Upload multiple receipts sequentially to build a unified tax-deduction ledger for easy tax filing.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 11. NPS STATEMENT E-E-A-T GUIDE
+  if (isNps) {
+    guideJsx = (
+      <div className="space-y-12">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+            <Building2 className="h-8 w-8 text-primary" /> Technical Guide: Extracting NPS CRA Statements to Excel
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            The National Pension System (NPS) statement (issued by CRA NSDL or KFintech) tracks your retirement contributions. NPS features Tier-I accounts (mandatory pension lock-in, eligible for extra ₹50,000 deduction under Sec 80CCD(1B)) and Tier-II accounts (voluntary withdrawable investment).
+          </p>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            An NPS transaction statement lists multiple pages of contribution tables, scheme holdings, asset classes (E, C, G, A), and transaction units. Copying this data directly breaks row schemas. GoluPDF parses your NPS statements locally, outputting structured Excel transaction ledgers.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-emerald-500" /> NPS Excel Ledger Columns
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Our tool extracts transaction dates, contributions, units allocated, NAV values, and investment amounts:
+            </p>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li><strong>PRAN:</strong> PRAN (Permanent Retirement Account Number) verification field.</li>
+              <li><strong>Tier Type:</strong> Separates Tier-I and Tier-II transactions.</li>
+              <li><strong>Contribution Amt:</strong> Net contribution amount before brokerage or fees.</li>
+              <li><strong>Asset Allocation:</strong> Splits units across Equity (E), Corporate Bonds (C), and G-Secs (G).</li>
+              <li><strong>NAV & Unit Allocation:</strong> Tracks NAV value and allocated pension units.</li>
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border bg-card p-6">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Secure Pension Statement Auditing
+            </h3>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              Your NPS statement contains your PRAN, financial holdings, employer details, and personal coordinates. Keeping this private is critical. 
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-emerald-500 font-semibold">
+              🔒 GoluPDF processes statements entirely client-side using local WebAssembly. No PRAN or retirement assets statistics are uploaded to third-party databases.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!guideJsx) return null;
+
+  return (
+    <div className="mt-16 border-t pt-16">
+      {guideJsx}
+      
+      {/* Visual Trademark Disclaimer Card */}
+      <div className="mt-12 rounded-xl border border-muted-foreground/15 bg-muted/40 p-4 text-[11px] leading-relaxed text-muted-foreground">
+        <p>
+          <strong>Disclaimer:</strong> GoluPDFs is a private, independent utility platform. It is not affiliated with, authorized, endorsed by, or in any way officially connected with the State Bank of India (SBI), HDFC Bank, ICICI Bank, Axis Bank, Kotak Mahindra Bank, Punjab National Bank (PNB), Bank of Baroda (BOB), Paytm, EPFO, CAMS, Karvy (KFintech), LIC, NPS, or any of their subsidiaries or affiliates. The official websites of these entities can be found at their respective domains. All product and service names, logos, brands, trademarks, and registered trademarks mentioned on this website are the property of their respective owners. Their use on GoluPDFs does not imply any affiliation with or endorsement by them.
+        </p>
+        <p className="mt-1.5 font-medium">
+          🔒 Data Privacy: All document decryption, processing, and table extractions are conducted 100% client-side inside your browser sandbox using WebAssembly. No files or personal/financial data are uploaded, stored, or transmitted to our servers.
+        </p>
+      </div>
+    </div>
+  );
 }

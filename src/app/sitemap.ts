@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { TOOLS } from "@/lib/tools";
-import { SEO_PAGES } from "@/lib/seo-pages";
+import { SEO_PAGES_ACTIVE } from "@/lib/seo-pages";
 import { SITE } from "@/lib/seo";
 import { getDbPosts } from "@/lib/admin/mock-blog-data";
 
@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: t.badge === "popular" ? 0.95 : 0.85,
   }));
 
-  const seoRoutes: MetadataRoute.Sitemap = SEO_PAGES.map((p) => ({
+  const seoRoutes: MetadataRoute.Sitemap = SEO_PAGES_ACTIVE.map((p) => ({
     url: `${SITE.url}/${p.slug}`,
     lastModified: now,
     changeFrequency: "weekly",

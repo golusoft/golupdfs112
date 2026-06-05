@@ -11,7 +11,7 @@ import { RelatedTools } from "@/components/tools/related-tools";
 import { StructuredData } from "@/components/structured-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SEO_PAGES, getSeoPage } from "@/lib/seo-pages";
+import { SEO_PAGES_ACTIVE, getSeoPage } from "@/lib/seo-pages";
 import { getToolBySlug, CATEGORIES, TOOLS } from "@/lib/tools";
 import {
   buildMetadata,
@@ -24,8 +24,11 @@ import {
 import { absoluteUrl, cn } from "@/lib/utils";
 import { SeoGuideContent } from "@/components/tools/seo-guide-content";
 
+// Block dynamic generation for unwhitelisted paths
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
-  return SEO_PAGES.map((p) => ({ slug: p.slug }));
+  return SEO_PAGES_ACTIVE.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata(
@@ -54,7 +57,7 @@ export default async function SeoLandingPage(
   const url = absoluteUrl(`/${page.slug}`);
   const faq = page.faq?.length ? page.faq : tool.faq;
   const cluster = (page.cluster ?? [])
-    .map((c) => SEO_PAGES.find((p) => p.slug === c))
+    .map((c) => SEO_PAGES_ACTIVE.find((p) => p.slug === c))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   // Dynamic Internal Linking Engine
@@ -62,17 +65,17 @@ export default async function SeoLandingPage(
   if (dynamicCluster.length === 0) {
     if (page.slug.startsWith("extract-") && page.slug.endsWith("-statement-pdf-to-excel")) {
       const isCard = page.slug.includes("-cc-") || page.slug.includes("amex") || page.slug.includes("apple-card") || page.slug.includes("discover") || page.slug.includes("visa") || page.slug.includes("freedom");
-      dynamicCluster = SEO_PAGES.filter((p) => {
+      dynamicCluster = SEO_PAGES_ACTIVE.filter((p) => {
         const otherIsCard = p.slug.includes("-cc-") || p.slug.includes("amex") || p.slug.includes("apple-card") || p.slug.includes("discover") || p.slug.includes("visa") || p.slug.includes("freedom");
         return p.slug.startsWith("extract-") && p.slug.endsWith("-statement-pdf-to-excel") && p.slug !== page.slug && (isCard === otherIsCard);
       }).slice(0, 5);
     } else if (page.slug.startsWith("extract-") && page.slug.endsWith("-invoice-pdf-to-excel")) {
-      dynamicCluster = SEO_PAGES.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-invoice-pdf-to-excel") && p.slug !== page.slug).slice(0, 5);
+      dynamicCluster = SEO_PAGES_ACTIVE.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-invoice-pdf-to-excel") && p.slug !== page.slug).slice(0, 5);
     } else if (page.slug.startsWith("extract-") && page.slug.endsWith("-bill-pdf-to-excel")) {
-      dynamicCluster = SEO_PAGES.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-bill-pdf-to-excel") && p.slug !== page.slug).slice(0, 5);
+      dynamicCluster = SEO_PAGES_ACTIVE.filter((p) => p.slug.startsWith("extract-") && p.slug.endsWith("-bill-pdf-to-excel") && p.slug !== page.slug).slice(0, 5);
     } else if (page.slug.startsWith("templates/")) {
       const industryKey = page.slug.split("/")[1];
-      dynamicCluster = SEO_PAGES.filter((p) => p.slug.startsWith(`templates/${industryKey}/`) && p.slug !== page.slug).slice(0, 5);
+      dynamicCluster = SEO_PAGES_ACTIVE.filter((p) => p.slug.startsWith(`templates/${industryKey}/`) && p.slug !== page.slug).slice(0, 5);
     }
   }
 
