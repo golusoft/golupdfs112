@@ -1063,6 +1063,122 @@ const ADDITIONAL_COMPARISON_PAGES: SeoPagePreset[] = [
   }
 ];
 
+const INDIAN_UTILITY_SEO_PAGES: SeoPagePreset[] = [
+  {
+    slug: "extract-epfo-passbook-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=epfo",
+    h1: "Extract EPFO EPF Passbook PDF to Excel",
+    title: "Convert EPFO Passbook PDF to Excel Online Free",
+    description: "Extract transaction tables, employer contributions, and employee share from EPFO EPF passbook PDFs directly into clean Excel (.xlsx) sheets. 100% secure.",
+    intro: "Need to export your EPF transaction passbook PDF into Excel for interest calculation or retirement planning? GoluPDF extracts EPFO transaction tables locally in your browser.",
+    whyBullets: [
+      "Byte-perfect extraction of EPFO passbook tables",
+      "Separates employee share, employer share, and pension contribution fields",
+      "100% browser-based processing guarantees complete privacy of your UAN and balance",
+      "Instantly compiles multi-year transactions onto a single sheet"
+    ],
+    faq: [
+      { q: "How do I convert EPFO passbook PDF to Excel?", a: "Upload your password-protected or unlocked EPF passbook PDF to GoluPDF's Table Extractor, select EPFO preset mapping, and click run. Your passbook tables will compile into a downloadable Excel worksheet." },
+      { q: "Is it safe to upload my EPF passbook?", a: "GoluPDF runs entirely client-side. Your EPF passbook is processed in your local browser sandbox and is never uploaded to any remote server, ensuring UAN and financial privacy." }
+    ],
+    keywords: ["extract epfo passbook pdf to excel", "epf passbook converter online", "convert epf passbook to excel"]
+  },
+  {
+    slug: "extract-cams-mutual-fund-cas-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=cams-cas",
+    h1: "Extract CAMS Consolidated Account Statement (CAS) PDF to Excel",
+    title: "Convert CAMS Mutual Fund CAS PDF to Excel Online Free",
+    description: "Convert CAMS or Karvy Mutual Fund Consolidated Account Statement (CAS) PDFs into clean Excel (.xlsx) sheets. 100% secure client-side extractor.",
+    intro: "Export mutual fund holdings, folio balances, and NAV transaction tables from CAMS CAS PDFs into Excel for portfolio tracking and capital gains audit.",
+    whyBullets: [
+      "Predefined mapping for CAMS/Karvy Consolidated Account Statements",
+      "Accurately maps schemes, folios, purchase/redemption transactions, and units",
+      "Completely private local processing keeps your mutual fund investments confidential",
+      "Compiles multiple folios into separate sheets or a unified ledger"
+    ],
+    faq: [
+      { q: "How do I extract a CAMS CAS statement to Excel?", a: "Upload the CAS PDF (usually password-protected with your PAN/email), enter the PDF password if requested to decrypt locally, select the CAMS CAS preset mapping, and run. Your mutual fund holdings will extract to Excel instantly." },
+      { q: "Does GoluPDF store my CAS password or investment data?", a: "Never. All decryption and extraction run locally on your device's processor using client-side libraries. No investment details are sent to our servers." }
+    ],
+    keywords: ["convert cams statement to excel", "mutual fund cas to excel converter", "cams mutual fund statement to csv"]
+  },
+  {
+    slug: "extract-itr-verification-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=itr-v",
+    h1: "Extract ITR Verification PDF to Excel",
+    title: "Convert ITR-V PDF to Excel Online Free",
+    description: "Extract tax filing headers, income schedules, and deduction data tables from Income Tax Return (ITR-V) PDFs into clean Excel sheets. Secure local extraction.",
+    intro: "Need to compile tax schedules or verify income details from ITR acknowledgment PDFs? GoluPDF parses tax calculation tables locally and exports them to clean Excel formats.",
+    whyBullets: [
+      "Extracts structured tax brackets, deductions, and tax paid tables",
+      "Ideal for financial audits, loan applications, and bookkeeping",
+      "Zero server uploads ensures complete safety of your PAN and tax details",
+      "Clean column alignments with no text overlapping"
+    ],
+    faq: [
+      { q: "How do I convert an ITR-V PDF to Excel?", a: "Drag and drop your ITR acknowledgment PDF, choose the ITR preset mapping, and download the parsed data directly as an Excel or CSV file." }
+    ],
+    keywords: ["extract itr pdf to excel", "itr acknowledgement to excel", "itr-v pdf to csv online"]
+  },
+  {
+    slug: "extract-lic-receipt-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=lic-receipt",
+    h1: "Extract LIC Premium Receipt PDF to Excel",
+    title: "Convert LIC Receipt PDF to Excel Online Free",
+    description: "Extract premium payments, policy numbers, GST breakout, and base premium tables from LIC premium receipts into clean Excel sheets for tax audits.",
+    intro: "Auditing life insurance premium payments for 80C tax deductions? Convert LIC premium receipt PDFs into clean Excel sheets locally.",
+    whyBullets: [
+      "Maps policy numbers, premium amounts, tax components, and transaction dates",
+      "Batch uploads combine multiple policy receipts into a single Excel table",
+      "Private in-browser scanning safeguards your personal details and policy parameters"
+    ],
+    faq: [
+      { q: "How do I export LIC premium receipt details to Excel?", a: "Upload the receipts to GoluPDF's Table Extractor, configure the LIC receipt preset mapping, and click run. Download as clean Excel sheets instantly." }
+    ],
+    keywords: ["convert lic receipt to excel", "lic premium receipt parser", "extract lic pdf to csv"]
+  },
+  {
+    slug: "extract-uppcl-bill-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=uppcl-bill",
+    h1: "Extract UPPCL Bill PDF to Excel",
+    title: "Convert UPPCL Bill PDF to Excel Online Free",
+    description: "Extract billing history, consumer parameters, consumption units, and payment schedules from UPPCL electricity bill PDFs into clean Excel sheets.",
+    intro: "Audit power consumption and billing histories. Convert UPPCL electricity bill PDFs to Excel format to track unit slabs and calculate energy audits.",
+    whyBullets: [
+      "Predefined templates matching UPPCL residential and commercial bills",
+      "Strips billing history tables and breaks down fixed vs energy charges",
+      "WASM-powered browser compiler processes files instantly without server uploads"
+    ],
+    faq: [
+      { q: "How do I parse UPPCL bill PDFs into Excel?", a: "Upload the bill PDF, select UPPCL mapping, run the extractor, and download the data table as an Excel workbook." }
+    ],
+    keywords: ["extract uppcl bill pdf to excel", "uppcl bill converter", "electricity bill pdf to excel"]
+  },
+  {
+    slug: "extract-mseb-bill-pdf-to-excel",
+    tool: "pdf-table-extractor",
+    toolQuery: "preset=mseb-bill",
+    h1: "Extract MSEB Mahadiscom Bill PDF to Excel",
+    title: "Convert MSEB Bill PDF to Excel Online Free",
+    description: "Extract power consumption tables, billing histories, and tax breakouts from MSEB Mahadiscom electricity bill PDFs into Excel sheets.",
+    intro: "Track electricity expenses in Maharashtra. Convert MSEB Mahadiscom bill PDFs to Excel sheets to audit energy consumption parameters locally.",
+    whyBullets: [
+      "Predefined templates for Mahadiscom billing schemes",
+      "Accurately extracts consumption history tables, slab details, and duty rates",
+      "Runs locally in browser cache to preserve consumer identity and privacy"
+    ],
+    faq: [
+      { q: "How do I convert MSEB bill PDF to Excel?", a: "Drag and drop the Mahadiscom bill PDF, select MSEB bill preset, run the local extractor, and save as Excel." }
+    ],
+    keywords: ["extract mseb bill pdf to excel", "mahadiscom bill converter", "mseb pdf bill parser"]
+  }
+];
+
 // Append dynamic programmatic lists to the main list
 SEO_PAGES.push(
   ...BANK_SEO_PAGES, 
@@ -1071,7 +1187,8 @@ SEO_PAGES.push(
   ...CREDIT_CARD_SEO_PAGES,
   ...UTILITY_SEO_PAGES,
   ...COUNTRY_BANK_SEO_PAGES,
-  ...ADDITIONAL_COMPARISON_PAGES
+  ...ADDITIONAL_COMPARISON_PAGES,
+  ...INDIAN_UTILITY_SEO_PAGES
 );
 
 export const SEO_PAGES_BY_SLUG: Record<string, SeoPagePreset> = Object.fromEntries(
