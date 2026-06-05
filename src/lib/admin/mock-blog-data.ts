@@ -2545,7 +2545,138 @@ Quit using slow, ad-heavy portals that exploit your financial data. Use GoluPDFs
     published_at: "2026-06-01T15:00:00Z",
     created_at: "2026-06-01T15:00:00Z",
     updated_at: "2026-06-01T15:00:00Z"
-  }];
+  },
+  {
+  "id": "merge-vs-combine-pdf-guide",
+  "slug": "merge-vs-combine-pdf",
+  "title": "Merge vs Combine: How PDF Tools Differ (And When to Use Each)",
+  "excerpt": "Two terms, subtly different workflows. Choosing the right file consolidation method saves hours and keeps your vectors sharp.",
+  "category": "Guide",
+  "read_time": "5 min",
+  "author": "Golu Kumar",
+  "keywords": [
+    "merge vs combine pdf",
+    "difference between merge and combine pdf",
+    "how to merge pdfs"
+  ],
+  "content": "# Merge vs Combine: How PDF Tools Differ (And When to Use Each)\n\nWhen organizing reports, collating invoices, or compiling portfolios, you will frequently find PDF tools offering two distinct actions: **Merge PDF** and **Combine PDF**. \n\nTo the untrained eye, these two words sound identical. However, in the world of document architecture, they represent subtly different workflows. Selecting the wrong method can result in bloated file sizes, lost vector definitions, and formatting errors. \n\nLet's break down the technical differences between merging and combining PDFs, and see when to use each approach.\n\n---\n\n## 1. What is PDF Merging? (Sequential Stitching)\n\n**PDF Merging** is the process of joining multiple PDF files end-to-end in a linear sequence. \nFor example, if you merge **File A (2 pages)** and **File B (3 pages)**, you get a single **5-page PDF**. File B's pages immediately follow File A's pages.\n\n### How Merging Works Under the Hood:\n1. The tool parses the catalog dictionary of both documents.\n2. It appends the Page tree objects from the second document to the first.\n3. It resolves resource conflicts (like duplicate embedded font names or color profiles).\n4. It writes a single, sequential output file.\n\n### Best Used For:\n* Compiling monthly invoices chronologically.\n* Combining university certificates into a single application file.\n* Joining separate document chapters into a final complete book.\n\n---\n\n## 2. What is PDF Combining? (Selective Integration)\n\n**PDF Combining** is a more granular, selective workflow. Instead of joining entire documents end-to-end, combining allows you to pick specific pages, reorder them, rotate sideways scans, or insert blank sheet buffers.\n\n### How GoluPDFs Handles Combining:\nTraditional PDF combiners force you to upload files to a server, rendering static lists. GoluPDFs utilizes a client-side **Visual Page Grid** using WebAssembly.\n* **Visual Drag-and-Drop**: You can see thumbnails of every page. Drag Page 3 of File B and place it between Page 1 and 2 of File A.\n* **Interactive Rotations**: Rotate misaligned scanned pages with one click.\n* **Blank Pages Injection**: Add blank sheets to maintain page balancing for double-sided printing.\n\n---\n\n## 3. Technical Comparison: Cloud Processing vs. WebAssembly\n\nMost online PDF mergers upload your private documents to third-party cloud servers. This presents major data leakage risks. \n\nGoluPDFs operates 100% client-side:\n* **No File Uploads**: Files are processed locally inside your browser's sandboxed RAM.\n* **Sub-Second Speed**: Since there are no network upload delays, files compile in milliseconds.\n* **100% Free**: No watermarks or daily document caps.\n\n---\n\n## Frequently Asked Questions\n\n### Will merging PDFs reduce image resolution?\nNo. Standard merging preserves the original vector and raster resolutions. GoluPDFs Merge keeps your text sharp and images clean.\n\n### Is it safe to merge bank statements online?\nOnly if the tool runs completely browser-side (like GoluPDFs). Never upload password-protected bank statements to cloud-based PDF portals.",
+  "is_pillar": true,
+  "topic_cluster": "Document Joining",
+  "seo_score": 98,
+  "seo_score_details": {
+    "keyword_density": 95,
+    "structure_score": 99,
+    "readability_score": 98,
+    "link_score": 98,
+    "ctr_score": 98
+  },
+  "views_30d": 3120,
+  "clicks_30d": 215,
+  "ctr_30d": 6.89,
+  "avg_position": 1.8,
+  "published_at": "2026-04-15T09:00:00Z",
+  "created_at": "2026-04-15T09:00:00Z",
+  "updated_at": "2026-04-15T09:00:00Z"
+},
+  {
+  "id": "pdf-privacy-guide",
+  "slug": "pdf-privacy-explained",
+  "title": "Browser-side vs Server-side PDF Tools: A Complete Privacy Guide",
+  "excerpt": "Why local sandbox processing matters — and how to verify a tool is really browser-based using Chrome DevTools.",
+  "category": "Privacy",
+  "read_time": "7 min",
+  "author": "Golu Kumar",
+  "keywords": [
+    "pdf privacy",
+    "are online pdf tools safe",
+    "browser-side pdf processing",
+    "gdpr pdf tools"
+  ],
+  "content": "# Browser-side vs Server-side PDF Tools: A Complete Privacy Guide\n\nEvery day, millions of users upload sensitive bank statements, employment contracts, identity cards, and tax forms to \"free\" online PDF tools. \n\nBut have you ever stopped to ask: **Where do your files go after you click upload?**\n\nUnderstanding the difference between **Server-Side** and **Browser-Side** document processing is the absolute foundation of digital privacy. Let's look at how these architectures operate and how you can verify your document safety.\n\n---\n\n## 1. The Server-Side Model (The Upload Trap)\n\nTraditional online PDF tools (like iLovePDF, Smallpdf, and Adobe Acrobat Web) rely on server-side compilation. \n\n### The Flow:\n1. You drag your document into the browser.\n2. The browser uploads the entire file to a remote cloud server.\n3. The server runs PDF processing scripts (e.g. compressing or unlocking).\n4. The server sends a download link back to your browser.\n\n### The Security Risks:\n* **Data Retention**: Even if sites claim they delete files within 1 hour, your data sits on a third-party server. It can be cached, logged, or exposed in a server breach.\n* **AI Training Scraping**: Some free platforms use uploaded PDFs to train machine learning models, leaking private company data.\n* **Regulatory Violations**: Uploading client PII (Personally Identifiable Information) to unauthorized servers breaches GDPR, HIPAA, and corporate compliance rules.\n\n---\n\n## 2. The Browser-Side Model (The GoluPDFs Approach)\n\nGoluPDFs uses a modern **client-side WebAssembly (WASM)** architecture.\n\n### The Flow:\n1. You drag your PDF into GoluPDFs.\n2. The file is loaded directly into your device's local RAM.\n3. WebAssembly modules (like compiled C++ PDF libraries) process the document locally on your CPU core.\n4. The processed PDF is generated and downloaded instantly.\n\n**Result**: Your files never touch a web server. They remain entirely on your computer, providing 100% privacy compliance.\n\n---\n\n## 3. How to Verify If a PDF Tool is Actually Browser-Side\n\nDon't just take a website's word for it. You can easily verify if a PDF tool is safe using **Chrome Developer Tools**:\n\n1. Open the website (e.g. GoluPDFs).\n2. Right-click anywhere and click **Inspect** (or press `F12`).\n3. Go to the **Network** tab.\n4. Upload a PDF file and run a tool (like Compress PDF).\n5. Watch the network traffic log:\n   * **Insecure Server-Side**: You will see a large POST request transferring your file bytes to a remote API endpoint.\n   * **Secure GoluPDFs**: Zero network requests. The file is processed in sub-seconds with completely empty network activity.\n\n---\n\n## Frequently Asked Questions\n\n### Are files stored in GoluPDFs databases?\nNever. GoluPDFs is serverless. We have no file databases, no upload logs, and we never see your documents.\n\n### Can I use GoluPDFs offline?\nYes! Once the webpage loads in your browser cache, you can disconnect from the internet and run all tools completely offline.",
+  "is_pillar": true,
+  "topic_cluster": "Document Security",
+  "seo_score": 98,
+  "seo_score_details": {
+    "keyword_density": 95,
+    "structure_score": 99,
+    "readability_score": 98,
+    "link_score": 98,
+    "ctr_score": 98
+  },
+  "views_30d": 4500,
+  "clicks_30d": 340,
+  "ctr_30d": 7.56,
+  "avg_position": 1.9,
+  "published_at": "2026-04-05T14:30:00Z",
+  "created_at": "2026-04-05T14:30:00Z",
+  "updated_at": "2026-04-05T14:30:00Z"
+},
+  {
+  "id": "esign-vs-digital-signature-guide",
+  "slug": "esign-vs-digital-signature",
+  "title": "Electronic Signature vs Digital Signature: What's the Difference?",
+  "excerpt": "ESIGN Act, eIDAS, and PKI cryptography guidelines — explained for non-lawyers in plain, simple English.",
+  "category": "Legal",
+  "read_time": "9 min",
+  "author": "Golu Kumar",
+  "keywords": [
+    "electronic signature vs digital signature",
+    "esign vs digital signature",
+    "difference between digital and electronic signature"
+  ],
+  "content": "# Electronic Signature vs Digital Signature: What's the Difference?\n\nIn today's paperless workplace, getting contracts signed online is standard. However, people regularly use the terms **Electronic Signature (eSign)** and **Digital Signature** interchangeably. \n\nLegally and technically, they are **not the same**. Using the wrong type of signature can make your business contracts invalid in court or expose you to document forgery. Let's explain the differences in plain, simple English.\n\n---\n\n## 1. What is an Electronic Signature (e-Sign)?\n\nAn **Electronic Signature** is a broad legal category. It represents any electronic mark, sound, or symbol associated with a contract, indicating a person's intent to sign.\n\n### Common Examples:\n* Drawing your signature on a touchscreen canvas.\n* Typing your name using a cursive calligraphy font.\n* Uploading an image of your physical pen signature.\n* Clicking an \"I Accept\" checkbox on a website form.\n\n### Legal Status:\nUnder the US **ESIGN Act (2000)** and India's **IT Act (2000)**, electronic signatures are legally binding for most standard agreements (like sales NDAs, HR forms, and invoices).\n\n---\n\n## 2. What is a Digital Signature? (Cryptographic Lock)\n\nA **Digital Signature** is a highly secure subcategory of electronic signatures. It does not just show intent; it uses advanced mathematics to **cryptographically bind** your identity to the document.\n\n### How it Works:\n* **PKI (Public Key Infrastructure)**: Uses a private key (held by the signer) and a public key.\n* **DSC (Digital Signature Certificate)**: Issued by government-licensed Certifying Authorities (like eMudhra in India) after verifying your identity (PAN/Aadhaar e-KYC).\n* **Tamper-Evident Lock**: If anyone tries to modify even a single character in the PDF after it is signed, the digital signature breaks, notifying all parties of tampering.\n\n---\n\n## 3. Comparison Matrix: e-Sign vs. Digital Signature\n\n| Feature | Electronic Signature (e-Sign) | Digital Signature |\n| :--- | :--- | :--- |\n| **Primary Purpose** | To show agreement/intent to sign. | To secure the document and verify identity. |\n| **Security Level** | Medium (Can be forged if not handled locally). | High (Asymmetric encryption, tamper-proof). |\n| **Identity Verification** | Visual match. | Government-authorized Certifying Authority. |\n| **Typical Use Cases** | NDAs, freelancer contracts, purchase orders. | Court affidavits, tax filings, tenders, property deeds. |\n| **Processing (GoluPDFs)** | Local browser canvas (No server uploads). | Requires client-held USB DSC tokens. |\n\n---\n\n## Frequently Asked Questions\n\n### Can I e-sign a PDF for free?\nYes. Using **GoluPDFs PDF Signer**, you can draw, type, or upload signature stamps locally in your browser.\n\n### Is an e-signature legally binding in India?\nYes, under Section 5 of the Information Technology Act (2000), standard electronic signatures carry legal validity for general business agreements.",
+  "is_pillar": true,
+  "topic_cluster": "Digital Signatures",
+  "seo_score": 98,
+  "seo_score_details": {
+    "keyword_density": 95,
+    "structure_score": 99,
+    "readability_score": 98,
+    "link_score": 98,
+    "ctr_score": 98
+  },
+  "views_30d": 2900,
+  "clicks_30d": 198,
+  "ctr_30d": 6.83,
+  "avg_position": 1.6,
+  "published_at": "2026-03-22T11:15:00Z",
+  "created_at": "2026-03-22T11:15:00Z",
+  "updated_at": "2026-03-22T11:15:00Z"
+},
+  {
+  "id": "ocr-best-practices-guide",
+  "slug": "ocr-best-practices",
+  "title": "OCR Best Practices for Clean, Searchable PDFs",
+  "excerpt": "From original scanning resolution levels to local language packs — a complete primer on getting browser-side OCR right.",
+  "category": "Tutorial",
+  "read_time": "11 min",
+  "author": "Golu Kumar",
+  "keywords": [
+    "ocr best practices",
+    "how to get clean ocr",
+    "extract text from scanned pdf",
+    "make pdf searchable ocr"
+  ],
+  "content": "# OCR Best Practices for Clean, Searchable PDFs\n\nScanned PDFs are essentially digital photographs of text. Because they lack a vector text layer, you cannot select words, copy sentences, or use `Ctrl+F` to search for keywords. \n\nTo convert these images into copyable, searchable text, we use **Optical Character Recognition (OCR)**. \n\nGetting clean OCR results requires following specific scanning and pre-processing standards. Here are the best practices to get perfect text extractions every time.\n\n---\n\n## 1. Scan at the Sweet Spot: 300 DPI Resolution\n\nDPI (Dots Per Inch) is the measure of image resolution. \n* **Under 150 DPI**: Text characters look blocky and blurred. The OCR engine will misinterpret letters (e.g. reading a capital \"O\" as a zero \"0\").\n* **Over 600 DPI**: File size grows massively without improving recognition accuracy, slowing down processing.\n* **300 DPI**: The mathematical **optimum** for clean, fast character feature detection.\n\n---\n\n## 2. Pre-Process Images for Maximum Contrast\n\nOCR engines look at pixel contrast to segment character structures:\n* **Binarization**: Stripping color profiles and converting the page to pure black-and-white. This separates text from yellowed paper backgrounds.\n* **Deskewing**: Straightening crooked scans. Even a 2-degree tilt can cause the engine to misalign sentences, merging adjacent lines.\n* **Noise Removal**: Filtering scan dust, staple shadows, and border artifacts.\n\n---\n\n## 3. Utilize Local WebAssembly OCR (Privacy Protection)\n\nTraditional online OCR tools upload your financial logs, corporate summaries, or certificates to remote cloud servers. This exposes sensitive details to potential leaks.\n\nGoluPDFs runs **Tesseract.js compiled into WebAssembly (WASM)**.\n* **100% In-Browser**: Text extraction runs completely inside your browser's sandboxed RAM.\n* **Zero Uploads**: Your documents remain on your device, ensuring full GDPR compliance.\n* **Multi-Lingual support**: Select the correct language profile (English, Hindi, etc.) before running to optimize character recognition.\n\n---\n\n## Frequently Asked Questions\n\n### Why does OCR read \"I\" as \"l\"?\nThis occurs due to font ambiguity or low scan resolutions. Scanning at 300 DPI under bright lighting resolves most character identification issues.\n\n### Can I run OCR on password-locked PDFs?\nYes. GoluPDFs will decrypt the PDF locally using your password before processing OCR extraction client-side.",
+  "is_pillar": true,
+  "topic_cluster": "Text Extraction OCR",
+  "seo_score": 98,
+  "seo_score_details": {
+    "keyword_density": 95,
+    "structure_score": 99,
+    "readability_score": 98,
+    "link_score": 98,
+    "ctr_score": 98
+  },
+  "views_30d": 6100,
+  "clicks_30d": 485,
+  "ctr_30d": 7.95,
+  "avg_position": 1.7,
+  "published_at": "2026-03-10T16:00:00Z",
+  "created_at": "2026-03-10T16:00:00Z",
+  "updated_at": "2026-03-10T16:00:00Z"
+}
+];
 
 let mockKeywords: KeywordOpportunity[] = [
   {
