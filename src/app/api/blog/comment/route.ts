@@ -2,10 +2,15 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Helper function to lazy load Supabase client
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, {
+    auth: { persistSession: false }
+  });
+}
 
 // GET: Fetch all comments for a specific post slug
 export async function GET(request: Request) {
@@ -15,6 +20,11 @@ export async function GET(request: Request) {
 
     if (!slug) {
       return NextResponse.json({ error: "Post slug is required." }, { status: 400 });
+    }
+
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json({ error: "Database not configured." }, { status: 500 });
     }
 
     const { data: comments, error } = await supabase
@@ -42,6 +52,11 @@ export async function POST(request: Request) {
 
     if (!post_slug || !name || !email || !content) {
       return NextResponse.json({ error: "All fields are required." }, { status: 400 });
+    }
+
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json({ error: "Database not configured." }, { status: 500 });
     }
 
     // 1. Insert comment into Supabase
