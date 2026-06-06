@@ -81,7 +81,7 @@ export interface AnalyticsInsight {
 // Memory Database Fallback Storage
 // ─────────────────────────────────────────────────────────────────────────────
 
-let mockBlogPosts: BlogPost[] = [
+export let mockBlogPosts: BlogPost[] = [
   {
     id: "post-1",
     slug: "best-pdf-compressor-2026",
