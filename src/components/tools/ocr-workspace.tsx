@@ -154,19 +154,26 @@ export function OcrWorkspace({ tool, files, setFiles, onReset }: OcrWorkspacePro
           const { data } = (await worker.recognize(canvas)) as any;
           const text = data.text || "";
           const confidence = data.confidence || 0;
-          const words = data.words || [];
+
+          // Calculate words robustly by splitting text, avoiding empty data.words array issues
+          const computedWordCount = text.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+          const rawLength = text.length;
+          const preview = text.trim().substring(0, 60).replace(/\n/g, " ");
 
           extractedPages.push({
             pageNumber: pNum,
             text: text.trim(),
             confidence: Math.round(confidence),
-            wordCount: words.length,
-            charCount: text.length
+            wordCount: computedWordCount,
+            charCount: rawLength
           });
 
           setScanLogs(prev => [
             ...prev,
-            `Page ${pNum} extraction complete. Word count: ${words.length}, Confidence: ${Math.round(confidence)}%`
+            `Page ${pNum} - Extracted raw text length: ${rawLength} characters`,
+            `Page ${pNum} - Word count calculation: ${computedWordCount} words`,
+            `Page ${pNum} - Page text preview: "${preview}..."`,
+            `Page ${pNum} extraction complete. Confidence: ${Math.round(confidence)}%`
           ]);
         }
       }
@@ -176,6 +183,13 @@ export function OcrWorkspace({ tool, files, setFiles, onReset }: OcrWorkspacePro
       setActiveTab(0); // Select merged view
       setProcessingTime(Math.round((performance.now() - startTime) / 1000));
       setScanProgress(100);
+      
+      const finalMergedText = extractedPages.map(p => p.text).filter(Boolean).join("\n\n");
+      setScanLogs(prev => [
+        ...prev,
+        `Scan finished successfully!`,
+        `Final merged text length: ${finalMergedText.length} characters`
+      ]);
       toast.success("OCR Text extraction completed successfully!");
     } catch (err: any) {
       console.error(err);
@@ -369,7 +383,7 @@ export function OcrWorkspace({ tool, files, setFiles, onReset }: OcrWorkspacePro
     : 0;
 
   // Check if OCR failed to find any text
-  const noTextDetected = ocrPages.length > 0 && totalExtractedWords === 0;
+  const noTextDetected = ocrPages.length > 0 && totalExtractedChars === 0;
 
   // Reset workspace
   const handleFullReset = () => {

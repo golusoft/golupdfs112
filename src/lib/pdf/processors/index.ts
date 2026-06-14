@@ -299,8 +299,11 @@ export async function processWithEngine(
           if (ctx) {
             await page.render({ canvasContext: ctx, viewport }).promise;
             const { data } = (await worker.recognize(canvas)) as any;
-            mergedText += `--- Page ${pNum} ---\n\n${(data.text || "").trim()}\n\n`;
-            totalWords += data.words?.length || 0;
+            const text = data.text || "";
+            mergedText += `--- Page ${pNum} ---\n\n${text.trim()}\n\n`;
+            
+            const pageWords = text.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+            totalWords += pageWords;
             sumConfidence += data.confidence || 0;
           }
         }
@@ -309,7 +312,8 @@ export async function processWithEngine(
 
         const avgConfidence = totalPages > 0 ? Math.round(sumConfidence / totalPages) : 0;
         
-        if (totalWords === 0) {
+        const cleanText = mergedText.replace(/--- Page \d+ ---/g, "").trim();
+        if (cleanText.length === 0) {
           mergedText = "No readable text found in this document.";
         }
 
