@@ -9,14 +9,10 @@ import {
   Loader2, 
   Plus, 
   Trash2, 
-  LayoutGrid, 
-  Layers, 
   FileSpreadsheet, 
   FileText, 
-  CheckCircle2, 
-  AlertCircle,
-  HelpCircle,
-  Table
+  Table,
+  CheckCircle2
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import type { Tool } from "@/lib/tools";
 import { getPdfJs } from "@/lib/pdf/pdfjs";
 import { ToolDropzone } from "./dropzone";
+import { createWorker } from "tesseract.js";
 
 interface TableSheet {
   name: string;
@@ -40,6 +37,14 @@ interface TableExtractorWorkspaceProps {
   onReset: () => void;
 }
 
+interface ExtractedCell {
+  text: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: TableExtractorWorkspaceProps) {
   const [sheets, setSheets] = useState<TableSheet[]>([]);
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
@@ -50,6 +55,10 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
   const [selectedPage, setSelectedPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pdfThumbnail, setPdfThumbnail] = useState("");
+  
+  // Debug telemetry state
+  const [debugMethod, setDebugMethod] = useState<"None" | "Vector text extraction" | "Scanned OCR extraction">("None");
+  const [debugOcrConfidence, setDebugOcrConfidence] = useState(0);
 
   const COLUMN_TYPES = [
     { label: "Unmapped", value: "none" },
@@ -63,46 +72,14 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     { label: "Amount / Total", value: "amount" }
   ];
 
-  // Initialize templates
-  const INVOICE_TEMPLATE: TableSheet = {
-    name: "Invoice Items",
-    headers: ["Item ID", "Description", "Qty", "Unit Price", "Total"],
-    columnMappings: ["none", "description", "quantity", "price", "amount"],
-    rows: [
-      ["API-CS", "API Integration Consulting", "8", "150.00", "1200.00"],
-      ["CLD-INF", "Enterprise Cloud Infrastructure Setup", "1", "4500.00", "4500.00"],
-      ["TAX-SLB", "Intra-State GST (18%)", "1", "1026.00", "1026.00"]
-    ]
-  };
-
-  const BANK_TEMPLATE: TableSheet = {
-    name: "Bank Statement",
-    headers: ["Date", "Transaction Details", "Withdrawals (Dr)", "Deposits (Cr)", "Balance"],
-    columnMappings: ["date", "description", "debit", "credit", "balance"],
-    rows: [
-      ["01/06/2026", "Opening Balance", "0.00", "0.00", "57200.00"],
-      ["02/06/2026", "UPI/AcmeCorp Payment Received", "0.00", "12500.00", "69700.00"],
-      ["02/06/2026", "ATM Cash Withdrawal", "5000.00", "0.00", "64700.00"],
-      ["03/06/2026", "AWS Cloud Hosting Charge", "1430.00", "0.00", "63270.00"]
-    ]
-  };
-
-  const FINANCIAL_TEMPLATE: TableSheet = {
-    name: "Income Statement",
-    headers: ["Revenue Streams", "Q1 FY26", "Q2 FY26", "YoY Change (%)"],
-    columnMappings: ["description", "amount", "amount", "none"],
-    rows: [
-      ["SaaS Subscriptions", "45000", "52000", "+15.5%"],
-      ["Professional Services", "12000", "9500", "-20.8%"],
-      ["License Royalties", "4500", "6200", "+37.7%"]
-    ]
-  };
-
-  // 1. Initial Load: Pre-load sheets & generate PDF previews
+  // 1. Initial Load: Parse text vector tables from all pages
   useEffect(() => {
-    async function loadPdfPreviews() {
+    async function loadPdfAndAutoScan() {
       if (!files.length) return;
       setLoading(true);
+      setSheets([]);
+      setDebugMethod("None");
+      setDebugOcrConfidence(0);
       try {
         const file = files[0];
         const pdfjs = await getPdfJs();
@@ -122,9 +99,28 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
           setPdfThumbnail(canvas.toDataURL("image/jpeg", 0.8));
         }
 
-        // Default: Load bank statement table preset
-        setSheets([{ ...BANK_TEMPLATE }]);
-        setActiveSheetIndex(0);
+        // Auto Scan all pages for vector text tables
+        const parsedSheets: TableSheet[] = [];
+        let detected = false;
+        
+        for (let pNum = 1; pNum <= pdfDoc.numPages; pNum++) {
+          const pg = await pdfDoc.getPage(pNum);
+          const sheet = await extractPageVectorTable(pg);
+          if (sheet) {
+            parsedSheets.push(sheet);
+            detected = true;
+          }
+        }
+
+        if (detected) {
+          const mergedSheets = mergeSimilarSheets(parsedSheets);
+          setSheets(mergedSheets);
+          setActiveSheetIndex(0);
+          setDebugMethod("Vector text extraction");
+          toast.success(`Successfully extracted ${mergedSheets.length} structured tables!`);
+        } else {
+          toast.warning("No structured vector tables detected. Try running OCR Table Recovery for scanned/image pages.");
+        }
       } catch (err: any) {
         console.error(err);
         toast.error("Failed to parse PDF document.");
@@ -132,26 +128,296 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
         setLoading(false);
       }
     }
-    loadPdfPreviews();
+    loadPdfAndAutoScan();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files]);
 
-  // Load a preset template
-  const loadPreset = (presetName: "bank" | "invoice" | "financial") => {
-    let t: TableSheet;
-    if (presetName === "invoice") t = { ...INVOICE_TEMPLATE };
-    else if (presetName === "financial") t = { ...FINANCIAL_TEMPLATE };
-    else t = { ...BANK_TEMPLATE };
+  // Coordinate-based table builder
+  function buildTableFromCoordinates(rawCells: ExtractedCell[], tableName: string): TableSheet | null {
+    // Sort cells by top (y) coordinate
+    rawCells.sort((a, b) => a.y - b.y);
 
-    setSheets(prev => {
-      const copy = [...prev];
-      copy[activeSheetIndex] = t;
-      return copy;
+    // Group cells into rows based on y coordinate overlap
+    const rows: ExtractedCell[][] = [];
+    const rowTolerance = 12; // vertical overlap threshold in pixels
+
+    rawCells.forEach((cell) => {
+      let added = false;
+      for (const row of rows) {
+        const avgY = row.reduce((sum, c) => sum + c.y, 0) / row.length;
+        if (Math.abs(cell.y - avgY) < rowTolerance) {
+          row.push(cell);
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        rows.push([cell]);
+      }
     });
-    toast.success(`Loaded ${t.name} structure preset`);
+
+    // Sort each row horizontally by x
+    rows.forEach((row) => {
+      row.sort((a, b) => a.x - b.x);
+    });
+
+    // Sort rows vertically from top to bottom
+    rows.sort((a, b) => {
+      const avgYA = a.reduce((sum, c) => sum + c.y, 0) / a.length;
+      const avgYB = b.reduce((sum, c) => sum + c.y, 0) / b.length;
+      return avgYA - avgYB;
+    });
+
+    // Merge horizontally adjacent items that are part of the same cell text
+    const horizontalMergeTolerance = 15; // pixels
+    const mergedRows: ExtractedCell[][] = [];
+
+    rows.forEach((row) => {
+      const newRow: ExtractedCell[] = [];
+      row.forEach((cell) => {
+        if (newRow.length === 0) {
+          newRow.push({ ...cell });
+        } else {
+          const lastCell = newRow[newRow.length - 1];
+          const gap = cell.x - (lastCell.x + lastCell.w);
+          if (gap >= 0 && gap < horizontalMergeTolerance) {
+            lastCell.text += " " + cell.text;
+            lastCell.w = (cell.x + cell.w) - lastCell.x;
+          } else {
+            newRow.push({ ...cell });
+          }
+        }
+      });
+      mergedRows.push(newRow);
+    });
+
+    // Filter out completely empty or extremely short rows
+    const cleanRows = mergedRows.filter((r) => r.length > 0 && r.some((c) => c.text !== ""));
+    if (cleanRows.length === 0) return null;
+
+    // Align cells to a global column grid based on their x coordinates
+    const xCoords: number[] = [];
+    cleanRows.forEach((row) => {
+      row.forEach((cell) => {
+        xCoords.push(cell.x);
+      });
+    });
+
+    xCoords.sort((a, b) => a - b);
+
+    // Cluster x coordinates to find global columns
+    const colsX: number[] = [];
+    const colTolerance = 30; // pixels
+    xCoords.forEach((x) => {
+      let added = false;
+      for (let i = 0; i < colsX.length; i++) {
+        if (Math.abs(x - colsX[i]) < colTolerance) {
+          colsX[i] = (colsX[i] * 4 + x) / 5;
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        colsX.push(x);
+      }
+    });
+
+    colsX.sort((a, b) => a - b);
+
+    // If column count is less than 2, it's not a table
+    if (colsX.length < 2) {
+      return null;
+    }
+
+    // Populate grid values aligned to global column coordinates
+    const finalRows: string[][] = [];
+    cleanRows.forEach((row) => {
+      const finalRow = Array(colsX.length).fill("");
+      row.forEach((cell) => {
+        let closestIdx = 0;
+        let minDiff = Infinity;
+        colsX.forEach((cx, colIdx) => {
+          const diff = Math.abs(cell.x - cx);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIdx = colIdx;
+          }
+        });
+        
+        if (finalRow[closestIdx]) {
+          finalRow[closestIdx] += " " + cell.text;
+        } else {
+          finalRow[closestIdx] = cell.text;
+        }
+      });
+      finalRows.push(finalRow);
+    });
+
+    const formattedRows = finalRows.filter((r) => r.some((val) => val.trim() !== ""));
+    if (formattedRows.length === 0) return null;
+
+    const headers = formattedRows[0].map((val, idx) => val.trim() !== "" ? val.trim() : `Column ${idx + 1}`);
+    const dataRows = formattedRows.slice(1);
+
+    return {
+      name: tableName,
+      headers: headers,
+      columnMappings: Array(headers.length).fill("none"),
+      rows: dataRows.length > 0 ? dataRows : [Array(headers.length).fill("")],
+    };
+  }
+
+  // Extract vector table from single page
+  async function extractPageVectorTable(page: any): Promise<TableSheet | null> {
+    const textContent = await page.getTextContent();
+    const items = textContent.items;
+    if (!items || items.length < 5) return null;
+
+    const viewport = page.getViewport({ scale: 1.0 });
+    const pageHeight = viewport.height;
+
+    const rawCells: ExtractedCell[] = items
+      .map((item: any) => {
+        const tx = item.transform;
+        return {
+          text: item.str.trim(),
+          x: tx[4],
+          y: pageHeight - tx[5], // Convert to top-down y
+          w: item.width || 0,
+          h: item.height || 0,
+        };
+      })
+      .filter((c: ExtractedCell) => c.text !== "");
+
+    return buildTableFromCoordinates(rawCells, `Page ${page.pageNumber} Table`);
+  }
+
+  // Merge similar tables across pages
+  function mergeSimilarSheets(sheets: TableSheet[]): TableSheet[] {
+    if (sheets.length <= 1) return sheets;
+
+    const merged: TableSheet[] = [];
+    
+    sheets.forEach((sheet) => {
+      let found = false;
+      for (const mSheet of merged) {
+        if (areSheetsMergeable(mSheet, sheet)) {
+          mSheet.rows = [...mSheet.rows, ...sheet.rows];
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        merged.push({ ...sheet });
+      }
+    });
+
+    return merged;
+  }
+
+  function areSheetsMergeable(s1: TableSheet, s2: TableSheet): boolean {
+    if (s1.headers.length !== s2.headers.length) return false;
+    
+    let matchCount = 0;
+    s1.headers.forEach((h1, idx) => {
+      const h2 = s2.headers[idx];
+      if (h1.toLowerCase() === h2.toLowerCase()) {
+        matchCount++;
+      }
+    });
+    
+    const matchRatio = matchCount / s1.headers.length;
+    if (matchRatio >= 0.5) return true;
+    
+    const isPlaceholder1 = s1.headers.every(h => h.startsWith("Column "));
+    const isPlaceholder2 = s2.headers.every(h => h.startsWith("Column "));
+    if (isPlaceholder1 && isPlaceholder2) return true;
+
+    return false;
+  }
+
+  // OCR recovery
+  const handleOcrRun = async () => {
+    if (!files.length) return;
+    setOcrScanning(true);
+    setOcrProgress(0);
+    setOcrLog(["Initializing Tesseract WebAssembly engine..."]);
+    
+    try {
+      const file = files[0];
+      const pdfjs = await getPdfJs();
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+      
+      const parsedSheets: TableSheet[] = [];
+      let totalConfidence = 0;
+      let ocrRanCount = 0;
+      
+      for (let pNum = 1; pNum <= pdfDoc.numPages; pNum++) {
+        setOcrProgress(Math.floor(((pNum - 1) / pdfDoc.numPages) * 100));
+        setOcrLog(prev => [...prev, `Rendering page ${pNum} to high-resolution canvas...`]);
+        
+        const page = await pdfDoc.getPage(pNum);
+        const viewport = page.getViewport({ scale: 2.0 }); // 2x scale for high resolution OCR
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext("2d");
+        
+        if (ctx) {
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          setOcrLog(prev => [...prev, `Running OCR table structure recovery on page ${pNum}...`]);
+          
+          const worker = await createWorker("eng");
+          const { data } = (await worker.recognize(canvas)) as any;
+          await worker.terminate();
+          
+          if (data.words && data.words.length > 0) {
+            const rawCells: ExtractedCell[] = data.words.map((w: any) => ({
+              text: w.text.trim(),
+              x: w.bbox.x0,
+              y: w.bbox.y0,
+              w: w.bbox.x1 - w.bbox.x0,
+              h: w.bbox.y1 - w.bbox.y0
+            })).filter((c: any) => c.text !== "");
+            
+            const sheet = buildTableFromCoordinates(rawCells, `Page ${pNum} Scanned Table`);
+            if (sheet) {
+              parsedSheets.push(sheet);
+            }
+            totalConfidence += data.confidence || 85;
+            ocrRanCount++;
+          }
+        }
+      }
+      
+      setOcrProgress(100);
+      const mergedSheets = mergeSimilarSheets(parsedSheets);
+      
+      if (mergedSheets.length > 0) {
+        setSheets(mergedSheets);
+        setActiveSheetIndex(0);
+        setDebugMethod("Scanned OCR extraction");
+        setDebugOcrConfidence(ocrRanCount > 0 ? totalConfidence / ocrRanCount : 85);
+        toast.success(`OCR parsed ${mergedSheets.length} tables from scanned PDF successfully!`);
+      } else {
+        setSheets([]);
+        setDebugMethod("None");
+        setDebugOcrConfidence(0);
+        toast.error("No tables detected after OCR processing.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setOcrLog(prev => [...prev, `❌ Error: ${err.message}`]);
+      toast.error("OCR table recovery failed.");
+    } finally {
+      setTimeout(() => {
+        setOcrScanning(false);
+      }, 500);
+    }
   };
 
-  // Cell modification
+  // Modify cell value
   const handleCellChange = (rIdx: number, cIdx: number, val: string) => {
     setSheets(prev => {
       const copy = [...prev];
@@ -164,7 +430,7 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     });
   };
 
-  // Header change
+  // Modify header title
   const handleHeaderChange = (cIdx: number, val: string) => {
     setSheets(prev => {
       const copy = [...prev];
@@ -249,7 +515,7 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     });
   };
 
-  // Add a fresh sheet tab
+  // Add a sheet tab manually
   const addSheetTab = () => {
     const nextTab: TableSheet = {
       name: `Table ${sheets.length + 1}`,
@@ -262,7 +528,7 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     toast.success("Created new table sheet tab");
   };
 
-  // Delete sheet tab
+  // Delete sheet tab manually
   const deleteSheetTab = (idx: number) => {
     if (sheets.length <= 1) return;
     setSheets(prev => prev.filter((_, i) => i !== idx));
@@ -270,58 +536,9 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     toast.success("Deleted table tab");
   };
 
-  // Visual OCR Recovery Animation simulation
-  const handleOcrRun = () => {
-    setOcrScanning(true);
-    setOcrProgress(0);
-    setOcrLog(["Initializing WebAssembly OCR extraction engine..."]);
-
-    const logs = [
-      "Clustering pixels bounding boxes...",
-      "Analyzing table vertical grids...",
-      "Detecting column delimiters...",
-      "Resolving merged cell structures...",
-      "Applying Column Auto-Mapping...",
-      "OCR compilation completed successfully! Accuracy rating: 99.4%"
-    ];
-
-    let current = 0;
-    const interval = setInterval(() => {
-      current += 20;
-      setOcrProgress(current);
-      const logIdx = Math.floor(current / 20) - 1;
-      if (logs[logIdx]) {
-        setOcrLog(prev => [...prev, logs[logIdx]]);
-      }
-
-      if (current >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setOcrScanning(false);
-          // Pre-populate with invoice or bank statement tables matching OCR simulation
-          setSheets([
-            { ...BANK_TEMPLATE },
-            {
-              name: "Invoice Ledger",
-              headers: ["Invoice No", "Date", "Description", "Amt Due"],
-              columnMappings: ["none", "date", "description", "amount"],
-              rows: [
-                ["INV-9821", "02/06/2026", "UPI/AcmeCorp Consulting Settlement", "12500.00"],
-                ["AWS-9021", "03/06/2026", "AWS Cloud Hosting Service Billing", "1430.00"]
-              ]
-            }
-          ]);
-          setActiveSheetIndex(0);
-          toast.success("OCR Recovery parsed 2 tables from scanned PDF successfully!");
-        }, 600);
-      }
-    }, 600);
-  };
-
-  // Compile XML Excel (.xls) file with multiple worksheets natively!
+  // Export Spreadsheet XML format (.xls)
   const handleExportExcel = () => {
-    // We will build a client-side Excel XML Workbook format (SpreadsheetML)
-    // Excel, LibreOffice, and Google Sheets open this format cleanly.
+    if (sheets.length === 0) return;
     let xml = `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
@@ -364,7 +581,6 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
       sheet.rows.forEach(row => {
         xml += `      <Row>\n`;
         row.forEach(val => {
-          // Check if value is numeric to map cell type accordingly
           const isNum = !isNaN(Number(val)) && val.trim() !== "";
           const type = isNum ? "Number" : "String";
           xml += `        <Cell><Data ss:Type="${type}">${val}</Data></Cell>\n`;
@@ -386,11 +602,36 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     link.download = `${files[0].name.replace(/\.pdf$/i, "")}-tables.xls`;
     link.click();
     URL.revokeObjectURL(url);
-    toast.success("Multi-sheet Excel spreadsheet compiled and downloaded!");
+    toast.success("Excel worksheets exported successfully!");
+  };
+
+  // Export Comma Separated Values (.csv)
+  const handleExportCsv = () => {
+    if (sheets.length === 0) return;
+    const sheet = sheets[activeSheetIndex];
+    
+    let csvContent = "";
+    // Write headers
+    csvContent += sheet.headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\n";
+    
+    // Write rows
+    sheet.rows.forEach(row => {
+      csvContent += row.map(val => `"${val.replace(/"/g, '""')}"`).join(",") + "\n";
+    });
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${files[0].name.replace(/\.pdf$/i, "")}-${sheet.name}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${sheet.name} as CSV`);
   };
 
   // Export JSON structured layout
   const handleExportJson = () => {
+    if (sheets.length === 0) return;
     const data = sheets.map(s => ({
       tableName: s.name,
       columns: s.headers.map((h, i) => ({ header: h, mapping: s.columnMappings[i] })),
@@ -425,7 +666,7 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
     );
   }
 
-  const activeSheet = sheets[activeSheetIndex] || { headers: [], columnMappings: [], rows: [] };
+  const activeSheet = sheets[activeSheetIndex] || null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-5">
@@ -462,10 +703,45 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
             </div>
             
             <div className="flex gap-2">
-              <Button size="sm" variant="outline" className="w-full text-xs font-semibold" onClick={handleOcrRun} disabled={ocrScanning}>
+              <Button size="sm" variant="outline" className="w-full text-xs font-semibold" onClick={handleOcrRun} disabled={ocrScanning || loading}>
                 <Sparkles className="h-3.5 w-3.5" /> Run OCR Table Recovery
               </Button>
             </div>
+          </div>
+        </Card>
+
+        {/* Debug Telemetry Panel */}
+        <Card className="p-5 shadow-xl border-border/40 bg-card/30 backdrop-blur-md space-y-3">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 font-mono">
+            <CheckCircle2 className="h-4 w-4 text-primary" /> Debug Telemetry Panel
+          </h4>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span className="text-muted-foreground block">Tables Detected:</span>
+              <span className="font-semibold text-foreground">{sheets.length}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground block">Scan Method:</span>
+              <span className="font-semibold text-foreground">{debugMethod}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground block">Rows Extracted:</span>
+              <span className="font-semibold text-foreground">
+                {sheets.reduce((sum, s) => sum + s.rows.length, 0)}
+              </span>
+            </div>
+            <div>
+              <span className="text-muted-foreground block">Columns Extracted:</span>
+              <span className="font-semibold text-foreground">
+                {sheets.length > 0 ? activeSheet?.headers.length || 0 : 0}
+              </span>
+            </div>
+            {debugOcrConfidence > 0 && (
+              <div className="col-span-2 border-t pt-2 mt-1 border-border/10">
+                <span className="text-muted-foreground block">OCR Confidence Rating:</span>
+                <span className="font-semibold text-emerald-500">{debugOcrConfidence.toFixed(1)}%</span>
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -473,174 +749,167 @@ export function TableExtractorWorkspace({ tool, files, setFiles, onReset }: Tabl
       {/* Spreadsheet Workspace Editor */}
       <div className="lg:col-span-3 space-y-6">
         <Card className="p-6 shadow-xl border-border/40 bg-card/30 backdrop-blur-md space-y-4">
-          <div className="flex flex-wrap justify-between items-center border-b pb-4 border-border/40 gap-3">
-            <div>
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Sheet className="text-primary h-5 w-5" /> Interactive Spreadsheet
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Review and adjust tabular data grids</p>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <h4 className="font-semibold text-sm">Scanning PDF vectors for tables...</h4>
             </div>
-            
-            {/* Sheet Tabs */}
-            <div className="flex gap-1 overflow-x-auto max-w-[200px] scrollbar-hide">
-              {sheets.map((sheet, idx) => (
-                <div key={idx} className="flex items-center gap-1">
-                  <button
-                    onClick={() => setActiveSheetIndex(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                      activeSheetIndex === idx
-                        ? "bg-primary text-white"
-                        : "bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {sheet.name}
-                  </button>
-                  {sheets.length > 1 && (
-                    <button className="text-muted-foreground hover:text-destructive p-0.5" onClick={() => deleteSheetTab(idx)}>
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button className="p-1 rounded-lg bg-muted text-muted-foreground hover:bg-primary hover:text-white" onClick={addSheetTab}>
-                <Plus className="h-3.5 w-3.5" />
-              </button>
+          ) : ocrScanning ? (
+            <div className="space-y-4 py-8 max-w-sm mx-auto text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-3" />
+              <h4 className="font-semibold text-sm">Recovering scanned PDF tables...</h4>
+              <Progress value={ocrProgress} />
+              <div className="bg-zinc-950/5 dark:bg-white/[0.02] p-3 rounded-lg border border-border/10 text-left font-mono text-[10px] space-y-1 h-[100px] overflow-y-auto">
+                {ocrLog.map((log, i) => (
+                  <div key={i} className="text-muted-foreground flex gap-1">
+                    <span className="text-emerald-500">▶</span> {log}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Preset Buttons */}
-          <div className="flex gap-2 border-b border-border/20 pb-3">
-            <span className="text-xs font-semibold text-muted-foreground self-center">Presets:</span>
-            {["Bank Statement", "Invoice Items", "Income Statement"].map((preset, idx) => {
-              const keys = ["bank", "invoice", "financial"];
-              return (
-                <button
-                  key={idx}
-                  onClick={() => loadPreset(keys[idx] as any)}
-                  className="px-2.5 py-1 rounded-full border border-border/40 bg-background/50 hover:bg-primary/5 text-xs text-muted-foreground hover:text-primary transition-all font-medium"
-                >
-                  {preset}
-                </button>
-              );
-            })}
-          </div>
-
-          <AnimatePresence mode="wait">
-            {ocrScanning ? (
-              <motion.div
-                key="ocr-processing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-4 py-8 max-w-sm mx-auto text-center"
-              >
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-3" />
-                <h4 className="font-semibold text-sm">Simulating OCR structure restoration...</h4>
-                <Progress value={ocrProgress} />
-                <div className="bg-zinc-950/5 dark:bg-white/[0.02] p-3 rounded-lg border border-border/10 text-left font-mono text-[10px] space-y-1 h-[100px] overflow-y-auto">
-                  {ocrLog.map((log, i) => (
-                    <div key={i} className="text-muted-foreground flex gap-1">
-                      <span className="text-emerald-500">▶</span> {log}
-                    </div>
-                  ))}
+          ) : sheets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-border/40 rounded-2xl min-h-[300px]">
+              <Table className="h-10 w-10 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground">No tables detected in this document</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                We couldn't extract any structured data grids. Try running OCR Table Recovery for scanned/image pages.
+              </p>
+              <Button onClick={handleOcrRun} variant="outline" className="mt-4 text-xs font-semibold">
+                <Sparkles className="h-3.5 w-3.5 mr-1" /> Run OCR Table Recovery
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-wrap justify-between items-center border-b pb-4 border-border/40 gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Sheet className="text-primary h-5 w-5" /> Interactive Spreadsheet
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Review and adjust tabular data grids</p>
                 </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="table-content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="space-y-4"
-              >
-                {/* Column Mapping Selector Row */}
-                <div className="flex gap-1 py-1 overflow-x-auto">
-                  {activeSheet.headers.map((_, hIdx) => (
-                    <div key={hIdx} className="min-w-[110px] flex-1">
-                      <select
-                        value={activeSheet.columnMappings[hIdx] || "none"}
-                        onChange={(e) => handleColumnMappingChange(hIdx, e.target.value)}
-                        className="w-full text-[10px] font-semibold border rounded px-1 py-1 bg-background/60 border-border/30"
+                
+                {/* Sheet Tabs */}
+                <div className="flex gap-1 overflow-x-auto max-w-[200px] scrollbar-hide">
+                  {sheets.map((sheet, idx) => (
+                    <div key={idx} className="flex items-center gap-1">
+                      <button
+                        onClick={() => setActiveSheetIndex(idx)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                          activeSheetIndex === idx
+                            ? "bg-primary text-white"
+                            : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
                       >
-                        {COLUMN_TYPES.map(type => (
-                          <option key={type.value} value={type.value}>{type.label}</option>
-                        ))}
-                      </select>
+                        {sheet.name}
+                      </button>
+                      {sheets.length > 1 && (
+                        <button className="text-muted-foreground hover:text-destructive p-0.5 font-bold" onClick={() => deleteSheetTab(idx)}>
+                          ×
+                        </button>
+                      )}
                     </div>
                   ))}
-                  <div className="w-8 shrink-0" />
+                  <button className="p-1 rounded-lg bg-muted text-muted-foreground hover:bg-primary hover:text-white" onClick={addSheetTab}>
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
                 </div>
+              </div>
 
-                {/* Main Spreadsheet grid */}
-                <div className="overflow-x-auto border border-border/30 rounded-xl bg-background/40">
-                  <table className="w-full text-xs text-left">
-                    <thead>
-                      <tr className="border-b border-border/30 bg-muted/40 font-semibold text-muted-foreground">
-                        {activeSheet.headers.map((header, hIdx) => (
-                          <th key={hIdx} className="p-2 border-r border-border/20 min-w-[110px]">
-                            <div className="flex justify-between items-center">
-                              <input
-                                type="text"
-                                value={header}
-                                onChange={(e) => handleHeaderChange(hIdx, e.target.value)}
-                                className="bg-transparent font-semibold border-none w-full outline-none focus:bg-background/80 focus:px-1 rounded"
-                              />
-                              <button onClick={() => deleteColumn(hIdx)} className="text-muted-foreground hover:text-destructive pl-1">
-                                ×
-                              </button>
-                            </div>
-                          </th>
-                        ))}
-                        <th className="w-8 p-2" />
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/20">
-                      {activeSheet.rows.map((row, rIdx) => (
-                        <tr key={rIdx} className="hover:bg-primary/5">
-                          {row.map((cell, cIdx) => (
-                            <td key={cIdx} className="p-1.5 border-r border-border/20">
-                              <input
-                                type="text"
-                                value={cell}
-                                onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)}
-                                className="w-full bg-transparent outline-none focus:bg-background/80 px-1 py-0.5 rounded focus:ring-1 focus:ring-primary"
-                              />
-                            </td>
+              {activeSheet && (
+                <div className="space-y-4">
+                  {/* Column Mapping Selector Row */}
+                  <div className="flex gap-1 py-1 overflow-x-auto">
+                    {activeSheet.headers.map((_, hIdx) => (
+                      <div key={hIdx} className="min-w-[110px] flex-1">
+                        <select
+                          value={activeSheet.columnMappings[hIdx] || "none"}
+                          onChange={(e) => handleColumnMappingChange(hIdx, e.target.value)}
+                          className="w-full text-[10px] font-semibold border rounded px-1 py-1 bg-background/60 border-border/30"
+                        >
+                          {COLUMN_TYPES.map(type => (
+                            <option key={type.value} value={type.value}>{type.label}</option>
                           ))}
-                          <td className="p-1.5 text-center">
-                            <button onClick={() => deleteRow(rIdx)} className="text-muted-foreground hover:text-destructive">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </td>
+                        </select>
+                      </div>
+                    ))}
+                    <div className="w-8 shrink-0" />
+                  </div>
+
+                  {/* Main Spreadsheet grid */}
+                  <div className="overflow-x-auto border border-border/30 rounded-xl bg-background/40">
+                    <table className="w-full text-xs text-left">
+                      <thead>
+                        <tr className="border-b border-border/30 bg-muted/40 font-semibold text-muted-foreground">
+                          {activeSheet.headers.map((header, hIdx) => (
+                            <th key={hIdx} className="p-2 border-r border-border/20 min-w-[110px]">
+                              <div className="flex justify-between items-center">
+                                <input
+                                  type="text"
+                                  value={header}
+                                  onChange={(e) => handleHeaderChange(hIdx, e.target.value)}
+                                  className="bg-transparent font-semibold border-none w-full outline-none focus:bg-background/80 focus:px-1 rounded"
+                                />
+                                <button onClick={() => deleteColumn(hIdx)} className="text-muted-foreground hover:text-destructive pl-1 font-bold">
+                                  ×
+                                </button>
+                              </div>
+                            </th>
+                          ))}
+                          <th className="w-8 p-2" />
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-border/20">
+                        {activeSheet.rows.map((row, rIdx) => (
+                          <tr key={rIdx} className="hover:bg-primary/5">
+                            {row.map((cell, cIdx) => (
+                              <td key={cIdx} className="p-1.5 border-r border-border/20">
+                                <input
+                                  type="text"
+                                  value={cell}
+                                  onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)}
+                                  className="w-full bg-transparent outline-none focus:bg-background/80 px-1 py-0.5 rounded focus:ring-1 focus:ring-primary"
+                                />
+                              </td>
+                            ))}
+                            <td className="p-1.5 text-center">
+                              <button onClick={() => deleteRow(rIdx)} className="text-muted-foreground hover:text-destructive">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                {/* Append Buttons */}
-                <div className="flex gap-2 justify-start">
-                  <Button size="sm" variant="outline" className="text-xs" onClick={addRow}>
-                    <Plus className="h-3 w-3" /> Add Row
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-xs" onClick={addColumn}>
-                    <Plus className="h-3 w-3" /> Add Column
-                  </Button>
-                </div>
-
-                {/* Export Card */}
-                <div className="flex justify-between items-center border-t pt-4 border-border/40">
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="text-xs" onClick={handleExportJson}>
-                      Export JSON
+                  {/* Append Buttons */}
+                  <div className="flex gap-2 justify-start">
+                    <Button size="sm" variant="outline" className="text-xs" onClick={addRow}>
+                      <Plus className="h-3 w-3 mr-1" /> Add Row
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-xs" onClick={addColumn}>
+                      <Plus className="h-3 w-3 mr-1" /> Add Column
                     </Button>
                   </div>
-                  <Button variant="gradient" size="sm" className="text-xs" onClick={handleExportExcel}>
-                    <Download className="h-3.5 w-3.5" /> Export Excel Worksheets
-                  </Button>
+
+                  {/* Export Card */}
+                  <div className="flex justify-between items-center border-t pt-4 border-border/40">
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="text-xs" onClick={handleExportJson}>
+                        Export JSON
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-xs" onClick={handleExportCsv}>
+                        Export CSV
+                      </Button>
+                    </div>
+                    <Button variant="gradient" size="sm" className="text-xs" onClick={handleExportExcel}>
+                      <Download className="h-3.5 w-3.5 mr-1" /> Export Excel
+                    </Button>
+                  </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+            </div>
+          )}
         </Card>
       </div>
     </div>
