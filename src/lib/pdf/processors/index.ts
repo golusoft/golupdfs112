@@ -98,13 +98,34 @@ export async function processWithEngine(
       return signPdf(files, opts, onProgress);
     case "pdf-to-word":
       {
-        onProgress?.(50, "Converting to editable document format...");
-        const text = `GOLUPDF EXECUTIVE DOCUMENT SUMMARY\n\n1. Scope of Deliverables\nAcme Global Services hereby provides consultive API integration engineering and cloud-native infrastructure automation to Linear Operations. Work includes high-availability nodes, IAM federation, and secure tokenization vaults.\n\n2. Commercial Invoicing & Tax\nSubtotal value of consultation equals $5,700.00. Standard GST slab of 18% applied yielding $1,026.00 tax balance. Grand total due is $6,726.00, payable within NET 14 days via wire.`;
+        if (files.length !== 1) throw new Error("Select a single PDF");
+        const file = files[0];
+        onProgress?.(20, "Reading document streams...");
+        const pdfjs = await getPdfJs();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        const totalPages = pdfDoc.numPages;
+        
+        let extractedText = "";
+        for (let i = 1; i <= totalPages; i++) {
+          onProgress?.(20 + (i / totalPages) * 70, `Extracting text page ${i}/${totalPages}`);
+          const page = await pdfDoc.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(" ");
+          extractedText += `--- Page ${i} ---\n\n${pageText.trim()}\n\n`;
+        }
+
+        if (!extractedText.trim() || extractedText.replace(/--- Page \d+ ---/g, "").trim().length < 5) {
+          extractedText = "No selectable text layer found in this PDF document.";
+        }
+
         onProgress?.(100, "Done");
-        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const blob = new Blob([extractedText.trim()], { type: "text/plain;charset=utf-8" });
         return {
           blob,
-          filename: `${files[0].name.replace(/\.pdf$/i, "")}-editable.txt`,
+          filename: `${file.name.replace(/\.pdf$/i, "")}-editable.txt`,
           bytes: blob.size,
           stats: {
             note: "PDF converted to editable plain-text document successfully!"
@@ -113,13 +134,79 @@ export async function processWithEngine(
       }
     case "pdf-to-excel":
       {
-        onProgress?.(50, "Scanning columns and tables...");
-        const csv = `Item ID,Description,Qty,Unit Price,Total,Tax %\nAPI-CS,API Integration Consulting,8,150.00,1200.00,18.0%\nCLD-INF,Enterprise Cloud Infrastructure,1,4500.00,4500.00,18.0%\n\nSubtotal,,5700.00\nSales Tax (18.0%),,1026.00\nTotal Balance,,6726.00`;
+        if (files.length !== 1) throw new Error("Select a single PDF");
+        const file = files[0];
+        onProgress?.(20, "Extracting table matrices...");
+        const pdfjs = await getPdfJs();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        const totalPages = pdfDoc.numPages;
+
+        let csvContent = "";
+        
+        for (let pNum = 1; pNum <= totalPages; pNum++) {
+          onProgress?.(20 + (pNum / totalPages) * 70, `Scanning page ${pNum}/${totalPages}`);
+          const page = await pdfDoc.getPage(pNum);
+          const textContent = await page.getTextContent();
+          const items = textContent.items || [];
+          
+          if (items.length > 0) {
+            const viewport = page.getViewport({ scale: 1.0 });
+            const pageHeight = viewport.height;
+
+            const cells = items.map((item: any) => {
+              const tx = item.transform;
+              return {
+                text: item.str.trim(),
+                x: tx[4],
+                y: pageHeight - tx[5]
+              };
+            }).filter((c: any) => c.text !== "");
+
+            cells.sort((a, b) => a.y - b.y);
+
+            const rows: any[][] = [];
+            const rowTolerance = 12;
+
+            cells.forEach((cell) => {
+              let added = false;
+              for (const row of rows) {
+                const avgY = row.reduce((sum, c) => sum + c.y, 0) / row.length;
+                if (Math.abs(cell.y - avgY) < rowTolerance) {
+                  row.push(cell);
+                  added = true;
+                  break;
+                }
+              }
+              if (!added) {
+                rows.push([cell]);
+              }
+            });
+
+            rows.forEach((row) => row.sort((a, b) => a.x - b.x));
+            rows.sort((a, b) => a[0].y - b[0].y);
+
+            csvContent += `--- Page ${pNum} ---\n`;
+            rows.forEach((row) => {
+              const rowText = row.map((cell) => {
+                const t = cell.text.replace(/"/g, '""');
+                return t.includes(",") || t.includes("\n") || t.includes('"') ? `"${t}"` : t;
+              }).join(",");
+              csvContent += rowText + "\n";
+            });
+            csvContent += "\n";
+          }
+        }
+
+        if (!csvContent.trim()) {
+          csvContent = "No tables or structured text detected in this document.";
+        }
+
         onProgress?.(100, "Done");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const blob = new Blob([csvContent.trim()], { type: "text/csv;charset=utf-8" });
         return {
           blob,
-          filename: `${files[0].name.replace(/\.pdf$/i, "")}-tables.csv`,
+          filename: `${file.name.replace(/\.pdf$/i, "")}-tables.csv`,
           bytes: blob.size,
           stats: {
             note: "Table structure parsed! Extracted clean Excel-ready CSV spreadsheet."
@@ -128,13 +215,44 @@ export async function processWithEngine(
       }
     case "pdf-to-ppt":
       {
-        onProgress?.(50, "Generating editable slide layers...");
-        const ppt = `### Slide 1: GoluPDFs Business Utilities Suite\n- SaaS-grade visual design inspired by Stripe & Zoho\n- Flawless client-side browser execution\n- 0% cloud overhead, 100% vector-sharp exports\n\n### Slide 2: Target Size Indexation\n- Dynamic rasterization scale matching exact KB\n- Lossless comment metadata padding up to byte level`;
+        if (files.length !== 1) throw new Error("Select a single PDF");
+        const file = files[0];
+        onProgress?.(20, "Analyzing slide layers...");
+        const pdfjs = await getPdfJs();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        const totalPages = pdfDoc.numPages;
+
+        let pptContent = "";
+        for (let i = 1; i <= totalPages; i++) {
+          onProgress?.(20 + (i / totalPages) * 70, `Building slide ${i}/${totalPages}`);
+          const page = await pdfDoc.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(" ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          pptContent += `### Slide ${i}\n`;
+          const sentences = pageText.split(/(?<=[.!?])\s+/);
+          sentences.forEach((s) => {
+            if (s.trim().length > 5) {
+              pptContent += `- ${s.trim()}\n`;
+            }
+          });
+          pptContent += "\n";
+        }
+
+        if (!pptContent.trim()) {
+          pptContent = "### Slide 1\n- No text found to compile slide presentations.";
+        }
+
         onProgress?.(100, "Done");
-        const blob = new Blob([ppt], { type: "text/plain;charset=utf-8" });
+        const blob = new Blob([pptContent.trim()], { type: "text/plain;charset=utf-8" });
         return {
           blob,
-          filename: `${files[0].name.replace(/\.pdf$/i, "")}-slides.txt`,
+          filename: `${file.name.replace(/\.pdf$/i, "")}-slides.txt`,
           bytes: blob.size,
           stats: {
             note: "Slide layers parsed! Downloaded slide presentation draft format."
@@ -217,13 +335,38 @@ export async function processWithEngine(
       return mergePdfs(files, opts, onProgress);
     case "ai-assistant":
       {
-        onProgress?.(50, "Analyzing document nodes with AI...");
-        const summary = `# 🤖 AI PDF Assistant Analysis Report\n\n## Document Name: ${files[0].name}\n\n### 📋 Executive Summary\n- **Document Node:** Acme-Linear Commercial Proposal (Locked Template)\n- **Core Deliverables:** Consultive high-scale API integration & AWS cloud infrastructure orchestration.\n- **Commercial Balance:** $5,700.00 subtotal with an 18% standard GST rate, yielding a grand total of $6,726.00.\n\n### 📊 Tax & GST Breakdown\n- **Standard Tax Slab:** 18.0% GST (CGST 9% + SGST 9% intra-state supply).\n- **Taxable Base:** $5,700.00\n- **Computed Tax Yield:** $1,026.00\n\n### 💡 Key Recommendations\n1. Verify the client's GSTIN matches the registered address to ensure seamless ITC claims.\n2. Ensure the UPI payment coordinates (VPA) are correct in the UPI QR block before client sharing.`;
+        if (files.length !== 1) throw new Error("Select a single PDF");
+        const file = files[0];
+        onProgress?.(20, "Extracting text nodes for AI summary...");
+        const pdfjs = await getPdfJs();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        const totalPages = pdfDoc.numPages;
+
+        let fullText = "";
+        let wordCount = 0;
+        
+        for (let i = 1; i <= totalPages; i++) {
+          onProgress?.(20 + (i / totalPages) * 60, `Analyzing page ${i}/${totalPages}`);
+          const page = await pdfDoc.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map((item: any) => item.str).join(" ");
+          fullText += pageText + " ";
+          wordCount += textContent.items.length;
+        }
+
+        const trimmedText = fullText.replace(/\s+/g, " ").trim();
+        const firstWords = trimmedText.split(" ").slice(0, 120).join(" ");
+
+        onProgress?.(90, "Assembling analysis report...");
+
+        const summary = `# 🤖 AI PDF Assistant Analysis Report\n\n## Document Name: ${file.name}\n\n### 📋 Executive Summary\n- **File Name:** ${file.name}\n- **Total Pages:** ${totalPages}\n- **Total Words:** ${wordCount}\n- **Estimated Read Time:** ${Math.ceil(wordCount / 200)} min\n\n### 📊 Document Preview & Insights\n${firstWords ? `"${firstWords}..."` : "_[No text layer detected in this PDF document]_"}\n\n### 💡 Key Recommendations\n1. Use GoluPDF's client-side converters to convert this document to text or spreadsheet formats.\n2. Running local WebAssembly OCR is recommended if this is an image-only scanned document.`;
+
         onProgress?.(100, "Done");
         const blob = new Blob([summary], { type: "text/markdown;charset=utf-8" });
         return {
           blob,
-          filename: `${files[0].name.replace(/\.pdf$/i, "")}-ai-summary.md`,
+          filename: `${file.name.replace(/\.pdf$/i, "")}-ai-summary.md`,
           bytes: blob.size,
           stats: {
             note: "AI PDF Analysis complete! Markdown summary generated successfully."
@@ -234,15 +377,83 @@ export async function processWithEngine(
       return removePages(files, opts, onProgress);
     case "table-extractor":
       {
-        onProgress?.(50, "Extracting tabular matrices...");
-        const csv = `Item ID,Description,Qty,Unit Price,Total,Tax %\nAPI-CS,API Integration Consulting,8,150.00,1200.00,18.0%\nCLD-INF,Enterprise Cloud Infrastructure,1,4500.00,4500.00,18.0%`;
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        if (files.length !== 1) throw new Error("Select a single PDF");
+        const file = files[0];
+        onProgress?.(20, "Extracting table matrices...");
+        const pdfjs = await getPdfJs();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        const totalPages = pdfDoc.numPages;
+
+        let csvContent = "";
+        
+        for (let pNum = 1; pNum <= totalPages; pNum++) {
+          onProgress?.(20 + (pNum / totalPages) * 70, `Scanning page ${pNum}/${totalPages}`);
+          const page = await pdfDoc.getPage(pNum);
+          const textContent = await page.getTextContent();
+          const items = textContent.items || [];
+          
+          if (items.length > 0) {
+            const viewport = page.getViewport({ scale: 1.0 });
+            const pageHeight = viewport.height;
+
+            const cells = items.map((item: any) => {
+              const tx = item.transform;
+              return {
+                text: item.str.trim(),
+                x: tx[4],
+                y: pageHeight - tx[5]
+              };
+            }).filter((c: any) => c.text !== "");
+
+            cells.sort((a, b) => a.y - b.y);
+
+            const rows: any[][] = [];
+            const rowTolerance = 12;
+
+            cells.forEach((cell) => {
+              let added = false;
+              for (const row of rows) {
+                const avgY = row.reduce((sum, c) => sum + c.y, 0) / row.length;
+                if (Math.abs(cell.y - avgY) < rowTolerance) {
+                  row.push(cell);
+                  added = true;
+                  break;
+                }
+              }
+              if (!added) {
+                rows.push([cell]);
+              }
+            });
+
+            rows.forEach((row) => row.sort((a, b) => a.x - b.x));
+            rows.sort((a, b) => a[0].y - b[0].y);
+
+            csvContent += `--- Page ${pNum} ---\n`;
+            rows.forEach((row) => {
+              const rowText = row.map((cell) => {
+                const t = cell.text.replace(/"/g, '""');
+                return t.includes(",") || t.includes("\n") || t.includes('"') ? `"${t}"` : t;
+              }).join(",");
+              csvContent += rowText + "\n";
+            });
+            csvContent += "\n";
+          }
+        }
+
+        if (!csvContent.trim()) {
+          csvContent = "No tables or structured text detected in this document.";
+        }
+
         onProgress?.(100, "Done");
+        const blob = new Blob([csvContent.trim()], { type: "text/csv;charset=utf-8" });
         return {
           blob,
-          filename: `${files[0].name.replace(/\.pdf$/i, "")}-extracted-tables.csv`,
+          filename: `${file.name.replace(/\.pdf$/i, "")}-extracted-tables.csv`,
           bytes: blob.size,
-          stats: { note: "Tables extracted client-side successfully." }
+          stats: {
+            note: "Tables extracted client-side successfully."
+          }
         };
       }
     default:
