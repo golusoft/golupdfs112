@@ -20,6 +20,8 @@ import {
 } from "./core";
 import { pdfToImages } from "./image";
 import { compressPdf } from "./compress";
+import { createWorker } from "tesseract.js";
+import { getPdfJs } from "../pdfjs";
 
 /**
  * Engines that are not yet implementable purely in-browser fall back to a
@@ -151,16 +153,56 @@ export async function processWithEngine(
       );
     case "ocr":
       {
-        onProgress?.(50, "Extracting text layers...");
-        const text = `# OCR EXTRACTED TEXT FROM: ${files[0].name}\n\n## 1. Scope of Deliverables\nAcme Global Services hereby provides consultive API integration engineering and cloud-native infrastructure automation to Linear Operations. Work includes high-availability nodes, IAM federation, and secure tokenization vaults.\n\n## 2. Commercial Invoicing & Tax\nSubtotal value of consultation equals $5,700.00. Standard GST slab of 18% applied yielding $1,026.00 tax balance. Grand total due is $6,726.00, payable within NET 14 days via wire.`;
+        if (files.length !== 1) throw new Error("OCR requires exactly one file");
+        const file = files[0];
+        const pdfjs = await getPdfJs();
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        const totalPages = pdfDoc.numPages;
+
+        onProgress?.(10, "Initializing Tesseract WebAssembly engine...");
+        const worker = await createWorker("eng");
+        
+        let mergedText = "";
+        let totalWords = 0;
+        let sumConfidence = 0;
+
+        for (let pNum = 1; pNum <= totalPages; pNum++) {
+          onProgress?.(
+            15 + (pNum / totalPages) * 75,
+            `Running OCR on page ${pNum} of ${totalPages}...`
+          );
+          const page = await pdfDoc.getPage(pNum);
+          const viewport = page.getViewport({ scale: 2.0 });
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            const { data } = (await worker.recognize(canvas)) as any;
+            mergedText += `--- Page ${pNum} ---\n\n${(data.text || "").trim()}\n\n`;
+            totalWords += data.words?.length || 0;
+            sumConfidence += data.confidence || 0;
+          }
+        }
+
+        await worker.terminate();
+
+        const avgConfidence = totalPages > 0 ? Math.round(sumConfidence / totalPages) : 0;
+        
+        if (totalWords === 0) {
+          mergedText = "No readable text found in this document.";
+        }
+
+        const blob = new Blob([mergedText.trim()], { type: "text/plain;charset=utf-8" });
         onProgress?.(100, "Done");
-        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         return {
           blob,
-          filename: `${files[0].name.replace(/\.pdf$/i, "")}-extracted.txt`,
+          filename: `${file.name.replace(/\.pdf$/i, "")}-extracted.txt`,
           bytes: blob.size,
           stats: {
-            note: "OCR text extraction complete! Downloaded the editable plaintext file."
+            note: `OCR text extraction complete! Avg Confidence: ${avgConfidence}%, Word Count: ${totalWords}`
           }
         };
       }

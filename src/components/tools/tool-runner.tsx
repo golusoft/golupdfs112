@@ -22,6 +22,7 @@ import { VisualPageGrid } from "./visual-page-grid";
 import { MetadataViewerWorkspace } from "./metadata-viewer-workspace";
 import { BlankPageDetectorWorkspace } from "./blank-page-detector-workspace";
 import { TableExtractorWorkspace } from "./table-extractor-workspace";
+import { OcrWorkspace } from "./ocr-workspace";
 
 interface ToolRunnerProps {
   tool: Omit<Tool, "icon">;
@@ -113,6 +114,10 @@ export function ToolRunner({ tool }: ToolRunnerProps) {
 
   if (tool.slug === "pdf-table-extractor") {
     return <TableExtractorWorkspace tool={tool} files={files} setFiles={setFiles} onReset={reset} />;
+  }
+
+  if (tool.slug === "ocr-pdf") {
+    return <OcrWorkspace tool={tool} files={files} setFiles={setFiles} onReset={reset} />;
   }
 
   const run = async () => {
